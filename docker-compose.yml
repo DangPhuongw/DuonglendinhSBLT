@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  olympia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: olympia-app
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+    volumes:
+      - ./uploads:/app/uploads
+      - ./snapshots:/app/snapshots
+    restart: unless-stopped
