@@ -100,7 +100,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         room.state?.subPhase === 'ANSWERING' ||
         room.state?.subPhase === 'STEAL_ANSWER' ||
         room.state?.subPhase === 'CNV_ANSWERING' ||
-        room.state?.subPhase === 'FINAL_GUESS_ANSWERING';
+        room.state?.subPhase === 'FINAL_GUESS_ANSWERING' ||
+        (room.state?.round === 'VCNV' && Boolean(room.state?.buzzerLockedBy));
 
       const isBuzzerActive = Boolean(room.state?.buzzerLockedBy);
       const buzzWinner =

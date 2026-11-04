@@ -115,6 +115,7 @@ export interface RoomState {
   stepIndex?: number;
   kdPackages?: { index: number; name: string; count: number; chosenBy?: string; chosenByName?: string }[];
   kdChosenPackageIndex?: number;
+  vcnvImage?: string;
   // Additional dynamic state fields
   [key: string]: any;
 }

@@ -891,7 +891,7 @@ export class RoomStateMachine {
 
       if (this.buzzedPlayerId) return false; // Already locked
 
-      if (subPhase === 'ROW_QUESTION') {
+      if (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') {
         // G7: Pressed during row question. Row finishes first, then CNV answering opens!
         this.buzzedPlayerId = playerId;
         this.pendingCnvBuzzerId = playerId;
@@ -907,11 +907,17 @@ export class RoomStateMachine {
         return true;
       }
 
-      if (subPhase === 'ROW_REVEAL' || subPhase === 'FINAL_GUESS') {
+      if (
+        subPhase === 'ROW_REVEAL' ||
+        subPhase === 'CENTER_REVEAL' ||
+        subPhase === 'PICK_ROW' ||
+        subPhase === 'FINAL_GUESS'
+      ) {
         this.buzzedPlayerId = playerId;
         this.room.state.buzzerLockedBy = playerId;
         this.room.state.activePlayerId = playerId;
         this.room.state.subPhase = subPhase === 'FINAL_GUESS' ? 'FINAL_GUESS_ANSWERING' : 'CNV_ANSWERING';
+        this.room.state.currentQuestion = this.questionSet.vcnv.obstacle;
 
         const diffMs = now - this.buzzerOpenTime;
         this.callbacks.broadcastBuzzWon({
@@ -1109,6 +1115,7 @@ export class RoomStateMachine {
       rowLetterCounts,
       rowAnswersRevealed: [null, null, null, null],
       stepIndex: 0,
+      vcnvImage: this.questionSet.vcnv.image || '',
     };
 
     this.persistSnapshot();
@@ -1131,12 +1138,24 @@ export class RoomStateMachine {
       return;
     }
 
-    // Determine who picks this row (in seat order among active players)
-    const chooserId = this.vcnvPlayerQueue.length > 0
-      ? this.vcnvPlayerQueue[stepIndex % this.vcnvPlayerQueue.length]
-      : this.room.players[0]?.id;
+    // Determine who picks this row (among active non-eliminated connected players)
+    const activeQueue = this.vcnvPlayerQueue.filter((id) => {
+      const p = this.room.players.find((pl) => pl.id === id);
+      return p && !p.eliminatedVcnv && p.connected;
+    });
+
+    if (activeQueue.length === 0) {
+      // No active players left -> transition to Tăng Tốc
+      this.transitionToReady('TANG_TOC');
+      return;
+    }
+
+    const chooserId = activeQueue[stepIndex % activeQueue.length];
 
     this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
+    this.answersMap.clear();
+
     this.room.state = {
       ...this.room.state,
       round: 'VCNV',
@@ -1255,11 +1274,15 @@ export class RoomStateMachine {
       openedPieces.push(rowIndex);
     }
 
-    // Reveal letters for this row
+    // Reveal letters for this row if at least one correct (Olympia rule)
     const rowAnswersRevealed: (string[] | null)[] = [
       ...(this.room.state.rowAnswersRevealed || [null, null, null, null]),
     ];
-    rowAnswersRevealed[rowIndex] = question.answer.toUpperCase().replace(/\s+/g, '').split('');
+    if (atLeastOneCorrect) {
+      rowAnswersRevealed[rowIndex] = question.answer.toUpperCase().replace(/\s+/g, '').split('');
+    } else {
+      rowAnswersRevealed[rowIndex] = null;
+    }
 
     const revealPayload: RevealPayload = {
       questionId: question.id,
@@ -1281,10 +1304,6 @@ export class RoomStateMachine {
       buzzerLockedBy: this.pendingCnvBuzzerId || null,
     };
 
-    this.callbacks.broadcastReveal(revealPayload);
-    this.persistSnapshot();
-    this.syncRoom();
-
     // 6 seconds display for ROW_REVEAL so players have time to see answers and picture
     this.setDeadline(6000, async () => {
       // If someone buzzed for CNV during the row, give them 15s to answer CNV now (G7)
@@ -1299,6 +1318,7 @@ export class RoomStateMachine {
           subPhase: 'CNV_ANSWERING',
           activePlayerId: buzzerId,
           buzzerLockedBy: buzzerId,
+          currentQuestion: this.questionSet.vcnv.obstacle,
           deadline: null,
         };
 
@@ -1312,8 +1332,12 @@ export class RoomStateMachine {
       }
 
       // Next row prompt
-      await this.promptVcnvPickRow(stepIndex + 1);
+      await this.promptVcnvPickRow(this.vcnvRowsAskedCount);
     });
+
+    this.callbacks.broadcastReveal(revealPayload);
+    this.persistSnapshot();
+    this.syncRoom();
   }
 
   private async evaluateCnvGuess(playerId: string, guess: string): Promise<void> {
@@ -1373,6 +1397,7 @@ export class RoomStateMachine {
     }
 
     this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
     this.room.state.buzzerLockedBy = null;
     this.room.state.activePlayerId = undefined;
 
@@ -1387,13 +1412,27 @@ export class RoomStateMachine {
     this.callbacks.broadcastPlayerUpdate(this.room.players);
     this.syncRoom();
 
+    // Check if any non-eliminated players remain
+    const remainingPlayers = this.room.players.filter((p) => !p.eliminatedVcnv && p.connected);
+    if (remainingPlayers.length === 0) {
+      // Nobody left -> finish VCNV
+      this.callbacks.broadcastReveal({
+        questionId: obsQuestion.id,
+        correctAnswer: obsQuestion.answer,
+        results: [{ playerId, answer: guess, isCorrect: false, delta: 0 }],
+      });
+      this.setDeadline(4000, async () => {
+        this.transitionToReady('TANG_TOC');
+      });
+      return;
+    }
+
     if (isFinalGuess) {
       // Resume final guess countdown for remaining players
       await this.presentVcnvFinalGuess();
     } else {
       // Continue next row
-      const stepIndex = (this.room.state.stepIndex || 0) + 1;
-      await this.promptVcnvPickRow(stepIndex);
+      await this.promptVcnvPickRow(this.vcnvRowsAskedCount);
     }
   }
 
@@ -1460,13 +1499,37 @@ export class RoomStateMachine {
       openedPieces,
     };
 
+    this.setDeadline(5000, async () => {
+      if (this.pendingCnvBuzzerId) {
+        const buzzerId = this.pendingCnvBuzzerId;
+        this.pendingCnvBuzzerId = null;
+        this.answersMap.clear();
+
+        this.room.state = {
+          ...this.room.state,
+          round: 'VCNV',
+          subPhase: 'CNV_ANSWERING',
+          activePlayerId: buzzerId,
+          buzzerLockedBy: buzzerId,
+          currentQuestion: this.questionSet.vcnv.obstacle,
+          deadline: null,
+        };
+
+        this.setDeadline(GAME_CONFIG.VCNV.CNV_ANSWER_SECONDS * 1000, async () => {
+          await this.evaluateCnvGuess(buzzerId, '');
+        });
+
+        this.persistSnapshot();
+        this.syncRoom();
+        return;
+      }
+
+      await this.presentVcnvFinalGuess();
+    });
+
     this.callbacks.broadcastReveal(revealPayload);
     this.persistSnapshot();
     this.syncRoom();
-
-    this.setDeadline(4000, async () => {
-      await this.presentVcnvFinalGuess();
-    });
   }
 
   private async presentVcnvFinalGuess(): Promise<void> {
@@ -1478,6 +1541,7 @@ export class RoomStateMachine {
     }
 
     this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
     this.buzzerOpenTime = Date.now();
     this.room.state = {
       ...this.room.state,
@@ -1485,6 +1549,8 @@ export class RoomStateMachine {
       subPhase: 'FINAL_GUESS',
       deadline: null,
       buzzerLockedBy: null,
+      activePlayerId: undefined,
+      currentQuestion: this.questionSet.vcnv.obstacle,
     };
 
     const durationMs = GAME_CONFIG.VCNV.FINAL_GUESS_SECONDS * 1000;
