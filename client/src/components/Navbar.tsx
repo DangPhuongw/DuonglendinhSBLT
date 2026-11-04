@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { soundManager } from '../utils/soundEffects';
 import { voiceReader } from '../utils/voiceReader';
-import { Volume2, VolumeX, Copy, Check, LogOut, Radio, Headphones } from 'lucide-react';
+import { Volume2, VolumeX, Copy, Check, LogOut, Radio, Headphones, FastForward } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const room = useGameStore((s) => s.room);
   const connected = useGameStore((s) => s.connected);
   const leaveRoom = useGameStore((s) => s.leaveRoom);
+  const jumpToRound = useGameStore((s) => s.jumpToRound);
 
   const [copied, setCopied] = useState(false);
   const [muted, setMuted] = useState(soundManager.isMuted);
@@ -97,6 +98,18 @@ export const Navbar: React.FC = () => {
         >
           {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
         </button>
+
+        {/* Nút tua giai đoạn (Tạm thời để test) */}
+        {room && (
+          <button
+            onClick={() => jumpToRound(room.status === 'VCNV' ? 'TANG_TOC' : 'VCNV')}
+            className="flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 hover:from-yellow-400 hover:to-amber-300 text-slate-950 font-black shadow-md shadow-amber-500/30 active:scale-95 transition-all border border-yellow-300 cursor-pointer"
+            title="Tua nhanh sang vòng tiếp theo (Nút tạm thời để test)"
+          >
+            <FastForward size={14} />
+            <span className="font-extrabold">{room.status === 'VCNV' ? 'Tua: Tăng Tốc' : 'Tua: VCNV'}</span>
+          </button>
+        )}
 
         {/* Leave room button */}
         {room && (

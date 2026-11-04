@@ -383,6 +383,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 14. Dev: Jump / Tua nhanh sang vòng khác (tạm thời để test)
+  socket.on('dev:jumpRound', ({ targetRound }) => {
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return;
+    const machine = roomManager.getRoom(info.roomCode);
+    if (machine) {
+      machine.jumpToRound(targetRound || 'VCNV');
+    }
+  });
+
   // 14. Disconnect
   socket.on('disconnect', () => {
     const info = roomManager.removeSocket(socket.id);

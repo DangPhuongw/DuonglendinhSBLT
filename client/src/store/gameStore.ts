@@ -38,6 +38,7 @@ interface GameStore {
   overrideScore: (questionId: string, playerId: string, isCorrect: boolean) => void;
   skipAbsent: (playerId: string) => void;
   kickPlayer: (playerId: string) => void;
+  jumpToRound: (targetRound?: string) => void;
   leaveRoom: () => void;
 }
 
@@ -322,6 +323,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   kickPlayer: (playerId) => {
     get().socket?.emit('host:kickPlayer', { playerId });
+  },
+
+  jumpToRound: (targetRound = 'VCNV') => {
+    get().socket?.emit('dev:jumpRound', { targetRound });
   },
 
   leaveRoom: () => {

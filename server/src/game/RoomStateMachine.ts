@@ -385,6 +385,29 @@ export class RoomStateMachine {
     return true;
   }
 
+  // --- Dev / Test shortcut: Tua nhanh vòng ---
+  public jumpToRound(targetRound: string = 'VCNV'): void {
+    this.clearTimer();
+    this.answersMap.clear();
+    this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
+    this.eventQueue.enqueue(async () => {
+      if (targetRound === 'VCNV') {
+        await this.startVcnv();
+      } else if (targetRound === 'TANG_TOC') {
+        await this.startTangToc();
+      } else if (targetRound === 'VE_DICH') {
+        await this.startVeDich();
+      } else if (targetRound === 'KD_RIENG') {
+        await this.startKhoiDongRieng();
+      } else if (targetRound === 'KD_CHUNG') {
+        await this.startKhoiDongChung();
+      } else {
+        await this.startVcnv();
+      }
+    });
+  }
+
   // --- Flow & Transitions ---
 
   public startGame(hostId: string): { ok: boolean; error?: string } {

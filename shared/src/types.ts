@@ -169,5 +169,6 @@ export interface ClientToServerEvents {
   'host:overrideScore': (data: { questionId: string; playerId: string; isCorrect: boolean }) => void;
   'host:skipAbsent': (data: { playerId: string }) => void;
   'host:kickPlayer': (data: { playerId: string }) => void;
+  'dev:jumpRound': (data: { targetRound: string }) => void;
   'time:ping': (data: { clientSentAt: number }) => void;
 }
