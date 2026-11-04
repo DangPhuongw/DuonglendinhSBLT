@@ -15,6 +15,9 @@
     "start": "node server/dist/index.js",
     "test": "npm run test --workspaces --if-present"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
     "typescript": "^5.4.5"
   }

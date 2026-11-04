@@ -81,6 +81,11 @@ roomManager.setCallbacksFactory((roomCode: string) => ({
 SnapshotManager.init();
 roomManager.loadSavedSnapshots();
 
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // --- REST Endpoints ---
 
 app.post('/api/upload-media', upload.single('media'), (req, res) => {
@@ -382,7 +387,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`Server Olympia Nội Bộ is running on port ${PORT}`);
+const PORT = Number(process.env.PORT) || 4000;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server Olympia Nội Bộ is running on http://0.0.0.0:${PORT}`);
 });
