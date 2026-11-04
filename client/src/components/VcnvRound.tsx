@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
-import { HostOverrideBar } from './HostOverrideBar';
 import { Bell, Send, Lock, HelpCircle } from 'lucide-react';
 
 export const VcnvRound: React.FC = () => {
@@ -307,8 +306,7 @@ export const VcnvRound: React.FC = () => {
         </div>
       )}
 
-      {/* Host Override Score Bar */}
-      {(subPhase === 'ROW_REVEAL' || subPhase === 'CENTER_REVEAL') && <HostOverrideBar />}
+      {/* Host Override Score Bar removed */}
     </div>
   );
 };

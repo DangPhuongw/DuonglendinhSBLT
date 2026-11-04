@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
-import { HostOverrideBar } from './HostOverrideBar';
 import { Zap, Send, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
 export const TangTocRound: React.FC = () => {
@@ -159,8 +158,7 @@ export const TangTocRound: React.FC = () => {
         </div>
       )}
 
-      {/* Host Override Bar */}
-      {subPhase === 'REVEAL' && <HostOverrideBar />}
+      {/* Host Override Bar removed */}
     </div>
   );
 };

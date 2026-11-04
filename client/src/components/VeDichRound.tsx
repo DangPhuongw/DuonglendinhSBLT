@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
-import { HostOverrideBar } from './HostOverrideBar';
 import { Star, Bell, Send, Trophy } from 'lucide-react';
 
 export const VeDichRound: React.FC = () => {
@@ -250,8 +249,7 @@ export const VeDichRound: React.FC = () => {
         </div>
       )}
 
-      {/* Host Override Bar */}
-      {subPhase === 'REVEAL' && <HostOverrideBar />}
+      {/* Host Override Bar removed */}
     </div>
   );
 };

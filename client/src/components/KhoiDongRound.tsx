@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
-import { HostOverrideBar } from './HostOverrideBar';
 import { Bell, CheckCircle, XCircle } from 'lucide-react';
 
 export const KhoiDongRound: React.FC = () => {
@@ -202,8 +201,7 @@ export const KhoiDongRound: React.FC = () => {
         </div>
       )}
 
-      {/* Host Override Score Bar */}
-      {subPhase === 'REVEAL' && <HostOverrideBar />}
+      {/* Host Override Score Bar removed */}
     </div>
   );
 };
