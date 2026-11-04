@@ -7,3 +7,5 @@ uploads/
 snapshots/
 *.log
 .DS_Store
+
+cloudflared.exe
