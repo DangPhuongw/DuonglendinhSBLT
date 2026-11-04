@@ -67,6 +67,16 @@ export class RoomManager {
     return this.socketToPlayer.get(socketId);
   }
 
+  public getSocketByPlayer(roomCode: string, playerId: string): string | undefined {
+    const code = roomCode.toUpperCase();
+    for (const [sockId, info] of this.socketToPlayer.entries()) {
+      if (info.roomCode === code && info.playerId === playerId) {
+        return sockId;
+      }
+    }
+    return undefined;
+  }
+
   public removeSocket(socketId: string): { roomCode: string; playerId: string } | undefined {
     const info = this.socketToPlayer.get(socketId);
     if (info) {

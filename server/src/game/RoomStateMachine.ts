@@ -273,6 +273,20 @@ export class RoomStateMachine {
     }
   }
 
+  public kickPlayer(hostId: string, targetPlayerId: string): boolean {
+    if (this.room.hostId !== hostId) return false;
+    if (hostId === targetPlayerId) return false;
+
+    const idx = this.room.players.findIndex((p) => p.id === targetPlayerId);
+    if (idx === -1) return false;
+
+    this.room.players.splice(idx, 1);
+    this.persistSnapshot();
+    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.syncRoom();
+    return true;
+  }
+
   // --- Score Ledger ---
 
   private addScore(

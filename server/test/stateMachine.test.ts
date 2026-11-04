@@ -70,6 +70,23 @@ describe('Room & Player lifecycle', () => {
     expect(startRes.ok).toBe(false);
     expect(startRes.error).toContain('tối thiểu');
   });
+
+  it('allows host to kick other players', () => {
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine('ROOM_KICK', { id: 'p1', name: 'Host', token: 'tok-1' }, callbacks);
+    const p2Res = machine.addPlayer('Player 2', 'tok-2');
+
+    expect(machine.room.players.length).toBe(2);
+
+    // Host kicks p2
+    const kickOk = machine.kickPlayer('p1', p2Res.player!.id);
+    expect(kickOk).toBe(true);
+    expect(machine.room.players.length).toBe(1);
+
+    // Host cannot kick self
+    const kickSelf = machine.kickPlayer('p1', 'p1');
+    expect(kickSelf).toBe(false);
+  });
 });
 
 describe('Sanitization & Security', () => {

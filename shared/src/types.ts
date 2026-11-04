@@ -142,6 +142,7 @@ export interface ServerToClientEvents {
   'score:update': (data: { scores: Record<string, number>; lastEvents: ScoreEvent[] }) => void;
   'player:update': (players: Player[]) => void;
   'time:pong': (data: { clientSentAt: number; serverReceivedAt: number }) => void;
+  'player:kicked': (data: { reason: string }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -156,5 +157,6 @@ export interface ClientToServerEvents {
   'vd:setStar': (data: { useStar: boolean }) => void;
   'host:overrideScore': (data: { questionId: string; playerId: string; isCorrect: boolean }) => void;
   'host:skipAbsent': (data: { playerId: string }) => void;
+  'host:kickPlayer': (data: { playerId: string }) => void;
   'time:ping': (data: { clientSentAt: number }) => void;
 }

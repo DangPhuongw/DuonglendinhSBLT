@@ -35,6 +35,7 @@ interface GameStore {
   setHopeStar: (useStar: boolean) => void;
   overrideScore: (questionId: string, playerId: string, isCorrect: boolean) => void;
   skipAbsent: (playerId: string) => void;
+  kickPlayer: (playerId: string) => void;
   leaveRoom: () => void;
 }
 
@@ -164,6 +165,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     });
 
+    socket.on('player:kicked', (data) => {
+      localStorage.removeItem('olympia_token');
+      localStorage.removeItem('olympia_room_code');
+      localStorage.removeItem('olympia_seat');
+      set({ room: null, player: null, myToken: null, mySeat: null });
+      alert(data.reason || 'Bạn đã bị mời ra khỏi phòng.');
+    });
+
     set({ socket });
 
     // Periodic clock sync every 30s
@@ -273,6 +282,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   skipAbsent: (playerId) => {
     get().socket?.emit('host:skipAbsent', { playerId });
+  },
+
+  kickPlayer: (playerId) => {
+    get().socket?.emit('host:kickPlayer', { playerId });
   },
 
   leaveRoom: () => {

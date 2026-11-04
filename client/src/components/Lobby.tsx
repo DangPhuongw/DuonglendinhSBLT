@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { GAME_CONFIG } from '@olympia/shared';
-import { Users, Upload, Play, CheckCircle2, Copy, Check } from 'lucide-react';
+import { Users, Upload, Play, CheckCircle2, Copy, Check, X } from 'lucide-react';
 
 export const Lobby: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -9,6 +9,7 @@ export const Lobby: React.FC = () => {
   const createRoom = useGameStore((s) => s.createRoom);
   const joinRoom = useGameStore((s) => s.joinRoom);
   const startGame = useGameStore((s) => s.startGame);
+  const kickPlayer = useGameStore((s) => s.kickPlayer);
 
   const [name, setName] = useState('');
   const [roomCodeInput, setRoomCodeInput] = useState('');
@@ -192,7 +193,7 @@ export const Lobby: React.FC = () => {
             return (
               <div
                 key={seatNum}
-                className={`p-4 rounded-xl border flex flex-col items-center justify-center min-h-[120px] transition-all ${
+                className={`relative p-4 rounded-xl border flex flex-col items-center justify-center min-h-[120px] transition-all ${
                   player
                     ? isMe
                       ? 'bg-indigo-950/40 border-indigo-500/80 shadow-md shadow-indigo-500/10'
@@ -200,6 +201,20 @@ export const Lobby: React.FC = () => {
                     : 'bg-slate-950/30 border-dashed border-slate-800/60 opacity-60'
                 }`}
               >
+                {/* Host kick button */}
+                {isHost && player && !isMe && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      kickPlayer(player.id);
+                    }}
+                    title={`Mời ${player.name} ra khỏi phòng`}
+                    className="absolute top-2 right-2 p-1 rounded-full bg-slate-800 hover:bg-rose-600 text-slate-400 hover:text-white transition-colors border border-slate-700 hover:border-rose-500 shadow z-10"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm mb-2 ${
                     player
@@ -217,11 +232,14 @@ export const Lobby: React.FC = () => {
                 </span>
 
                 {player && (
-                  <span className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                  <span className="text-[10px] text-slate-400 mt-1 flex flex-col items-center gap-0.5">
                     {room.hostId === player.id && (
                       <span className="text-amber-400 font-semibold">(Chủ phòng)</span>
                     )}
                     {isMe && <span className="text-indigo-400 font-semibold">(Bạn)</span>}
+                    {!player.connected && (
+                      <span className="text-rose-400 font-medium">(Mất kết nối)</span>
+                    )}
                   </span>
                 )}
               </div>

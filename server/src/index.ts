@@ -21,7 +21,9 @@ app.use(cors());
 app.use(express.json());
 
 // Media uploads directory
-const uploadsDir = path.resolve(process.cwd(), 'uploads');
+const uploadsDir = fs.existsSync(path.resolve(process.cwd(), 'uploads'))
+  ? path.resolve(process.cwd(), 'uploads')
+  : path.resolve(process.cwd(), 'server/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -144,8 +146,12 @@ app.get('/api/room/:code/export-csv', (req, res) => {
 });
 
 // Serve frontend static files if client/dist exists
-const clientDist = path.resolve(process.cwd(), '../client/dist');
-if (fs.existsSync(clientDist)) {
+const clientDistCandidates = [
+  path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(process.cwd(), '../client/dist'),
+];
+const clientDist = clientDistCandidates.find((dir) => fs.existsSync(dir));
+if (clientDist) {
   app.use(express.static(clientDist));
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
@@ -322,7 +328,32 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 13. Disconnect
+  // 13. Host kick player
+  socket.on('host:kickPlayer', ({ playerId }) => {
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return;
+    const machine = roomManager.getRoom(info.roomCode);
+    if (machine) {
+      machine.eventQueue.enqueue(async () => {
+        const ok = machine.kickPlayer(info.playerId, playerId);
+        if (ok) {
+          const targetSocketId = roomManager.getSocketByPlayer(info.roomCode, playerId);
+          if (targetSocketId) {
+            io.to(targetSocketId).emit('player:kicked', {
+              reason: 'Bạn đã bị chủ phòng mời ra khỏi phòng.',
+            });
+            const targetSocket = io.sockets.sockets.get(targetSocketId);
+            if (targetSocket) {
+              targetSocket.leave(info.roomCode);
+            }
+            roomManager.removeSocket(targetSocketId);
+          }
+        }
+      });
+    }
+  });
+
+  // 14. Disconnect
   socket.on('disconnect', () => {
     const info = roomManager.removeSocket(socket.id);
     if (info) {
