@@ -116,6 +116,8 @@ export interface RoomState {
   kdPackages?: { index: number; name: string; count: number; chosenBy?: string; chosenByName?: string }[];
   kdChosenPackageIndex?: number;
   vcnvImage?: string;
+  obstacleLetterCount?: number;
+  obstacleAnswerRevealed?: string[] | null;
   // Additional dynamic state fields
   [key: string]: any;
 }

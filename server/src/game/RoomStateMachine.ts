@@ -878,63 +878,42 @@ export class RoomStateMachine {
       return true;
     }
 
-    // VCNV Buzzer
+    // VCNV Buzzer: Bấm chuông để trả lời từ khóa chính bất kì lúc nào
     if (round === 'VCNV') {
       const player = this.room.players.find((p) => p.id === playerId);
       if (!player || player.eliminatedVcnv) return false;
-
-      // Rule: Buzzer opens only after first row asked
-      if (this.vcnvRowsAskedCount < 1) {
-        this.callbacks.broadcastBuzzRejected(null, { reason: 'Chuông chỉ mở sau khi hàng ngang đầu tiên kết thúc.' });
-        return false;
-      }
-
       if (this.buzzedPlayerId) return false; // Already locked
 
-      if (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') {
-        // G7: Pressed during row question. Row finishes first, then CNV answering opens!
-        this.buzzedPlayerId = playerId;
-        this.pendingCnvBuzzerId = playerId;
-        this.room.state.buzzerLockedBy = playerId;
+      // Bấm chuông trả lời từ khóa chính bất kì lúc nào!
+      this.clearTimer();
+      this.buzzedPlayerId = playerId;
+      this.pendingCnvBuzzerId = null;
+      this.answersMap.clear();
 
-        const diffMs = now - this.buzzerOpenTime;
-        this.callbacks.broadcastBuzzWon({
-          winnerId: playerId,
-          winnerName: player.name,
-          diffMs,
-        });
-        this.syncRoom();
-        return true;
-      }
+      this.room.state = {
+        ...this.room.state,
+        round: 'VCNV',
+        subPhase: 'CNV_ANSWERING',
+        activePlayerId: playerId,
+        buzzerLockedBy: playerId,
+        currentQuestion: this.questionSet.vcnv.obstacle,
+        deadline: null,
+      };
 
-      if (
-        subPhase === 'ROW_REVEAL' ||
-        subPhase === 'CENTER_REVEAL' ||
-        subPhase === 'PICK_ROW' ||
-        subPhase === 'FINAL_GUESS'
-      ) {
-        this.buzzedPlayerId = playerId;
-        this.room.state.buzzerLockedBy = playerId;
-        this.room.state.activePlayerId = playerId;
-        this.room.state.subPhase = subPhase === 'FINAL_GUESS' ? 'FINAL_GUESS_ANSWERING' : 'CNV_ANSWERING';
-        this.room.state.currentQuestion = this.questionSet.vcnv.obstacle;
+      const diffMs = now - this.buzzerOpenTime;
+      this.callbacks.broadcastBuzzWon({
+        winnerId: playerId,
+        winnerName: player.name,
+        diffMs,
+      });
 
-        const diffMs = now - this.buzzerOpenTime;
-        this.callbacks.broadcastBuzzWon({
-          winnerId: playerId,
-          winnerName: player.name,
-          diffMs,
-        });
+      this.setDeadline(GAME_CONFIG.VCNV.CNV_ANSWER_SECONDS * 1000, async () => {
+        await this.evaluateCnvGuess(playerId, '');
+      });
 
-        this.clearTimer();
-        this.setDeadline(GAME_CONFIG.VCNV.CNV_ANSWER_SECONDS * 1000, async () => {
-          await this.evaluateCnvGuess(playerId, '');
-        });
-
-        this.persistSnapshot();
-        this.syncRoom();
-        return true;
-      }
+      this.persistSnapshot();
+      this.syncRoom();
+      return true;
     }
 
     // VE_DICH Steal Buzzer
@@ -1103,6 +1082,13 @@ export class RoomStateMachine {
       r.answer.toUpperCase().replace(/\s+/g, '').length
     );
 
+    // Calculate letter count for obstacle main keyword
+    const obstacleLetters = this.questionSet.vcnv.obstacle.answer
+      .toUpperCase()
+      .replace(/\s+/g, '')
+      .split('');
+    const obstacleLetterCount = obstacleLetters.length;
+
     // Initial state
     this.room.state = {
       round: 'VCNV',
@@ -1116,6 +1102,8 @@ export class RoomStateMachine {
       rowAnswersRevealed: [null, null, null, null],
       stepIndex: 0,
       vcnvImage: this.questionSet.vcnv.image || '',
+      obstacleLetterCount,
+      obstacleAnswerRevealed: null,
     };
 
     this.persistSnapshot();
@@ -1358,10 +1346,11 @@ export class RoomStateMachine {
 
       this.addScore(playerId, 'VCNV', obsQuestion.id, delta, 'correct');
 
-      // Reveal all pieces (0..4), all rows, and all letters
+      // Reveal all pieces (0..4), all rows, all letters, and obstacle answer
       const allRowLetters = this.questionSet.vcnv.rows.map((r) =>
         r.answer.toUpperCase().replace(/\s+/g, '').split('')
       );
+      const obstacleLetters = obsQuestion.answer.toUpperCase().replace(/\s+/g, '').split('');
       this.room.state = {
         ...this.room.state,
         round: 'VCNV',
@@ -1370,6 +1359,7 @@ export class RoomStateMachine {
         rowsRevealed: [true, true, true, true],
         rowAnswersRevealed: allRowLetters,
         obstacleSolved: true,
+        obstacleAnswerRevealed: obstacleLetters,
       };
 
       const revealPayload: RevealPayload = {
@@ -1416,11 +1406,14 @@ export class RoomStateMachine {
     const remainingPlayers = this.room.players.filter((p) => !p.eliminatedVcnv && p.connected);
     if (remainingPlayers.length === 0) {
       // Nobody left -> finish VCNV
+      const obstacleLetters = obsQuestion.answer.toUpperCase().replace(/\s+/g, '').split('');
+      this.room.state.obstacleAnswerRevealed = obstacleLetters;
       this.callbacks.broadcastReveal({
         questionId: obsQuestion.id,
         correctAnswer: obsQuestion.answer,
         results: [{ playerId, answer: guess, isCorrect: false, delta: 0 }],
       });
+      this.syncRoom();
       this.setDeadline(4000, async () => {
         this.transitionToReady('TANG_TOC');
       });
