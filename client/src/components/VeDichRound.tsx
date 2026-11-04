@@ -194,7 +194,7 @@ export const VeDichRound: React.FC = () => {
       )}
 
       {/* Buzzer winner notice */}
-      {buzzWinner && (
+      {buzzWinner && Boolean(room.state.buzzerLockedBy) && (
         <div className="w-full p-2.5 mb-4 bg-amber-950/60 border border-amber-500/50 rounded-xl text-center text-xs font-bold text-amber-300 animate-bounce">
           {buzzWinner.winnerName} đã giành quyền trả lời câu hỏi!
         </div>

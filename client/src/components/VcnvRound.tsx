@@ -23,6 +23,10 @@ export const VcnvRound: React.FC = () => {
   const openedPieces: number[] = room.state.openedPieces || [];
   const rowsRevealed: boolean[] = room.state.rowsRevealed || [false, false, false, false];
   const isEliminated = myPlayer.eliminatedVcnv;
+  const isBuzzerLocked = Boolean(room.state.buzzerLockedBy);
+  const isFirstRow = (room.state.rowStepIndex === 0 || !room.state.rowStepIndex) && subPhase === 'ROW_QUESTION';
+  const canBuzz = !isEliminated && !isBuzzerLocked && !isFirstRow;
+
   const isMyTurnToAnswerCnv =
     (subPhase === 'CNV_ANSWERING' || subPhase === 'FINAL_GUESS_ANSWERING') &&
     room.state.activePlayerId === myPlayer.id;
@@ -36,7 +40,7 @@ export const VcnvRound: React.FC = () => {
   // Space key for buzzer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !isEliminated) {
+      if (e.code === 'Space' && canBuzz) {
         if (
           subPhase === 'ROW_QUESTION' ||
           subPhase === 'ROW_REVEAL' ||
@@ -50,7 +54,7 @@ export const VcnvRound: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [subPhase, isEliminated, buzz]);
+  }, [subPhase, canBuzz, buzz]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +84,7 @@ export const VcnvRound: React.FC = () => {
       <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={15} className="mb-4" />
 
       {/* Buzzer alerts */}
-      {buzzWinner && (
+      {buzzWinner && isBuzzerLocked && (
         <div className="w-full p-2.5 mb-3 bg-amber-950/60 border border-amber-500/50 rounded-xl text-center text-xs font-bold text-amber-300 animate-bounce">
           Chuông VCNV: {buzzWinner.winnerName} đã bấm chuông giành quyền giải Chướng ngại vật!
         </div>
@@ -148,17 +152,23 @@ export const VcnvRound: React.FC = () => {
             <span className="text-[11px] text-slate-400">
               {isEliminated ? (
                 <span className="text-rose-400 font-bold">Bạn đã bị loại khỏi VCNV</span>
+              ) : isBuzzerLocked ? (
+                <span className="text-amber-400 font-semibold">
+                  {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Có người'} đã bấm chuông
+                </span>
+              ) : isFirstRow ? (
+                <span className="text-slate-500 italic">Chuông sẽ mở từ sau hàng ngang 1</span>
               ) : (
-                'Bấm chuông khi đã đoán được từ khóa CNV'
+                'Bấm chuông khi đã đoán được từ khóa CNV (Space)'
               )}
             </span>
             <button
               onClick={buzz}
-              disabled={isEliminated || room.state.buzzerLockedBy !== null}
+              disabled={!canBuzz}
               className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all ${
-                isEliminated || room.state.buzzerLockedBy !== null
+                !canBuzz
                   ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white shadow-lg shadow-rose-600/30 cursor-pointer active:scale-95'
+                  : 'bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white shadow-lg shadow-rose-600/30 cursor-pointer active:scale-95 animate-pulse'
               }`}
             >
               <Bell size={14} />

@@ -90,7 +90,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     socket.on('state:sync', (room) => {
       const currentToken = get().myToken || localStorage.getItem('olympia_token');
       const me = room.players.find((p) => p.token === currentToken) || null;
-      set({ room, player: me });
+      const prevRound = get().room?.state?.round;
+      const newRound = room.state?.round;
+
+      // Clear buzzWinner if round changed or buzzer is not currently locked
+      const buzzWinner = (prevRound !== newRound || !room.state?.buzzerLockedBy) ? null : get().buzzWinner;
+
+      set({ room, player: me, buzzWinner });
     });
 
     socket.on('player:update', (players) => {

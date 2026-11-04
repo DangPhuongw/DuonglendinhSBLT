@@ -402,12 +402,16 @@ export class RoomStateMachine {
 
   private transitionToReady(targetRound: RoundType): void {
     this.clearTimer();
+    this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
     this.room.status = 'READY';
     this.room.state = {
       round: 'READY',
       targetRound,
       subPhase: 'WAITING_READY',
       deadline: null,
+      buzzerLockedBy: null,
+      activePlayerId: undefined,
     };
 
     // Reset players ready status
@@ -994,6 +998,8 @@ export class RoomStateMachine {
       round: 'VCNV',
       subPhase: 'PICK_ROW',
       deadline: null,
+      buzzerLockedBy: null,
+      activePlayerId: undefined,
       openedPieces: [], // indices of opened pieces (0..4)
       rowsRevealed: [false, false, false, false],
     };
@@ -1021,6 +1027,7 @@ export class RoomStateMachine {
     this.answersMap.clear();
     this.buzzerOpenTime = Date.now();
     this.pendingCnvBuzzerId = null;
+    this.buzzedPlayerId = null;
 
     this.room.state = {
       ...this.room.state,
@@ -1028,6 +1035,8 @@ export class RoomStateMachine {
       subPhase: 'ROW_QUESTION',
       currentQuestion: rowQuestion,
       deadline: null,
+      buzzerLockedBy: null,
+      activePlayerId: undefined,
       activeRowIndex: rowIndex,
       rowStepIndex: stepIndex,
     };
