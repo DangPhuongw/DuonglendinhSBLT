@@ -10,14 +10,11 @@ import { TangTocRound } from './components/TangTocRound';
 import { VeDichRound } from './components/VeDichRound';
 import { TieBreakRound } from './components/TieBreakRound';
 import { Podium } from './components/Podium';
-import { useGameAudio } from './hooks/useGameAudio';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export const App: React.FC = () => {
   const initSocket = useGameStore((s) => s.initSocket);
   const room = useGameStore((s) => s.room);
-
-  // Automatic Audio Coordinator (BGM & TTS)
-  useGameAudio();
 
   useEffect(() => {
     initSocket();
@@ -71,13 +68,15 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col selection:bg-amber-500 selection:text-black">
-      <Navbar />
-      {room && currentRound !== 'LOBBY' && <Scoreboard />}
-      <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 flex flex-col justify-center">
-        {renderCurrentView()}
-      </main>
-    </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col selection:bg-amber-500 selection:text-black">
+        <Navbar />
+        {room && currentRound !== 'LOBBY' && <Scoreboard />}
+        <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 flex flex-col justify-center">
+          {renderCurrentView()}
+        </main>
+      </div>
+    </ErrorBoundary>
   );
 };
 

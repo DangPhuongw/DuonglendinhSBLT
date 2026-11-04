@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
+import { QuestionSpeakerButton } from './QuestionSpeakerButton';
+import { voiceReader } from '../utils/voiceReader';
 import { Bell, Send, HelpCircle, CheckCircle2, XCircle, Sparkles } from 'lucide-react';
 
 export const VcnvRound: React.FC = () => {
@@ -16,33 +18,52 @@ export const VcnvRound: React.FC = () => {
   const [inputAnswer, setInputAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  if (!room || !myPlayer) return null;
+  const subPhase = room?.state?.subPhase;
+  const currentQ = room?.state?.currentQuestion;
+  const openedPieces: number[] = room?.state?.openedPieces || [];
+  const rowsRevealed: boolean[] = room?.state?.rowsRevealed || [false, false, false, false];
+  const rowLetterCounts: number[] = room?.state?.rowLetterCounts || [6, 5, 9, 7];
+  const rowAnswersRevealed = room?.state?.rowAnswersRevealed;
+  const activeRowIdx = room?.state?.activeRowIndex;
 
-  const subPhase = room.state.subPhase;
-  const currentQ = room.state.currentQuestion;
-  const openedPieces: number[] = room.state.openedPieces || [];
-  const rowsRevealed: boolean[] = room.state.rowsRevealed || [false, false, false, false];
-  const rowLetterCounts: number[] = room.state.rowLetterCounts || [6, 5, 9, 7];
-  const rowAnswersRevealed = room.state.rowAnswersRevealed;
-  const activeRowIdx = room.state.activeRowIndex;
-
-  const isEliminated = myPlayer.eliminatedVcnv;
-  const isBuzzerLocked = Boolean(room.state.buzzerLockedBy);
+  const isEliminated = Boolean(myPlayer?.eliminatedVcnv);
+  const isBuzzerLocked = Boolean(room?.state?.buzzerLockedBy);
   const hasRevealedAtLeastOne = rowsRevealed.some(Boolean);
   const canBuzz = !isEliminated && !isBuzzerLocked && hasRevealedAtLeastOne;
 
-  const activeChooser = room.players.find((p) => p.id === room.state.activePlayerId);
-  const isMyTurnToPick = subPhase === 'PICK_ROW' && room.state.activePlayerId === myPlayer.id;
+  const activeChooser = room?.players.find((p) => p.id === room?.state?.activePlayerId);
+  const isMyTurnToPick = Boolean(subPhase === 'PICK_ROW' && myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
-  const isMyTurnToAnswerCnv =
+  const isMyTurnToAnswerCnv = Boolean(
     (subPhase === 'CNV_ANSWERING' || subPhase === 'FINAL_GUESS_ANSWERING') &&
-    room.state.activePlayerId === myPlayer.id;
+    myPlayer &&
+    room?.state?.activePlayerId === myPlayer.id
+  );
 
   // Clear input when question or subPhase changes
   useEffect(() => {
     setInputAnswer('');
     setSubmitted(false);
   }, [currentQ?.id, subPhase]);
+
+  // Stop voice reading on reveal or answering phase
+  useEffect(() => {
+    if (
+      subPhase === 'ROW_REVEAL' ||
+      subPhase === 'CENTER_REVEAL' ||
+      subPhase === 'CNV_ANSWERING' ||
+      subPhase === 'FINAL_GUESS_ANSWERING'
+    ) {
+      voiceReader.stop();
+    }
+  }, [subPhase]);
+
+  // Stop speech when round unmounts
+  useEffect(() => {
+    return () => {
+      voiceReader.stop();
+    };
+  }, []);
 
   // Space key for buzzer
   useEffect(() => {
@@ -61,6 +82,8 @@ export const VcnvRound: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [subPhase, canBuzz, buzz]);
+
+  if (!room || !myPlayer) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -361,6 +384,10 @@ export const VcnvRound: React.FC = () => {
                   : `Câu hỏi Hàng Ngang số ${(activeRowIdx ?? 0) + 1} (${rowLetterCounts[activeRowIdx ?? 0] || 6} chữ cái)`}
               </span>
             </div>
+            <QuestionSpeakerButton
+              question={currentQ}
+              autoRead={subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION'}
+            />
           </div>
 
           <p className="text-base sm:text-lg font-bold text-slate-100 mb-4">{currentQ.prompt}</p>

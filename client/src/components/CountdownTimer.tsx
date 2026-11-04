@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { bgmManager } from '../utils/bgmManager';
 
 interface CountdownTimerProps {
   deadline: number | null;
@@ -42,11 +41,6 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const totalMs = totalDurationSeconds * 1000;
   const percent = Math.min(100, Math.max(0, (remainingMs / totalMs) * 100));
   const isUrgent = remainingMs <= 5000;
-
-  useEffect(() => {
-    bgmManager.setUrgency(isUrgent);
-    return () => bgmManager.setUrgency(false);
-  }, [isUrgent]);
 
   return (
     <div className={`w-full max-w-xl mx-auto flex flex-col items-center gap-1.5 ${className}`}>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
+import { QuestionSpeakerButton } from './QuestionSpeakerButton';
+import { voiceReader } from '../utils/voiceReader';
 import { Star, Bell, Send, Trophy } from 'lucide-react';
 
 export const VeDichRound: React.FC = () => {
@@ -16,20 +18,32 @@ export const VeDichRound: React.FC = () => {
   const [inputAnswer, setInputAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  if (!room || !myPlayer) return null;
-
-  const subPhase = room.state.subPhase;
-  const currentQ = room.state.currentQuestion;
-  const activePlayer = room.players.find((p) => p.id === room.state.activePlayerId);
-  const isMyTurn = myPlayer.id === room.state.activePlayerId;
-  const questionPoints = room.state.questionPoints || 10;
-  const questionIndex = room.state.questionIndex || 0;
+  const subPhase = room?.state?.subPhase;
+  const currentQ = room?.state?.currentQuestion;
+  const activePlayer = room?.players.find((p) => p.id === room.state.activePlayerId);
+  const isMyTurn = Boolean(myPlayer && room?.state?.activePlayerId === myPlayer.id);
+  const questionPoints = room?.state?.questionPoints || 10;
+  const questionIndex = room?.state?.questionIndex || 0;
 
   // Clear answer on question change
   useEffect(() => {
     setInputAnswer('');
     setSubmitted(false);
   }, [currentQ?.id, subPhase]);
+
+  // Stop voice reading on reveal, steal buzz, or steal answer
+  useEffect(() => {
+    if (subPhase === 'STEAL_BUZZ' || subPhase === 'STEAL_ANSWER' || subPhase === 'REVEAL') {
+      voiceReader.stop();
+    }
+  }, [subPhase]);
+
+  // Stop speech when round unmounts
+  useEffect(() => {
+    return () => {
+      voiceReader.stop();
+    };
+  }, []);
 
   // Space key for steal buzzer
   useEffect(() => {
@@ -42,6 +56,8 @@ export const VeDichRound: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [subPhase, isMyTurn, buzz]);
+
+  if (!room || !myPlayer) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,6 +218,13 @@ export const VeDichRound: React.FC = () => {
       {/* Question Card */}
       {currentQ && (
         <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Câu hỏi Về Đích ({questionPoints} điểm)
+            </span>
+            <QuestionSpeakerButton question={currentQ} autoRead={subPhase === 'QUESTION'} />
+          </div>
+
           <p className="text-base sm:text-xl font-bold text-slate-100 mb-6 leading-relaxed">
             {currentQ.prompt}
           </p>

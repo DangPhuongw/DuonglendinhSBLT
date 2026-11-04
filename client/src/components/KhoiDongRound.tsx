@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
+import { QuestionSpeakerButton } from './QuestionSpeakerButton';
+import { voiceReader } from '../utils/voiceReader';
 import { Bell, CheckCircle, XCircle } from 'lucide-react';
 
 export const KhoiDongRound: React.FC = () => {
@@ -14,18 +16,30 @@ export const KhoiDongRound: React.FC = () => {
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  if (!room || !myPlayer) return null;
-
-  const currentRound = room.state.round; // 'KD_RIENG' or 'KD_CHUNG'
-  const subPhase = room.state.subPhase;
-  const currentQ = room.state.currentQuestion;
-  const activePlayer = room.players.find((p) => p.id === room.state.activePlayerId);
-  const isMyTurn = myPlayer && room.state.activePlayerId === myPlayer.id;
+  const currentRound = room?.state?.round; // 'KD_RIENG' or 'KD_CHUNG'
+  const subPhase = room?.state?.subPhase;
+  const currentQ = room?.state?.currentQuestion;
+  const activePlayer = room?.players.find((p) => p.id === room.state.activePlayerId);
+  const isMyTurn = Boolean(myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
   // Clear local selected option when question changes
   useEffect(() => {
     setSelectedOption(null);
   }, [currentQ?.id]);
+
+  // Stop voice reading on reveal or answering phase
+  useEffect(() => {
+    if (subPhase === 'REVEAL' || subPhase === 'ANSWERING') {
+      voiceReader.stop();
+    }
+  }, [subPhase]);
+
+  // Stop speech when round unmounts
+  useEffect(() => {
+    return () => {
+      voiceReader.stop();
+    };
+  }, []);
 
   // Keyboard shortcut listener (1-4 for options, Space for buzzer)
   useEffect(() => {
@@ -43,7 +57,7 @@ export const KhoiDongRound: React.FC = () => {
           const index = parseInt(e.key, 10) - 1;
           const letter = ['A', 'B', 'C', 'D'][index];
           setSelectedOption(letter);
-          submitAnswer(currentQ.id, letter);
+          if (currentQ) submitAnswer(currentQ.id, letter);
         }
       }
     };
@@ -51,6 +65,8 @@ export const KhoiDongRound: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentRound, subPhase, isMyTurn, currentQ, selectedOption, buzz, submitAnswer]);
+
+  if (!room || !myPlayer) return null;
 
   const handleSelectOption = (letter: string) => {
     if (!isMyTurn || selectedOption || !currentQ) return;
@@ -135,6 +151,16 @@ export const KhoiDongRound: React.FC = () => {
       {/* Question Card */}
       {currentQ && (
         <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Câu hỏi
+            </span>
+            <QuestionSpeakerButton
+              question={currentQ}
+              autoRead={subPhase === 'QUESTION' || subPhase === 'QUESTION_BUZZ'}
+            />
+          </div>
+
           <div className="text-base sm:text-xl font-bold text-slate-100 mb-6 leading-relaxed">
             {currentQ.prompt}
           </div>

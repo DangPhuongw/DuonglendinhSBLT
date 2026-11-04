@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
+import { QuestionSpeakerButton } from './QuestionSpeakerButton';
+import { voiceReader } from '../utils/voiceReader';
 import { Zap, Send, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
 export const TangTocRound: React.FC = () => {
@@ -12,17 +14,31 @@ export const TangTocRound: React.FC = () => {
   const [inputAnswer, setInputAnswer] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  if (!room || !myPlayer) return null;
-
-  const subPhase = room.state.subPhase;
-  const currentQ = room.state.currentQuestion;
-  const questionIndex = room.state.questionIndex || 0;
+  const subPhase = room?.state?.subPhase;
+  const currentQ = room?.state?.currentQuestion;
+  const questionIndex = room?.state?.questionIndex || 0;
 
   // Clear answer on new question
   useEffect(() => {
     setInputAnswer('');
     setSubmitted(false);
   }, [currentQ?.id]);
+
+  // Stop voice reading on reveal
+  useEffect(() => {
+    if (subPhase === 'REVEAL') {
+      voiceReader.stop();
+    }
+  }, [subPhase]);
+
+  // Stop speech when round unmounts
+  useEffect(() => {
+    return () => {
+      voiceReader.stop();
+    };
+  }, []);
+
+  if (!room || !myPlayer) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +66,13 @@ export const TangTocRound: React.FC = () => {
       {/* Question & Media Card */}
       {currentQ && (
         <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur mb-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Nội dung câu hỏi
+            </span>
+            <QuestionSpeakerButton question={currentQ} autoRead={subPhase === 'QUESTION'} />
+          </div>
+
           <p className="text-base sm:text-xl font-bold text-slate-100 mb-4 leading-relaxed">
             {currentQ.prompt}
           </p>

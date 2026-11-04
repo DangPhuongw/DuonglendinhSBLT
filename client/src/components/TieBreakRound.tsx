@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
+import { QuestionSpeakerButton } from './QuestionSpeakerButton';
+import { voiceReader } from '../utils/voiceReader';
 import { Bell, AlertTriangle, Send } from 'lucide-react';
 
 export const TieBreakRound: React.FC = () => {
@@ -14,13 +16,11 @@ export const TieBreakRound: React.FC = () => {
 
   const [inputAnswer, setInputAnswer] = useState('');
 
-  if (!room || !myPlayer) return null;
-
-  const subPhase = room.state.subPhase;
-  const currentQ = room.state.currentQuestion;
-  const eligibleIds: string[] = room.state.eligiblePlayerIds || [];
-  const isEligible = eligibleIds.includes(myPlayer.id);
-  const isAnswering = subPhase === 'ANSWERING' && room.state.activePlayerId === myPlayer.id;
+  const subPhase = room?.state?.subPhase;
+  const currentQ = room?.state?.currentQuestion;
+  const eligibleIds: string[] = room?.state?.eligiblePlayerIds || [];
+  const isEligible = Boolean(myPlayer && eligibleIds.includes(myPlayer.id));
+  const isAnswering = Boolean(subPhase === 'ANSWERING' && myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
   // Space key for buzzer
   useEffect(() => {
@@ -33,6 +33,22 @@ export const TieBreakRound: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [subPhase, isEligible, buzz]);
+
+  // Stop voice reading on reveal or answering phase
+  useEffect(() => {
+    if (subPhase === 'REVEAL' || subPhase === 'ANSWERING') {
+      voiceReader.stop();
+    }
+  }, [subPhase]);
+
+  // Stop speech when round unmounts
+  useEffect(() => {
+    return () => {
+      voiceReader.stop();
+    };
+  }, []);
+
+  if (!room || !myPlayer) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +136,16 @@ export const TieBreakRound: React.FC = () => {
       {/* Question Card */}
       {currentQ && (
         <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Câu hỏi phụ
+            </span>
+            <QuestionSpeakerButton
+              question={currentQ}
+              autoRead={subPhase === 'WAIT_SIGNAL' || subPhase === 'BUZZ_OPEN'}
+            />
+          </div>
+
           <p className="text-base sm:text-xl font-bold text-slate-100 mb-6 leading-relaxed">
             {currentQ.prompt}
           </p>
