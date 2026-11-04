@@ -3,12 +3,13 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
-import { Bell, CheckCircle, XCircle } from 'lucide-react';
+import { Bell, CheckCircle, XCircle, Package, Sparkles } from 'lucide-react';
 
 export const KhoiDongRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
   const myPlayer = useGameStore((s) => s.player);
   const submitAnswer = useGameStore((s) => s.submitAnswer);
+  const chooseKdPackage = useGameStore((s) => s.chooseKdPackage);
   const buzz = useGameStore((s) => s.buzz);
   const buzzWinner = useGameStore((s) => s.buzzWinner);
   const buzzRejectedReason = useGameStore((s) => s.buzzRejectedReason);
@@ -51,6 +52,15 @@ export const KhoiDongRound: React.FC = () => {
         return;
       }
 
+      // 1-4 for picking package if active player
+      if (isMyTurn && subPhase === 'CHOOSE_PACKAGE') {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+          const index = parseInt(e.key, 10) - 1;
+          chooseKdPackage(index);
+          return;
+        }
+      }
+
       // 1-4 for MCQ options if active player
       if (isMyTurn && (subPhase === 'QUESTION' || subPhase === 'ANSWERING') && currentQ?.options) {
         if (['1', '2', '3', '4'].includes(e.key) && !selectedOption) {
@@ -74,20 +84,114 @@ export const KhoiDongRound: React.FC = () => {
     submitAnswer(currentQ.id, letter);
   };
 
-  // --- 1. TURN INTRO ---
-  if (subPhase === 'TURN_INTRO') {
+  // --- 1. CHOOSE PACKAGE (CHỌN Ô CÂU HỎI KHỞI ĐỘNG) ---
+  if (subPhase === 'CHOOSE_PACKAGE' || subPhase === 'PACKAGE_CONFIRMED' || subPhase === 'TURN_INTRO') {
+    const packages = room.state.kdPackages || [
+      { index: 0, name: 'Ô số 1', count: 5 },
+      { index: 1, name: 'Ô số 2', count: 5 },
+      { index: 2, name: 'Ô số 3', count: 5 },
+      { index: 3, name: 'Ô số 4', count: 5 },
+    ];
+    const confirmedIndex = room.state.kdChosenPackageIndex;
+    const confirmedPkg = packages.find((p) => p.index === confirmedIndex);
+
     return (
-      <div className="max-w-2xl mx-auto p-6 flex flex-col items-center justify-center min-h-[50vh] text-center">
-        <span className="text-xs uppercase font-bold text-amber-400 tracking-widest mb-2">
-          Lượt thi Khởi động riêng
-        </span>
-        <h2 className="text-2xl sm:text-4xl font-black text-white mb-2">
-          {activePlayer?.name}
-        </h2>
-        <span className="text-sm font-semibold text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
-          Ghế số {activePlayer?.seat}
-        </span>
-        <p className="text-xs text-slate-500 mt-4">5 câu hỏi trắc nghiệm (15 giây/câu)</p>
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur flex flex-col items-center">
+          <span className="text-xs uppercase font-bold text-amber-400 tracking-widest mb-1">
+            Vòng 1: Khởi Động Riêng
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">
+            LƯỢT THI CỦA: {activePlayer?.name}
+          </h2>
+          <span className="text-xs font-semibold text-slate-400 bg-slate-800/80 px-3 py-0.5 rounded-full border border-slate-700 mb-4">
+            Ghế số {activePlayer?.seat}
+          </span>
+
+          {subPhase === 'PACKAGE_CONFIRMED' ? (
+            <div className="my-6 p-6 rounded-2xl bg-gradient-to-b from-amber-950/60 to-slate-900 border-2 border-amber-500 flex flex-col items-center gap-2 animate-bounce">
+              <Sparkles className="text-amber-400" size={32} />
+              <span className="text-xl font-black text-amber-300">
+                {activePlayer?.name} đã chọn {confirmedPkg?.name || 'Ô câu hỏi'}!
+              </span>
+              <span className="text-xs text-slate-400">
+                Gói gồm 5 câu hỏi trắc nghiệm (15s/câu). Bắt đầu sau 2 giây...
+              </span>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs sm:text-sm text-slate-300 mb-4 max-w-md">
+                {isMyTurn ? (
+                  <span className="text-amber-300 font-bold">
+                    Đến lượt bạn! Hãy bấm chọn 1 trong các ô câu hỏi dưới đây (10 giây):
+                  </span>
+                ) : (
+                  <span>Đang chờ thí sinh chọn ô câu hỏi...</span>
+                )}
+              </p>
+
+              <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={10} className="mb-6" />
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full">
+                {packages.map((pkg) => {
+                  const isChosen = Boolean(pkg.chosenBy);
+                  const canClick = isMyTurn && !isChosen;
+
+                  return (
+                    <button
+                      key={pkg.index}
+                      disabled={!canClick}
+                      onClick={() => chooseKdPackage(pkg.index)}
+                      className={`relative p-5 rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all ${
+                        isChosen
+                          ? 'bg-slate-950/60 border-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                          : canClick
+                          ? 'bg-gradient-to-b from-amber-950/40 to-slate-900 border-amber-500/80 hover:border-amber-400 hover:scale-105 shadow-lg shadow-amber-500/10 cursor-pointer active:scale-95'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center font-bold text-xs text-amber-400">
+                        {pkg.index + 1}
+                      </div>
+
+                      <Package
+                        size={28}
+                        className={
+                          canClick
+                            ? 'text-amber-400 animate-pulse'
+                            : isChosen
+                            ? 'text-slate-600'
+                            : 'text-slate-400'
+                        }
+                      />
+
+                      <span className="font-black text-sm sm:text-base text-white tracking-wide">
+                        {pkg.name}
+                      </span>
+                      <span className="text-[11px] text-amber-300/80 font-medium">
+                        5 câu hỏi
+                      </span>
+
+                      {isChosen ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 truncate max-w-full">
+                          {pkg.chosenByName ? `Đã chọn (${pkg.chosenByName})` : 'Đã chọn'}
+                        </span>
+                      ) : canClick ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold uppercase tracking-wider">
+                          Bấm chọn
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-500 italic">
+                          Chưa mở
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -98,7 +202,7 @@ export const KhoiDongRound: React.FC = () => {
       <div className="w-full flex items-center justify-between mb-4 px-1">
         <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
           {currentRound === 'KD_RIENG'
-            ? `Khởi Động Riêng - ${activePlayer?.name} (Ghế ${activePlayer?.seat})`
+            ? `Khởi Động Riêng - ${activePlayer?.name} (Ghế ${activePlayer?.seat} • Ô số ${(room.state.kdChosenPackageIndex ?? 0) + 1} • Câu ${(room.state.questionIndex ?? 0) + 1}/5)`
             : 'Khởi Động Chung - Giành Chuông (10 Câu)'}
         </span>
         <span className="text-xs text-slate-400 font-mono">

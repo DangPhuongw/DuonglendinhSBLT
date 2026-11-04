@@ -294,6 +294,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 8a. Khởi động: choose package
+  socket.on('kd:choosePackage', ({ packageIndex }) => {
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return;
+    const machine = roomManager.getRoom(info.roomCode);
+    if (machine) {
+      machine.chooseKdPackage(info.playerId, packageIndex);
+    }
+  });
+
   // 8b. VCNV: Pick row
   socket.on('vcnv:pickRow', ({ rowIndex }) => {
     const info = roomManager.getPlayerBySocket(socket.id);

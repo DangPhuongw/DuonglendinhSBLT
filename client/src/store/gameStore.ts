@@ -31,6 +31,7 @@ interface GameStore {
   setReady: (mediaLoaded?: boolean) => void;
   submitAnswer: (questionId: string, content: string) => void;
   buzz: () => void;
+  chooseKdPackage: (packageIndex: number) => void;
   pickVcnvRow: (rowIndex: number) => void;
   choosePackage: (packagePoints: 40 | 60 | 80) => void;
   setHopeStar: (useStar: boolean) => void;
@@ -291,6 +292,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   buzz: () => {
     get().socket?.emit('buzz', {});
+  },
+
+  chooseKdPackage: (packageIndex: number) => {
+    get().socket?.emit('kd:choosePackage', { packageIndex });
   },
 
   pickVcnvRow: (rowIndex: number) => {

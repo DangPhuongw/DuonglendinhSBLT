@@ -113,6 +113,8 @@ export interface RoomState {
   rowAnswersRevealed?: (string[] | null)[];
   activeRowIndex?: number;
   stepIndex?: number;
+  kdPackages?: { index: number; name: string; count: number; chosenBy?: string; chosenByName?: string }[];
+  kdChosenPackageIndex?: number;
   // Additional dynamic state fields
   [key: string]: any;
 }
@@ -157,6 +159,7 @@ export interface ClientToServerEvents {
   'player:ready': (data: { mediaLoaded: boolean }) => void;
   'answer:submit': (data: { questionId: string; content: string }) => void;
   'buzz': (data: { questionId?: string }) => void;
+  'kd:choosePackage': (data: { packageIndex: number }) => void;
   'vcnv:pickRow': (data: { rowIndex: number }) => void;
   'vd:choosePackage': (data: { packagePoints: 40 | 60 | 80 }) => void;
   'vd:setStar': (data: { useStar: boolean }) => void;

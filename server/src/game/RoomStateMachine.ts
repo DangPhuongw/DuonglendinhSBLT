@@ -56,6 +56,7 @@ export class RoomStateMachine {
   private vcnvCurrentRowIndex: number = 0;
   private vcnvPlayerQueue: string[] = [];
   private lastRevealedPayload: RevealPayload | null = null;
+  private chosenKdPackages: Map<string, number> = new Map();
 
   constructor(
     roomCode: string,
@@ -448,8 +449,106 @@ export class RoomStateMachine {
   // VÒNG 1: KHỞI ĐỘNG
   // ==========================================
 
+  private getKdPackagesList() {
+    const totalBoxes = Math.max(4, this.room.players.length);
+    const result = [];
+    for (let i = 0; i < totalBoxes; i++) {
+      let chosenByPlayerId: string | undefined;
+      let chosenByName: string | undefined;
+      for (const [pId, pIdx] of this.chosenKdPackages.entries()) {
+        if (pIdx === i) {
+          chosenByPlayerId = pId;
+          const p = this.room.players.find((pl) => pl.id === pId);
+          chosenByName = p?.name;
+          break;
+        }
+      }
+      result.push({
+        index: i,
+        name: `Ô số ${i + 1}`,
+        count: (this.questionSet.khoiDong.rieng[i] || []).length || 5,
+        chosenBy: chosenByPlayerId,
+        chosenByName,
+      });
+    }
+    return result;
+  }
+
+  public chooseKdPackage(playerId: string, packageIndex: number): boolean {
+    if (this.room.status !== 'KD_RIENG') return false;
+    if (this.room.state.subPhase !== 'CHOOSE_PACKAGE') return false;
+    if (this.room.state.activePlayerId !== playerId) return false;
+
+    const packages = this.getKdPackagesList();
+    const pkg = packages.find((p) => p.index === packageIndex);
+    if (!pkg || pkg.chosenBy) {
+      return false; // Already chosen or invalid
+    }
+
+    this.clearTimer();
+    this.eventQueue.enqueue(async () => {
+      const players = [...this.room.players].sort((a, b) => a.seat - b.seat);
+      const playerIdx = players.findIndex((p) => p.id === playerId);
+      if (playerIdx === -1) return;
+      await this.applyKdPackageChoice(players, playerIdx, packageIndex);
+    });
+    return true;
+  }
+
+  private async promptKdChoosePackage(
+    players: Player[],
+    playerIndex: number
+  ): Promise<void> {
+    const currentPlayer = players[playerIndex];
+    const packages = this.getKdPackagesList();
+
+    this.room.state = {
+      round: 'KD_RIENG',
+      subPhase: 'CHOOSE_PACKAGE',
+      activePlayerId: currentPlayer.id,
+      deadline: Date.now() + 10000,
+      kdPackages: packages,
+    };
+    this.persistSnapshot();
+    this.syncRoom();
+
+    this.setDeadline(10000, async () => {
+      const currentPkgs = this.getKdPackagesList();
+      const unchosen = currentPkgs.find((p) => !p.chosenBy);
+      const pickIdx = unchosen ? unchosen.index : 0;
+      await this.applyKdPackageChoice(players, playerIndex, pickIdx);
+    });
+  }
+
+  private async applyKdPackageChoice(
+    players: Player[],
+    playerIndex: number,
+    packageIndex: number
+  ): Promise<void> {
+    const currentPlayer = players[playerIndex];
+    this.chosenKdPackages.set(currentPlayer.id, packageIndex);
+    const packages = this.getKdPackagesList();
+
+    // Show confirmed choice for 2.5s
+    this.room.state = {
+      round: 'KD_RIENG',
+      subPhase: 'PACKAGE_CONFIRMED',
+      activePlayerId: currentPlayer.id,
+      deadline: Date.now() + 2500,
+      kdPackages: packages,
+      kdChosenPackageIndex: packageIndex,
+    };
+    this.persistSnapshot();
+    this.syncRoom();
+
+    this.setDeadline(2500, async () => {
+      await this.presentKdRiengQuestion(players, playerIndex, 0);
+    });
+  }
+
   private async startKhoiDongRieng(): Promise<void> {
     this.room.status = 'KD_RIENG';
+    this.chosenKdPackages.clear();
     const playersInOrder = [...this.room.players].sort((a, b) => a.seat - b.seat);
     await this.runKhoiDongRiengTurn(playersInOrder, 0, 0);
   }
@@ -466,29 +565,19 @@ export class RoomStateMachine {
     }
 
     const currentPlayer = players[playerIndex];
-    const playerSeatIndex = currentPlayer.seat - 1;
-    const playerQuestions = this.questionSet.khoiDong.rieng[playerSeatIndex] || [];
+    const pkgIdx = this.chosenKdPackages.get(currentPlayer.id);
+
+    // If player hasn't chosen package yet, prompt choice
+    if (pkgIdx === undefined) {
+      await this.promptKdChoosePackage(players, playerIndex);
+      return;
+    }
+
+    const playerQuestions = this.questionSet.khoiDong.rieng[pkgIdx] || this.questionSet.khoiDong.rieng[0] || [];
 
     if (questionIndex >= GAME_CONFIG.KHOI_DONG.RIENG_QUESTIONS_PER_PLAYER || questionIndex >= playerQuestions.length) {
       // Move to next player
       await this.runKhoiDongRiengTurn(players, playerIndex + 1, 0);
-      return;
-    }
-
-    if (questionIndex === 0) {
-      // Intro 3s for this player
-      this.room.state = {
-        round: 'KD_RIENG',
-        subPhase: 'TURN_INTRO',
-        activePlayerId: currentPlayer.id,
-        deadline: null,
-      };
-      this.persistSnapshot();
-      this.syncRoom();
-
-      this.setDeadline(3000, async () => {
-        await this.presentKdRiengQuestion(players, playerIndex, 0);
-      });
       return;
     }
 
@@ -501,8 +590,14 @@ export class RoomStateMachine {
     questionIndex: number
   ): Promise<void> {
     const currentPlayer = players[playerIndex];
-    const playerSeatIndex = currentPlayer.seat - 1;
-    const question = this.questionSet.khoiDong.rieng[playerSeatIndex][questionIndex];
+    const pkgIdx = this.chosenKdPackages.get(currentPlayer.id) ?? (currentPlayer.seat - 1);
+    const playerQuestions = this.questionSet.khoiDong.rieng[pkgIdx] || this.questionSet.khoiDong.rieng[0] || [];
+    const question = playerQuestions[questionIndex];
+
+    if (!question) {
+      await this.runKhoiDongRiengTurn(players, playerIndex + 1, 0);
+      return;
+    }
 
     this.answersMap.clear();
     this.room.state = {
@@ -511,6 +606,8 @@ export class RoomStateMachine {
       activePlayerId: currentPlayer.id,
       deadline: null,
       currentQuestion: question,
+      kdChosenPackageIndex: pkgIdx,
+      questionIndex,
     };
 
     const durationMs = GAME_CONFIG.KHOI_DONG.RIENG_TIME_SECONDS * 1000;
@@ -548,10 +645,10 @@ export class RoomStateMachine {
         this.eventQueue.enqueue(async () => {
           const players = [...this.room.players].sort((a, b) => a.seat - b.seat);
           const activeIdx = players.findIndex((p) => p.id === playerId);
-          const qIdx = this.questionSet.khoiDong.rieng[players[activeIdx].seat - 1].findIndex(
-            (q) => q.id === questionId
-          );
-          const fullQuestion = this.questionSet.khoiDong.rieng[players[activeIdx].seat - 1][qIdx];
+          const pkgIdx = this.chosenKdPackages.get(playerId) ?? (players[activeIdx].seat - 1);
+          const questionsInPkg = this.questionSet.khoiDong.rieng[pkgIdx] || [];
+          const qIdx = questionsInPkg.findIndex((q) => q.id === questionId);
+          const fullQuestion = questionsInPkg[qIdx] || questionsInPkg[0];
           await this.revealKdRiengQuestion(players, activeIdx, qIdx, fullQuestion);
         });
         return true;
