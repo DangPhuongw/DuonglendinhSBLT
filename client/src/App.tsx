@@ -10,10 +10,14 @@ import { TangTocRound } from './components/TangTocRound';
 import { VeDichRound } from './components/VeDichRound';
 import { TieBreakRound } from './components/TieBreakRound';
 import { Podium } from './components/Podium';
+import { useGameAudio } from './hooks/useGameAudio';
 
 export const App: React.FC = () => {
   const initSocket = useGameStore((s) => s.initSocket);
   const room = useGameStore((s) => s.room);
+
+  // Automatic Audio Coordinator (BGM & TTS)
+  useGameAudio();
 
   useEffect(() => {
     initSocket();
