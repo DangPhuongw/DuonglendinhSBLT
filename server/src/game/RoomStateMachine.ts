@@ -450,7 +450,8 @@ export class RoomStateMachine {
   // ==========================================
 
   private getKdPackagesList() {
-    const totalBoxes = Math.max(4, this.room.players.length);
+    // Luôn luôn có đúng 5 ô câu hỏi tổng
+    const totalBoxes = 5;
     const result = [];
     for (let i = 0; i < totalBoxes; i++) {
       let chosenByPlayerId: string | undefined;

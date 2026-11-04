@@ -14,7 +14,7 @@ const ROUND_RULES: Record<string, RoundRule> = {
     points: [
       {
         title: 'Khởi động Riêng',
-        desc: 'Mỗi thí sinh chọn 1 trong 4 ô câu hỏi và lần lượt trả lời 5 câu riêng (15s/câu). Đúng được +10 điểm, trả lời sai không bị trừ điểm.',
+        desc: 'Mỗi thí sinh chọn 1 trong 5 ô câu hỏi (mỗi ô 5 câu, 15s/câu). Ô đã chọn sẽ bị khóa và người sau không thể chọn lại. Đúng +10đ/câu, sai không bị trừ điểm.',
         badge: '+10đ / 0đ',
       },
       {
