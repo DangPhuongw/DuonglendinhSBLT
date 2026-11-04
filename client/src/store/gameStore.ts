@@ -93,8 +93,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const prevRound = get().room?.state?.round;
       const newRound = room.state?.round;
 
-      // Clear buzzWinner if round changed or buzzer is not currently locked
-      const buzzWinner = (prevRound !== newRound || !room.state?.buzzerLockedBy) ? null : get().buzzWinner;
+      // Only preserve buzzWinner if buzzer is actively locked in a relevant answering subPhase
+      const isAnsweringSubPhase =
+        room.state?.subPhase === 'ANSWERING' ||
+        room.state?.subPhase === 'STEAL_ANSWER' ||
+        room.state?.subPhase === 'CNV_ANSWERING' ||
+        room.state?.subPhase === 'FINAL_GUESS_ANSWERING';
+
+      const isBuzzerActive = Boolean(room.state?.buzzerLockedBy);
+      const buzzWinner =
+        prevRound === newRound && isBuzzerActive && isAnsweringSubPhase ? get().buzzWinner : null;
 
       set({ room, player: me, buzzWinner });
     });
@@ -123,6 +131,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               subPhase: data.subPhase,
               deadline: data.deadline,
               currentQuestion: data.question,
+              buzzerLockedBy: null,
             },
           },
           buzzWinner: null,

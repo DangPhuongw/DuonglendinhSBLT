@@ -127,9 +127,9 @@ export const KhoiDongRound: React.FC = () => {
       )}
 
       {/* Buzzer Winner Announcement */}
-      {buzzWinner && Boolean(room.state.buzzerLockedBy) && (
+      {subPhase === 'ANSWERING' && Boolean(room.state.buzzerLockedBy) && (
         <div className="w-full p-2.5 mb-4 bg-amber-950/60 border border-amber-500/50 rounded-xl text-center text-xs font-bold text-amber-300 animate-bounce">
-          Chuông: {buzzWinner.winnerName} đã giành được quyền trả lời!
+          Chuông: {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành được quyền trả lời!
         </div>
       )}
 

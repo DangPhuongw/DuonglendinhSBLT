@@ -1325,6 +1325,8 @@ export class RoomStateMachine {
 
   private async startTangToc(): Promise<void> {
     this.room.status = 'TANG_TOC';
+    this.buzzedPlayerId = null;
+    this.room.state.buzzerLockedBy = null;
     await this.runTangTocQuestion(0);
   }
 
@@ -1337,6 +1339,7 @@ export class RoomStateMachine {
 
     const question = questions[questionIndex];
     this.answersMap.clear();
+    this.buzzedPlayerId = null;
     const durationMs = GAME_CONFIG.TANG_TOC.TIME_SECONDS * 1000;
 
     this.room.state = {
@@ -1345,6 +1348,7 @@ export class RoomStateMachine {
       currentQuestion: question,
       deadline: null,
       questionIndex,
+      buzzerLockedBy: null,
     };
 
     const startTime = Date.now();
@@ -1432,12 +1436,14 @@ export class RoomStateMachine {
     };
     this.lastRevealedPayload = revealPayload;
 
+    this.buzzedPlayerId = null;
     this.room.state = {
       round: 'TANG_TOC',
       subPhase: 'REVEAL',
       currentQuestion: question,
       deadline: null,
       questionIndex,
+      buzzerLockedBy: null,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
@@ -1456,6 +1462,8 @@ export class RoomStateMachine {
 
   private async startVeDich(): Promise<void> {
     this.room.status = 'VE_DICH';
+    this.buzzedPlayerId = null;
+    this.room.state.buzzerLockedBy = null;
     // G9: Sort players by current score descending, tiebreaker smaller seat
     const sorted = [...this.room.players].sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
@@ -1473,12 +1481,14 @@ export class RoomStateMachine {
     }
 
     const activePlayerId = this.veDichPlayerQueue[playerQueueIndex];
+    this.buzzedPlayerId = null;
     this.room.state = {
       round: 'VE_DICH',
       subPhase: 'CHOOSE_PACKAGE',
       activePlayerId,
       deadline: null,
       turnIndex: playerQueueIndex,
+      buzzerLockedBy: null,
     };
 
     const chooseSec = GAME_CONFIG.VE_DICH.CHOOSE_PACKAGE_SECONDS;
@@ -1544,6 +1554,7 @@ export class RoomStateMachine {
     const question = pool[Math.floor(Math.random() * pool.length)] || pool[0];
 
     // Star decision phase: 10s
+    this.buzzedPlayerId = null;
     this.room.state = {
       round: 'VE_DICH',
       subPhase: 'STAR_DECISION',
@@ -1552,6 +1563,7 @@ export class RoomStateMachine {
       currentQuestion: question,
       questionPoints: pValue,
       questionIndex: questionIdx,
+      buzzerLockedBy: null,
     };
 
     this.setDeadline(GAME_CONFIG.VE_DICH.STAR_DECISION_SECONDS * 1000, async () => {
@@ -1593,6 +1605,7 @@ export class RoomStateMachine {
     turnIndex: number
   ): Promise<void> {
     this.answersMap.clear();
+    this.buzzedPlayerId = null;
     const durationSec = GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[points] || 15;
 
     this.room.state = {
@@ -1603,6 +1616,7 @@ export class RoomStateMachine {
       deadline: null,
       hopeStarActive: this.veDichHopeStarActive,
       questionPoints: points,
+      buzzerLockedBy: null,
     };
 
     this.setDeadline(durationSec * 1000, async () => {
@@ -1640,12 +1654,14 @@ export class RoomStateMachine {
       };
       this.lastRevealedPayload = revealPayload;
 
+      this.buzzedPlayerId = null;
       this.room.state = {
         round: 'VE_DICH',
         subPhase: 'REVEAL',
         activePlayerId: playerId,
         currentQuestion: question,
         deadline: null,
+        buzzerLockedBy: null,
       };
 
       this.callbacks.broadcastReveal(revealPayload);
@@ -1687,11 +1703,13 @@ export class RoomStateMachine {
       };
       this.lastRevealedPayload = revealPayload;
 
+      this.buzzedPlayerId = null;
       this.room.state = {
         round: 'VE_DICH',
         subPhase: 'REVEAL',
         currentQuestion: question,
         deadline: null,
+        buzzerLockedBy: null,
       };
 
       this.callbacks.broadcastReveal(revealPayload);
@@ -1744,11 +1762,13 @@ export class RoomStateMachine {
     };
     this.lastRevealedPayload = revealPayload;
 
+    this.buzzedPlayerId = null;
     this.room.state = {
       round: 'VE_DICH',
       subPhase: 'REVEAL',
       currentQuestion: question,
       deadline: null,
+      buzzerLockedBy: null,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
@@ -1798,6 +1818,7 @@ export class RoomStateMachine {
       currentQuestion: question,
       deadline: null,
       eligiblePlayerIds,
+      buzzerLockedBy: null,
     };
 
     this.setDeadline(GAME_CONFIG.TIEBREAK.WAIT_SIGNAL_SECONDS * 1000, async () => {
