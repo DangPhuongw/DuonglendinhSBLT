@@ -88,7 +88,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Room sync
     socket.on('state:sync', (room) => {
-      const currentToken = get().myToken;
+      const currentToken = get().myToken || localStorage.getItem('olympia_token');
       const me = room.players.find((p) => p.token === currentToken) || null;
       set({ room, player: me });
     });
@@ -96,7 +96,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     socket.on('player:update', (players) => {
       const currentRoom = get().room;
       if (currentRoom) {
-        const currentToken = get().myToken;
+        const currentToken = get().myToken || localStorage.getItem('olympia_token');
         const me = players.find((p) => p.token === currentToken) || null;
         set({
           room: { ...currentRoom, players },
@@ -198,7 +198,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
           localStorage.setItem('olympia_token', res.token);
           localStorage.setItem('olympia_room_code', res.roomCode);
           localStorage.setItem('olympia_seat', String(res.seat));
-          set({ myToken: res.token, mySeat: res.seat });
+          set({
+            myToken: res.token,
+            mySeat: res.seat,
+            room: res.room || get().room,
+            player: res.player || get().player,
+          });
           resolve({ ok: true });
         } else {
           resolve({ ok: false, error: res.error || 'Tạo phòng thất bại.' });
@@ -217,7 +222,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
           localStorage.setItem('olympia_token', res.token);
           localStorage.setItem('olympia_room_code', res.roomCode);
           localStorage.setItem('olympia_seat', String(res.seat));
-          set({ myToken: res.token, mySeat: res.seat });
+          set({
+            myToken: res.token,
+            mySeat: res.seat,
+            room: res.room || get().room,
+            player: res.player || get().player,
+          });
           resolve({ ok: true });
         } else {
           resolve({ ok: false, error: res.error || 'Vào phòng thất bại.' });

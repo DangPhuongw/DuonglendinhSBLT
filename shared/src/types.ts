@@ -146,8 +146,8 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  'room:create': (data: { name: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; error?: string }) => void) => void;
-  'room:join': (data: { name: string; roomCode: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; error?: string }) => void) => void;
+  'room:create': (data: { name: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
+  'room:join': (data: { name: string; roomCode: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:rejoin': (data: { roomCode: string; token: string }, callback: (res: { ok: boolean; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:start': () => void;
   'player:ready': (data: { mediaLoaded: boolean }) => void;

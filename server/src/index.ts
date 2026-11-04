@@ -176,15 +176,17 @@ io.on('connection', (socket) => {
 
     socket.join(roomCode);
     roomManager.associateSocket(socket.id, roomCode, playerId);
+    machine.syncRoom();
 
+    const hostPlayer = machine.room.players.find((p) => p.id === playerId);
     callback({
       ok: true,
       token,
       seat: 1,
       roomCode,
+      player: hostPlayer,
+      room: machine.getSanitizedRoom(),
     });
-
-    machine.syncRoom();
   });
 
   // 3. Room join
@@ -204,12 +206,15 @@ io.on('connection', (socket) => {
 
     socket.join(code);
     roomManager.associateSocket(socket.id, code, res.player.id);
+    machine.syncRoom();
 
     callback({
       ok: true,
       token,
       seat: res.player.seat,
       roomCode: code,
+      player: res.player,
+      room: machine.getSanitizedRoom(),
     });
   });
 

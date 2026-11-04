@@ -12,7 +12,12 @@ export const Lobby: React.FC = () => {
   const kickPlayer = useGameStore((s) => s.kickPlayer);
 
   const [name, setName] = useState('');
-  const [roomCodeInput, setRoomCodeInput] = useState('');
+  const [roomCodeInput, setRoomCodeInput] = useState(() => {
+    const pathMatch = window.location.pathname.match(/\/r\/([A-Za-z0-9]{6})/);
+    const searchParams = new URLSearchParams(window.location.search);
+    const fromUrl = pathMatch ? pathMatch[1] : searchParams.get('room');
+    return (fromUrl || localStorage.getItem('olympia_room_code') || '').toUpperCase();
+  });
   const [errorMsg, setErrorMsg] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
