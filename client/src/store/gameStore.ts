@@ -31,6 +31,7 @@ interface GameStore {
   setReady: (mediaLoaded?: boolean) => void;
   submitAnswer: (questionId: string, content: string) => void;
   buzz: () => void;
+  pickVcnvRow: (rowIndex: number) => void;
   choosePackage: (packagePoints: 40 | 60 | 80) => void;
   setHopeStar: (useStar: boolean) => void;
   overrideScore: (questionId: string, playerId: string, isCorrect: boolean) => void;
@@ -290,6 +291,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   buzz: () => {
     get().socket?.emit('buzz', {});
+  },
+
+  pickVcnvRow: (rowIndex: number) => {
+    get().socket?.emit('vcnv:pickRow', { rowIndex });
   },
 
   choosePackage: (packagePoints) => {

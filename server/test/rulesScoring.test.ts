@@ -144,3 +144,39 @@ describe('Tăng Tốc Scoring & 50ms Tiebreaker (G8)', () => {
     expect(player3.score).toBe(20);
   });
 });
+
+describe('VCNV Turn-based Row Selection & Letter Counts', () => {
+  it('correctly sets row letter counts and allows turn-based row picking', async () => {
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine(
+      'VCNV01',
+      { id: 'p1', name: 'Player 1', token: 'tok-1' },
+      callbacks
+    );
+    const p2Res = machine.addPlayer('Player 2', 'tok-2');
+    const p2 = p2Res.player!;
+
+    // Start VCNV
+    await (machine as any).startVcnv();
+
+    expect(machine.room.status).toBe('VCNV');
+    expect(machine.room.state.subPhase).toBe('PICK_ROW');
+    expect(machine.room.state.activePlayerId).toBe('p1');
+    expect(machine.room.state.rowLetterCounts).toBeDefined();
+    expect(machine.room.state.rowLetterCounts?.length).toBe(4);
+
+    // Player 2 cannot pick during Player 1's turn
+    const p2Pick = machine.pickVcnvRow(p2.id, 0);
+    expect(p2Pick).toBe(false);
+
+    // Player 1 picks row 1 (index 1)
+    const p1Pick = machine.pickVcnvRow('p1', 1);
+    expect(p1Pick).toBe(true);
+
+    // Execute event queue
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(machine.room.state.subPhase).toBe('ROW_QUESTION');
+    expect(machine.room.state.activeRowIndex).toBe(1);
+  });
+});

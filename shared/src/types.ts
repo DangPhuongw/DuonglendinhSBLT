@@ -109,6 +109,10 @@ export interface RoomState {
   currentQuestion?: ClientQuestion;
   activePlayerId?: string;
   buzzerLockedBy?: string | null;
+  rowLetterCounts?: number[];
+  rowAnswersRevealed?: (string[] | null)[];
+  activeRowIndex?: number;
+  stepIndex?: number;
   // Additional dynamic state fields
   [key: string]: any;
 }
@@ -153,6 +157,7 @@ export interface ClientToServerEvents {
   'player:ready': (data: { mediaLoaded: boolean }) => void;
   'answer:submit': (data: { questionId: string; content: string }) => void;
   'buzz': (data: { questionId?: string }) => void;
+  'vcnv:pickRow': (data: { rowIndex: number }) => void;
   'vd:choosePackage': (data: { packagePoints: 40 | 60 | 80 }) => void;
   'vd:setStar': (data: { useStar: boolean }) => void;
   'host:overrideScore': (data: { questionId: string; playerId: string; isCorrect: boolean }) => void;

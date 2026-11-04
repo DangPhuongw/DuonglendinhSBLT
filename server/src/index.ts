@@ -289,6 +289,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 8b. VCNV: Pick row
+  socket.on('vcnv:pickRow', ({ rowIndex }) => {
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return;
+    const machine = roomManager.getRoom(info.roomCode);
+    if (machine) {
+      machine.pickVcnvRow(info.playerId, rowIndex);
+    }
+  });
+
   // 9. Về đích: choose package
   socket.on('vd:choosePackage', ({ packagePoints }) => {
     const info = roomManager.getPlayerBySocket(socket.id);

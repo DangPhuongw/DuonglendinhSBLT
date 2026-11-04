@@ -54,7 +54,7 @@ export class RoomStateMachine {
   private tieBreakQuestionIndex: number = 0;
   private vcnvRowsAskedCount: number = 0;
   private vcnvCurrentRowIndex: number = 0;
-  private vcnvRandomRowIndices: number[] = [0, 1, 2, 3];
+  private vcnvPlayerQueue: string[] = [];
   private lastRevealedPayload: RevealPayload | null = null;
 
   constructor(
@@ -990,8 +990,14 @@ export class RoomStateMachine {
       p.eliminatedVcnv = false;
     }
 
-    // Randomize rows order: 0, 1, 2, 3 shuffled
-    this.vcnvRandomRowIndices = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+    // Sort players by seat for turn order
+    const sorted = [...this.room.players].sort((a, b) => a.seat - b.seat);
+    this.vcnvPlayerQueue = sorted.map((p) => p.id);
+
+    // Calculate letter counts for all 4 rows
+    const rowLetterCounts = this.questionSet.vcnv.rows.map((r) =>
+      r.answer.toUpperCase().replace(/\s+/g, '').length
+    );
 
     // Initial state
     this.room.state = {
@@ -999,29 +1005,89 @@ export class RoomStateMachine {
       subPhase: 'PICK_ROW',
       deadline: null,
       buzzerLockedBy: null,
-      activePlayerId: undefined,
+      activePlayerId: this.vcnvPlayerQueue[0],
       openedPieces: [], // indices of opened pieces (0..4)
       rowsRevealed: [false, false, false, false],
+      rowLetterCounts,
+      rowAnswersRevealed: [null, null, null, null],
+      stepIndex: 0,
     };
 
     this.persistSnapshot();
     this.syncRoom();
 
-    // Auto start row after 3 seconds
-    this.setDeadline(3000, async () => {
-      await this.presentVcnvRow(0);
-    });
+    await this.promptVcnvPickRow(0);
   }
 
-  private async presentVcnvRow(stepIndex: number): Promise<void> {
+  private async promptVcnvPickRow(stepIndex: number): Promise<void> {
     if (stepIndex >= 4) {
       // All 4 rows finished without CNV guessed -> Center question
       await this.presentVcnvCenter();
       return;
     }
 
-    this.vcnvCurrentRowIndex = stepIndex;
-    const rowIndex = this.vcnvRandomRowIndices[stepIndex];
+    const rowsRevealed: boolean[] = this.room.state.rowsRevealed || [false, false, false, false];
+    const unrevealedIndices = [0, 1, 2, 3].filter((idx) => !rowsRevealed[idx]);
+    if (unrevealedIndices.length === 0) {
+      await this.presentVcnvCenter();
+      return;
+    }
+
+    // Determine who picks this row (in seat order among active players)
+    const chooserId = this.vcnvPlayerQueue.length > 0
+      ? this.vcnvPlayerQueue[stepIndex % this.vcnvPlayerQueue.length]
+      : this.room.players[0]?.id;
+
+    this.buzzedPlayerId = null;
+    this.room.state = {
+      ...this.room.state,
+      round: 'VCNV',
+      subPhase: 'PICK_ROW',
+      activePlayerId: chooserId,
+      deadline: null,
+      buzzerLockedBy: null,
+      activeRowIndex: undefined,
+      stepIndex,
+      currentQuestion: undefined,
+    };
+
+    // 10 seconds for the chooser to pick a row
+    const chooseTimeoutSec = 10;
+    this.setDeadline(chooseTimeoutSec * 1000, async () => {
+      // Auto pick first unrevealed row
+      const fallbackRow = unrevealedIndices[0];
+      await this.presentVcnvRow(fallbackRow, stepIndex);
+    });
+
+    this.persistSnapshot();
+    this.syncRoom();
+  }
+
+  public pickVcnvRow(playerId: string, rowIndex: number): boolean {
+    if (this.room.state.round !== 'VCNV' || this.room.state.subPhase !== 'PICK_ROW') {
+      return false;
+    }
+    if (this.room.state.activePlayerId !== playerId) {
+      return false;
+    }
+    if (rowIndex < 0 || rowIndex > 3) {
+      return false;
+    }
+    const rowsRevealed = this.room.state.rowsRevealed || [false, false, false, false];
+    if (rowsRevealed[rowIndex]) {
+      return false; // Row already chosen/revealed
+    }
+
+    this.clearTimer();
+    const stepIndex = this.room.state.stepIndex || 0;
+    this.eventQueue.enqueue(async () => {
+      await this.presentVcnvRow(rowIndex, stepIndex);
+    });
+    return true;
+  }
+
+  private async presentVcnvRow(rowIndex: number, stepIndex: number): Promise<void> {
+    this.vcnvCurrentRowIndex = rowIndex;
     const rowQuestion = this.questionSet.vcnv.rows[rowIndex];
 
     this.answersMap.clear();
@@ -1036,9 +1102,9 @@ export class RoomStateMachine {
       currentQuestion: rowQuestion,
       deadline: null,
       buzzerLockedBy: null,
-      activePlayerId: undefined,
+      activePlayerId: undefined, // All non-eliminated players answer!
       activeRowIndex: rowIndex,
-      rowStepIndex: stepIndex,
+      stepIndex,
     };
 
     const durationMs = GAME_CONFIG.VCNV.ROW_TIME_SECONDS * 1000;
@@ -1083,19 +1149,24 @@ export class RoomStateMachine {
     }
 
     // Open row and piece if at least 1 correct
-    const openedPieces: number[] = this.room.state.openedPieces || [];
-    const rowsRevealed: boolean[] = this.room.state.rowsRevealed || [false, false, false, false];
+    const openedPieces: number[] = [...(this.room.state.openedPieces || [])];
+    const rowsRevealed: boolean[] = [...(this.room.state.rowsRevealed || [false, false, false, false])];
     rowsRevealed[rowIndex] = true;
 
     if (atLeastOneCorrect && !openedPieces.includes(rowIndex)) {
       openedPieces.push(rowIndex);
     }
 
+    // Reveal letters for this row
+    const rowAnswersRevealed: (string[] | null)[] = [
+      ...(this.room.state.rowAnswersRevealed || [null, null, null, null]),
+    ];
+    rowAnswersRevealed[rowIndex] = question.answer.toUpperCase().replace(/\s+/g, '').split('');
+
     const revealPayload: RevealPayload = {
       questionId: question.id,
       correctAnswer: question.answer,
       results,
-      overrideWindowExpiresAt: Date.now() + GAME_CONFIG.HOST_OVERRIDE_WINDOW_SECONDS * 1000,
     };
     this.lastRevealedPayload = revealPayload;
 
@@ -1107,13 +1178,17 @@ export class RoomStateMachine {
       currentQuestion: question,
       openedPieces,
       rowsRevealed,
+      rowAnswersRevealed,
+      activeRowIndex: rowIndex,
+      buzzerLockedBy: this.pendingCnvBuzzerId || null,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
     this.persistSnapshot();
     this.syncRoom();
 
-    this.setDeadline(4000, async () => {
+    // 6 seconds display for ROW_REVEAL so players have time to see answers and picture
+    this.setDeadline(6000, async () => {
       // If someone buzzed for CNV during the row, give them 15s to answer CNV now (G7)
       if (this.pendingCnvBuzzerId) {
         const buzzerId = this.pendingCnvBuzzerId;
@@ -1138,8 +1213,8 @@ export class RoomStateMachine {
         return;
       }
 
-      // Next row
-      await this.presentVcnvRow(stepIndex + 1);
+      // Next row prompt
+      await this.promptVcnvPickRow(stepIndex + 1);
     });
   }
 
@@ -1161,13 +1236,17 @@ export class RoomStateMachine {
 
       this.addScore(playerId, 'VCNV', obsQuestion.id, delta, 'correct');
 
-      // Reveal all pieces (0..4) and obstacle
+      // Reveal all pieces (0..4), all rows, and all letters
+      const allRowLetters = this.questionSet.vcnv.rows.map((r) =>
+        r.answer.toUpperCase().replace(/\s+/g, '').split('')
+      );
       this.room.state = {
         ...this.room.state,
         round: 'VCNV',
         subPhase: 'CNV_RESULT',
         openedPieces: [0, 1, 2, 3, 4],
         rowsRevealed: [true, true, true, true],
+        rowAnswersRevealed: allRowLetters,
         obstacleSolved: true,
       };
 
@@ -1215,7 +1294,8 @@ export class RoomStateMachine {
       await this.presentVcnvFinalGuess();
     } else {
       // Continue next row
-      await this.presentVcnvRow(this.vcnvCurrentRowIndex + 1);
+      const stepIndex = (this.room.state.stepIndex || 0) + 1;
+      await this.promptVcnvPickRow(stepIndex);
     }
   }
 
