@@ -179,4 +179,53 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     expect(machine.room.state.subPhase).toBe('ROW_QUESTION');
     expect(machine.room.state.activeRowIndex).toBe(1);
   });
+
+  it('enforces VCNV scoring scale: 60 (Q1), 50 (Q2), 40 (Q3), 30 (Q4), 20 (Center/Final) and buzzer window', async () => {
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine(
+      'VCNVSC',
+      { id: 'p1', name: 'Player 1', token: 'tok-1' },
+      callbacks
+    );
+    machine.addPlayer('Player 2', 'tok-2');
+
+    await (machine as any).startVcnv();
+    expect((machine as any).vcnvQuestionsAppearedCount).toBe(0);
+
+    // Buzzer before question 1 appeared is rejected
+    const buzzBeforeQ1 = machine.handleBuzzer('p1');
+    expect(buzzBeforeQ1).toBe(false);
+
+    // Question 1 appears
+    await (machine as any).presentVcnvRow(0, 0);
+    expect((machine as any).vcnvQuestionsAppearedCount).toBe(1);
+
+    // Buzz during Q1 -> correct gives 60 points
+    await (machine as any).evaluateCnvGuess('p1', (machine as any).questionSet.vcnv.obstacle.answer);
+    expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(60);
+
+    // Reset scores & test Q2 appearance -> 50 points
+    machine.room.players.find((p) => p.id === 'p1')!.score = 0;
+    (machine as any).vcnvQuestionsAppearedCount = 2;
+    await (machine as any).evaluateCnvGuess('p1', (machine as any).questionSet.vcnv.obstacle.answer);
+    expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(50);
+
+    // Q3 appearance -> 40 points
+    machine.room.players.find((p) => p.id === 'p1')!.score = 0;
+    (machine as any).vcnvQuestionsAppearedCount = 3;
+    await (machine as any).evaluateCnvGuess('p1', (machine as any).questionSet.vcnv.obstacle.answer);
+    expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(40);
+
+    // Q4 appearance -> 30 points
+    machine.room.players.find((p) => p.id === 'p1')!.score = 0;
+    (machine as any).vcnvQuestionsAppearedCount = 4;
+    await (machine as any).evaluateCnvGuess('p1', (machine as any).questionSet.vcnv.obstacle.answer);
+    expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(30);
+
+    // Center / Final appearance -> 20 points
+    machine.room.players.find((p) => p.id === 'p1')!.score = 0;
+    (machine as any).vcnvQuestionsAppearedCount = 5;
+    await (machine as any).evaluateCnvGuess('p1', (machine as any).questionSet.vcnv.obstacle.answer);
+    expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(20);
+  });
 });

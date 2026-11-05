@@ -53,6 +53,7 @@ export class RoomStateMachine {
   private veDichHopeStarActive: boolean = false;
   private tieBreakQuestionIndex: number = 0;
   private vcnvRowsAskedCount: number = 0;
+  private vcnvQuestionsAppearedCount: number = 0;
   private vcnvCurrentRowIndex: number = 0;
   private vcnvPlayerQueue: string[] = [];
   private lastRevealedPayload: RevealPayload | null = null;
@@ -907,6 +908,14 @@ export class RoomStateMachine {
       if (!player || player.eliminatedVcnv) return false;
       if (this.buzzedPlayerId) return false; // Already locked
 
+      // Chuông Chướng ngại vật chỉ mở sau khi câu hỏi hàng ngang thứ 1 xuất hiện
+      if (this.vcnvQuestionsAppearedCount < 1) {
+        this.callbacks.broadcastBuzzRejected(null, {
+          reason: 'Chuông Chướng ngại vật chỉ mở sau khi câu hỏi hàng ngang thứ 1 xuất hiện.',
+        });
+        return false;
+      }
+
       // Bấm chuông trả lời từ khóa chính bất kì lúc nào!
       this.clearTimer();
       this.buzzedPlayerId = playerId;
@@ -921,6 +930,7 @@ export class RoomStateMachine {
         buzzerLockedBy: playerId,
         currentQuestion: this.questionSet.vcnv.obstacle,
         deadline: null,
+        vcnvQuestionsAppearedCount: this.vcnvQuestionsAppearedCount,
       };
 
       const diffMs = now - this.buzzerOpenTime;
@@ -1087,6 +1097,7 @@ export class RoomStateMachine {
   private async startVcnv(): Promise<void> {
     this.room.status = 'VCNV';
     this.vcnvRowsAskedCount = 0;
+    this.vcnvQuestionsAppearedCount = 0;
     this.vcnvCurrentRowIndex = 0;
     this.buzzedPlayerId = null;
     this.pendingCnvBuzzerId = null;
@@ -1127,6 +1138,7 @@ export class RoomStateMachine {
       vcnvImage: this.questionSet.vcnv.image || '',
       obstacleLetterCount,
       obstacleAnswerRevealed: null,
+      vcnvQuestionsAppearedCount: 0,
     };
 
     this.persistSnapshot();
@@ -1211,6 +1223,7 @@ export class RoomStateMachine {
 
   private async presentVcnvRow(rowIndex: number, stepIndex: number): Promise<void> {
     this.vcnvCurrentRowIndex = rowIndex;
+    this.vcnvQuestionsAppearedCount = Math.max(this.vcnvQuestionsAppearedCount, stepIndex + 1);
     const rowQuestion = this.questionSet.vcnv.rows[rowIndex];
 
     this.answersMap.clear();
@@ -1228,6 +1241,7 @@ export class RoomStateMachine {
       activePlayerId: undefined, // All non-eliminated players answer!
       activeRowIndex: rowIndex,
       stepIndex,
+      vcnvQuestionsAppearedCount: this.vcnvQuestionsAppearedCount,
     };
 
     const durationMs = GAME_CONFIG.VCNV.ROW_TIME_SECONDS * 1000;
@@ -1308,6 +1322,7 @@ export class RoomStateMachine {
       rowAnswersRevealed,
       activeRowIndex: rowIndex,
       buzzerLockedBy: this.pendingCnvBuzzerId || null,
+      vcnvQuestionsAppearedCount: this.vcnvQuestionsAppearedCount,
     };
 
     // 6 seconds display for ROW_REVEAL so players have time to see answers and picture
@@ -1355,11 +1370,23 @@ export class RoomStateMachine {
     const isFinalGuess = this.room.state.subPhase === 'FINAL_GUESS_ANSWERING';
 
     if (isCorrect) {
-      let delta = 20; // Final guess points
-      if (!isFinalGuess) {
-        // Point index: 1 row done = 60, 2 rows done = 50, 3 = 40, 4 = 30
-        const pointsTable = GAME_CONFIG.VCNV.CNV_POINTS_BY_ROWS_DONE;
-        delta = pointsTable[this.vcnvRowsAskedCount] || 30;
+      // Thang điểm trả lời đúng Chướng ngại vật:
+      // 60đ: Bấm chuông trả lời đúng sau khi câu hỏi hàng ngang 1 xuất hiện (trước khi câu 2 xuất hiện)
+      // 50đ: Bấm chuông trả lời đúng sau khi câu hỏi hàng ngang 2 xuất hiện (trước khi câu 3 xuất hiện)
+      // 40đ: Bấm chuông trả lời đúng sau khi câu hỏi hàng ngang 3 xuất hiện (trước khi câu 4 xuất hiện)
+      // 30đ: Bấm chuông trả lời đúng sau khi câu hỏi hàng ngang 4 xuất hiện (trước khi câu ô trung tâm xuất hiện)
+      // 20đ: Bấm chuông trả lời đúng sau khi câu hỏi thứ 5 (ô trung tâm) xuất hiện cho đến khi hết 15s suy nghĩ cuối cùng
+      let delta = 20;
+      if (this.vcnvQuestionsAppearedCount <= 1) {
+        delta = 60;
+      } else if (this.vcnvQuestionsAppearedCount === 2) {
+        delta = 50;
+      } else if (this.vcnvQuestionsAppearedCount === 3) {
+        delta = 40;
+      } else if (this.vcnvQuestionsAppearedCount === 4) {
+        delta = 30;
+      } else {
+        delta = 20;
       }
 
       this.addScore(playerId, 'VCNV', obsQuestion.id, delta, 'correct');
@@ -1438,7 +1465,7 @@ export class RoomStateMachine {
       return;
     }
 
-    if (isFinalGuess) {
+    if (isFinalGuess || this.vcnvQuestionsAppearedCount >= 5) {
       // Resume final guess countdown for remaining players
       await this.presentVcnvFinalGuess();
     } else {
@@ -1450,6 +1477,7 @@ export class RoomStateMachine {
   private async presentVcnvCenter(): Promise<void> {
     const centerQ = this.questionSet.vcnv.center;
     this.answersMap.clear();
+    this.vcnvQuestionsAppearedCount = 5;
 
     this.room.state = {
       ...this.room.state,
@@ -1457,6 +1485,7 @@ export class RoomStateMachine {
       subPhase: 'CENTER_QUESTION',
       currentQuestion: centerQ,
       deadline: null,
+      vcnvQuestionsAppearedCount: 5,
     };
 
     const durationMs = GAME_CONFIG.VCNV.CENTER_TIME_SECONDS * 1000;
@@ -1508,6 +1537,7 @@ export class RoomStateMachine {
       deadline: null,
       currentQuestion: question,
       openedPieces,
+      vcnvQuestionsAppearedCount: 5,
     };
 
     this.setDeadline(5000, async () => {
@@ -1524,6 +1554,7 @@ export class RoomStateMachine {
           buzzerLockedBy: buzzerId,
           currentQuestion: this.questionSet.vcnv.obstacle,
           deadline: null,
+          vcnvQuestionsAppearedCount: 5,
         };
 
         this.setDeadline(GAME_CONFIG.VCNV.CNV_ANSWER_SECONDS * 1000, async () => {
@@ -1554,6 +1585,7 @@ export class RoomStateMachine {
     this.buzzedPlayerId = null;
     this.pendingCnvBuzzerId = null;
     this.buzzerOpenTime = Date.now();
+    this.vcnvQuestionsAppearedCount = 5;
     this.room.state = {
       ...this.room.state,
       round: 'VCNV',
@@ -1562,6 +1594,7 @@ export class RoomStateMachine {
       buzzerLockedBy: null,
       activePlayerId: undefined,
       currentQuestion: this.questionSet.vcnv.obstacle,
+      vcnvQuestionsAppearedCount: 5,
     };
 
     const durationMs = GAME_CONFIG.VCNV.FINAL_GUESS_SECONDS * 1000;

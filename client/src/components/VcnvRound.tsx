@@ -35,8 +35,27 @@ export const VcnvRound: React.FC = () => {
 
   const isEliminated = Boolean(myPlayer?.eliminatedVcnv);
   const isBuzzerLocked = Boolean(room?.state?.buzzerLockedBy);
-  // Bấm chuông bất kì lúc nào (chỉ cần chưa bị loại và chuông chưa bị ai giữ)
-  const canBuzz = !isEliminated && !isBuzzerLocked;
+  const vcnvQuestionsAppearedCount = room?.state?.vcnvQuestionsAppearedCount || 0;
+
+  // Thang điểm trả lời đúng Chướng ngại vật:
+  // 60đ: sau khi câu 1 xuất hiện (trước khi câu 2 xuất hiện)
+  // 50đ: sau khi câu 2 xuất hiện (trước khi câu 3 xuất hiện)
+  // 40đ: sau khi câu 3 xuất hiện (trước khi câu 4 xuất hiện)
+  // 30đ: sau khi câu 4 xuất hiện (trước khi câu trung tâm xuất hiện)
+  // 20đ: sau khi câu thứ 5 (trung tâm) xuất hiện cho đến hết 15s suy nghĩ cuối cùng
+  const currentCnvPoints =
+    vcnvQuestionsAppearedCount <= 1
+      ? 60
+      : vcnvQuestionsAppearedCount === 2
+      ? 50
+      : vcnvQuestionsAppearedCount === 3
+      ? 40
+      : vcnvQuestionsAppearedCount === 4
+      ? 30
+      : 20;
+
+  // Bấm chuông Chướng ngại vật: Chỉ mở sau khi câu hỏi hàng ngang 1 xuất hiện
+  const canBuzz = !isEliminated && !isBuzzerLocked && vcnvQuestionsAppearedCount >= 1;
 
   const activeChooser = room?.players.find((p) => p.id === room?.state?.activePlayerId);
   const isMyTurnToPick = Boolean(subPhase === 'PICK_ROW' && myPlayer && room?.state?.activePlayerId === myPlayer.id);
@@ -167,11 +186,41 @@ export const VcnvRound: React.FC = () => {
 
       {/* TỪ KHÓA CHÍNH (N KÝ TỰ CẦN ĐƯỢC GIẢI MÃ) */}
       <div className="w-full bg-gradient-to-r from-amber-950/40 via-slate-900/90 to-amber-950/40 border border-amber-500/40 rounded-2xl p-4 sm:p-5 mb-5 shadow-xl text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Key size={18} className="text-amber-400 animate-pulse" />
-          <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-amber-300">
-            TỪ KHÓA CHÍNH CẦN GIẢI MÃ ({obstacleLetterCount} KÝ TỰ)
-          </h2>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <Key size={18} className="text-amber-400 animate-pulse" />
+            <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-amber-300">
+              TỪ KHÓA CHÍNH CẦN GIẢI MÃ ({obstacleLetterCount} KÝ TỰ)
+            </h2>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs bg-slate-800/90 px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-300 font-bold">
+            <span>Điểm đoán đúng lúc này:</span>
+            <span className="text-amber-400 font-black text-sm">+{currentCnvPoints}đ</span>
+          </div>
+        </div>
+
+        {/* Thang điểm quy định */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 my-2.5 text-[11px] font-mono">
+          <div className={`p-1.5 rounded-lg border text-center transition-all ${vcnvQuestionsAppearedCount === 1 ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold scale-105 shadow-sm' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+            <span className="block font-bold">60 ĐIỂM</span>
+            <span className="text-[10px] text-slate-500">Sau câu hỏi 1</span>
+          </div>
+          <div className={`p-1.5 rounded-lg border text-center transition-all ${vcnvQuestionsAppearedCount === 2 ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold scale-105 shadow-sm' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+            <span className="block font-bold">50 ĐIỂM</span>
+            <span className="text-[10px] text-slate-500">Sau câu hỏi 2</span>
+          </div>
+          <div className={`p-1.5 rounded-lg border text-center transition-all ${vcnvQuestionsAppearedCount === 3 ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold scale-105 shadow-sm' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+            <span className="block font-bold">40 ĐIỂM</span>
+            <span className="text-[10px] text-slate-500">Sau câu hỏi 3</span>
+          </div>
+          <div className={`p-1.5 rounded-lg border text-center transition-all ${vcnvQuestionsAppearedCount === 4 ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold scale-105 shadow-sm' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+            <span className="block font-bold">30 ĐIỂM</span>
+            <span className="text-[10px] text-slate-500">Sau câu hỏi 4</span>
+          </div>
+          <div className={`col-span-2 sm:col-span-1 p-1.5 rounded-lg border text-center transition-all ${vcnvQuestionsAppearedCount >= 5 ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold scale-105 shadow-sm' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+            <span className="block font-bold">20 ĐIỂM</span>
+            <span className="text-[10px] text-slate-500">Gợi ý 5 / Cuối</span>
+          </div>
         </div>
 
         {/* N Letter Boxes for the Main Keyword */}
@@ -194,9 +243,15 @@ export const VcnvRound: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[11px] text-slate-400 mt-1">
-          <span>4 hàng ngang tương ứng 4 từ liên quan</span>
+          <span>4 từ hàng ngang (4 gợi ý)</span>
           <span className="text-amber-400 hidden sm:inline">•</span>
-          <span className="text-amber-300 font-semibold">Bấm chuông (Space) để trả lời từ khóa chính bất kì lúc nào!</span>
+          <span>Gợi ý thứ 5: Câu hỏi & ô trung tâm</span>
+          <span className="text-amber-400 hidden sm:inline">•</span>
+          <span className="text-amber-300 font-semibold">
+            {vcnvQuestionsAppearedCount < 1
+              ? '⏳ Chuông CNV sẽ mở sau khi câu hỏi hàng ngang thứ 1 xuất hiện'
+              : '🔔 Bấm chuông (Space) để trả lời từ khóa chính bất kì lúc nào!'}
+          </span>
         </div>
       </div>
 
@@ -363,7 +418,7 @@ export const VcnvRound: React.FC = () => {
             })}
           </div>
 
-          {/* Buzzer Button for Main Keyword (Bấm chuông bất kì lúc nào) */}
+          {/* Buzzer Button for Main Keyword (Bấm chuông bất kì lúc nào sau câu hỏi 1) */}
           <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
             <span className="text-[11px] text-slate-400 leading-tight">
               {isEliminated ? (
@@ -372,8 +427,14 @@ export const VcnvRound: React.FC = () => {
                 <span className="text-amber-400 font-semibold">
                   Chuông đã được bấm bởi {activeAnsweringPlayer?.name || 'thí sinh'}
                 </span>
+              ) : vcnvQuestionsAppearedCount < 1 ? (
+                <span className="text-slate-500 font-medium">
+                  Chuông Chướng ngại vật sẽ mở sau khi câu hỏi hàng ngang 1 xuất hiện
+                </span>
               ) : (
-                'Bấm chuông bất kì lúc nào để giải từ khóa chính (Phím Space)'
+                <span className="text-amber-300 font-semibold">
+                  Bấm chuông trả lời từ khóa chính (+{currentCnvPoints}đ) [Phím Space]
+                </span>
               )}
             </span>
             <button
@@ -386,7 +447,7 @@ export const VcnvRound: React.FC = () => {
               }`}
             >
               <Bell size={15} />
-              <span>Chuông Từ Khóa Chính</span>
+              <span>{canBuzz ? `Chuông CNV (+${currentCnvPoints}đ)` : 'Chuông CNV'}</span>
             </button>
           </div>
         </div>
@@ -395,7 +456,7 @@ export const VcnvRound: React.FC = () => {
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Hình Ảnh Gợi Ý
+              Hình Ảnh Gợi Ý (5 Mảnh Ghép)
             </h4>
             <span className="text-[11px] text-slate-500 font-mono">
               {openedPieces.length}/5 mảnh đã mở
@@ -410,63 +471,89 @@ export const VcnvRound: React.FC = () => {
               className="w-full h-full object-cover select-none"
             />
 
-            {/* 4 Quadrants */}
+            {/* 4 Quadrants (Mảnh 1, 2, 3, 4) */}
             <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-              {/* Piece 0 (Top Left) */}
+              {/* Piece 0 (Top Left - Mảnh 1) */}
               <div
-                className={`transition-opacity duration-700 border border-slate-900/60 flex items-center justify-center ${
+                className={`transition-opacity duration-700 border border-slate-900/60 flex flex-col items-center justify-center p-2 ${
                   openedPieces.includes(0) ? 'opacity-0 pointer-events-none' : 'bg-slate-950/95 opacity-100'
                 }`}
               >
                 {!openedPieces.includes(0) && (
-                  <span className="text-slate-600 font-bold text-sm">Mảnh 1</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-amber-400 text-sm shadow">
+                      1
+                    </span>
+                    <span className="text-slate-400 font-bold text-xs uppercase tracking-wide">Mảnh 1 (Hàng 1)</span>
+                  </div>
                 )}
               </div>
 
-              {/* Piece 1 (Top Right) */}
+              {/* Piece 1 (Top Right - Mảnh 2) */}
               <div
-                className={`transition-opacity duration-700 border border-slate-900/60 flex items-center justify-center ${
+                className={`transition-opacity duration-700 border border-slate-900/60 flex flex-col items-center justify-center p-2 ${
                   openedPieces.includes(1) ? 'opacity-0 pointer-events-none' : 'bg-slate-950/95 opacity-100'
                 }`}
               >
                 {!openedPieces.includes(1) && (
-                  <span className="text-slate-600 font-bold text-sm">Mảnh 2</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-amber-400 text-sm shadow">
+                      2
+                    </span>
+                    <span className="text-slate-400 font-bold text-xs uppercase tracking-wide">Mảnh 2 (Hàng 2)</span>
+                  </div>
                 )}
               </div>
 
-              {/* Piece 2 (Bottom Left) */}
+              {/* Piece 2 (Bottom Left - Mảnh 3) */}
               <div
-                className={`transition-opacity duration-700 border border-slate-900/60 flex items-center justify-center ${
+                className={`transition-opacity duration-700 border border-slate-900/60 flex flex-col items-center justify-center p-2 ${
                   openedPieces.includes(2) ? 'opacity-0 pointer-events-none' : 'bg-slate-950/95 opacity-100'
                 }`}
               >
                 {!openedPieces.includes(2) && (
-                  <span className="text-slate-600 font-bold text-sm">Mảnh 3</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-amber-400 text-sm shadow">
+                      3
+                    </span>
+                    <span className="text-slate-400 font-bold text-xs uppercase tracking-wide">Mảnh 3 (Hàng 3)</span>
+                  </div>
                 )}
               </div>
 
-              {/* Piece 3 (Bottom Right) */}
+              {/* Piece 3 (Bottom Right - Mảnh 4) */}
               <div
-                className={`transition-opacity duration-700 border border-slate-900/60 flex items-center justify-center ${
+                className={`transition-opacity duration-700 border border-slate-900/60 flex flex-col items-center justify-center p-2 ${
                   openedPieces.includes(3) ? 'opacity-0 pointer-events-none' : 'bg-slate-950/95 opacity-100'
                 }`}
               >
                 {!openedPieces.includes(3) && (
-                  <span className="text-slate-600 font-bold text-sm">Mảnh 4</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-amber-400 text-sm shadow">
+                      4
+                    </span>
+                    <span className="text-slate-400 font-bold text-xs uppercase tracking-wide">Mảnh 4 (Hàng 4)</span>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Center Piece (Piece 4) */}
+            {/* Center Piece (Piece 4 - Ô Trung Tâm / Gợi Ý Thứ 5) */}
             <div
-              className={`absolute inset-[24%] rounded-lg transition-opacity duration-700 border-2 border-amber-500/40 flex items-center justify-center shadow-lg ${
+              className={`absolute inset-[22%] rounded-xl transition-opacity duration-700 border-2 border-amber-500/60 flex flex-col items-center justify-center shadow-2xl backdrop-blur-sm ${
                 openedPieces.includes(4) ? 'opacity-0 pointer-events-none' : 'bg-slate-950/95 opacity-100'
               }`}
             >
               {!openedPieces.includes(4) && (
-                <span className="text-amber-500/80 font-black text-xs uppercase tracking-wider">
-                  Trung tâm
-                </span>
+                <div className="flex flex-col items-center gap-1 text-center p-1 sm:p-2">
+                  <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-amber-500/30">
+                    5
+                  </span>
+                  <span className="text-amber-400 font-black text-[11px] sm:text-xs uppercase tracking-wider">
+                    Ô Trung Tâm
+                  </span>
+                  <span className="text-[10px] text-slate-400 hidden sm:inline">(Gợi ý thứ 5)</span>
+                </div>
               )}
             </div>
           </div>
@@ -614,12 +701,15 @@ export const VcnvRound: React.FC = () => {
               GIẢI MÃ TỪ KHÓA CHÍNH
             </h3>
 
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
               <span className="text-xs font-bold text-slate-300">
                 Thí sinh bấm chuông:
               </span>
               <span className="px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs font-black text-amber-300 uppercase tracking-wider">
                 {activeAnsweringPlayer?.name || 'Thí sinh'}
+              </span>
+              <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-xs font-black text-emerald-300 uppercase tracking-wider">
+                Đúng: +{currentCnvPoints} điểm
               </span>
             </div>
 

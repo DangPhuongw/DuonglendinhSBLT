@@ -101,14 +101,45 @@ export const Navbar: React.FC = () => {
 
         {/* Nút tua giai đoạn (Tạm thời để test) */}
         {room && (
-          <button
-            onClick={() => jumpToRound(room.status === 'VCNV' ? 'TANG_TOC' : 'VCNV')}
-            className="flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 hover:from-yellow-400 hover:to-amber-300 text-slate-950 font-black shadow-md shadow-amber-500/30 active:scale-95 transition-all border border-yellow-300 cursor-pointer"
-            title="Tua nhanh sang vòng tiếp theo (Nút tạm thời để test)"
-          >
-            <FastForward size={14} />
-            <span className="font-extrabold">{room.status === 'VCNV' ? 'Tua: Tăng Tốc' : 'Tua: VCNV'}</span>
-          </button>
+          <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/40 rounded-xl p-1">
+            <span className="text-[10px] font-bold text-amber-400 px-1 hidden lg:inline">TUA:</span>
+            <button
+              onClick={() => jumpToRound('VCNV')}
+              className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-black transition-all ${
+                room.state?.round === 'VCNV'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'bg-slate-800 hover:bg-amber-500/30 text-amber-300'
+              }`}
+              title="Tua sang Vòng 2: Vượt Chướng Ngại Vật"
+            >
+              <FastForward size={13} />
+              <span>VCNV</span>
+            </button>
+            <button
+              onClick={() => jumpToRound('TANG_TOC')}
+              className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-black transition-all ${
+                room.state?.round === 'TANG_TOC'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'bg-slate-800 hover:bg-amber-500/30 text-amber-300'
+              }`}
+              title="Tua sang Vòng 3: Tăng Tốc"
+            >
+              <FastForward size={13} />
+              <span>Tăng Tốc</span>
+            </button>
+            <button
+              onClick={() => jumpToRound('VE_DICH')}
+              className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-black transition-all ${
+                room.state?.round === 'VE_DICH'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'bg-slate-800 hover:bg-amber-500/30 text-amber-300'
+              }`}
+              title="Tua sang Vòng 4: Về Đích"
+            >
+              <FastForward size={13} />
+              <span>Về Đích</span>
+            </button>
+          </div>
         )}
 
         {/* Leave room button */}

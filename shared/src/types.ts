@@ -118,6 +118,7 @@ export interface RoomState {
   vcnvImage?: string;
   obstacleLetterCount?: number;
   obstacleAnswerRevealed?: string[] | null;
+  vcnvQuestionsAppearedCount?: number;
   // Additional dynamic state fields
   [key: string]: any;
 }
