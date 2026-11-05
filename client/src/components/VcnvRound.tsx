@@ -213,12 +213,12 @@ export const VcnvRound: React.FC = () => {
             <div className="flex items-center justify-center gap-2">
               <Sparkles size={18} className="text-amber-400 animate-spin" />
               <span className="text-sm font-black text-amber-300 uppercase tracking-wider">
-                Đến lượt bạn chọn hàng ngang! Bấm vào hàng ngang trên bảng hoặc phím 1 - 4
+                Đến lượt bạn chọn hàng ngang! Bấm chọn 1 hàng trên bảng hoặc phím 1 - 4 để bắt đầu câu hỏi
               </span>
             </div>
           ) : (
             <span className="text-xs font-semibold text-slate-300">
-              Đang chờ thí sinh <strong className="text-amber-400 font-bold text-sm">{activeChooser?.name || 'Thí sinh'}</strong> chọn hàng ngang...
+              Đang chờ thí sinh <strong className="text-amber-400 font-bold text-sm">{activeChooser?.name || 'Thí sinh'}</strong> chọn hàng ngang (chọn xong mới bắt đầu tính giờ)...
             </span>
           )}
         </div>

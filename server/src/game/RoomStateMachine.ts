@@ -1179,13 +1179,8 @@ export class RoomStateMachine {
       currentQuestion: undefined,
     };
 
-    // 10 seconds for the chooser to pick a row
-    const chooseTimeoutSec = 10;
-    this.setDeadline(chooseTimeoutSec * 1000, async () => {
-      // Auto pick first unrevealed row
-      const fallbackRow = unrevealedIndices[0];
-      await this.presentVcnvRow(fallbackRow, stepIndex);
-    });
+    // Lúc chọn hàng không đếm giờ: không đặt deadline.
+    // Khi thí sinh bấm chọn hàng (pickVcnvRow -> presentVcnvRow), lúc đó mới bắt đầu tính giờ 15 giây cho câu hỏi!
 
     this.persistSnapshot();
     this.syncRoom();
