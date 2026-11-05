@@ -1675,6 +1675,14 @@ export class RoomStateMachine {
       this.addScore(correctSubs[i].playerId, 'TANG_TOC', question.id, pts, 'correct');
     }
 
+    // Sắp xếp tất cả thí sinh theo thời gian nộp nhanh nhất (fastest first), chưa nộp ở cuối
+    subs.sort((a, b) => {
+      if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+      const pA = this.room.players.find((p) => p.id === a.playerId);
+      const pB = this.room.players.find((p) => p.id === b.playerId);
+      return (pA?.seat || 0) - (pB?.seat || 0);
+    });
+
     const results: RevealResult[] = subs.map((s) => ({
       playerId: s.playerId,
       answer: s.answer,
