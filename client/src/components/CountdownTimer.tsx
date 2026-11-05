@@ -45,23 +45,23 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   return (
     <div className={`w-full max-w-xl mx-auto flex flex-col items-center gap-1.5 ${className}`}>
       <div className="flex justify-between items-center w-full px-1">
-        <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">
+        <span className="text-xs uppercase tracking-wider font-black text-black">
           Thời gian còn lại
         </span>
         <span
-          className={`font-mono text-xl font-bold tracking-tight ${
-            isUrgent ? 'text-rose-500 animate-pulse' : 'text-amber-400'
+          className={`font-mono text-xl font-black tracking-tight px-2 py-0.5 rounded-lg border-2 border-black shadow-neo-sm ${
+            isUrgent ? 'bg-rose-200 text-rose-950 animate-pulse' : 'bg-[#E8FE36] text-black'
           }`}
         >
           {seconds}s
         </span>
       </div>
-      <div className="w-full bg-slate-800/80 rounded-full h-3 p-0.5 overflow-hidden border border-slate-700/60 shadow-inner">
+      <div className="w-full bg-white rounded-full h-4 p-0.5 overflow-hidden border-2 border-black shadow-neo-sm">
         <div
-          className={`h-full rounded-full transition-all duration-100 ease-linear ${
+          className={`h-full rounded-full transition-all duration-100 ease-linear border-r-2 border-black ${
             isUrgent
-              ? 'bg-gradient-to-r from-rose-600 to-amber-500'
-              : 'bg-gradient-to-r from-amber-500 to-yellow-400'
+              ? 'bg-rose-500'
+              : 'bg-[#E8FE36]'
           }`}
           style={{ width: `${percent}%` }}
         />

@@ -33,29 +33,34 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="w-full bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-2.5 flex items-center justify-between sticky top-0 z-50">
+    <header className="w-full bg-white border-b-2 border-black px-4 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-[0_3px_0px_0px_#000]">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-slate-950 text-sm shadow-md shadow-amber-500/20">
+          <div className="w-9 h-9 rounded-xl bg-[#E8FE36] border-2 border-black flex items-center justify-center font-black text-black text-sm shadow-neo-sm">
             OL
           </div>
-          <span className="font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 text-sm md:text-base hidden sm:inline">
-            OLYMPIA NỘI BỘ
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-black tracking-tight text-black text-base sm:text-lg leading-none">
+              OLYMPIA
+            </span>
+            <span className="bg-[#E8FE36] px-1.5 py-0.5 border border-black rounded-md shadow-[1px_1px_0px_#000] text-[10px] font-black uppercase text-black">
+              Nội bộ
+            </span>
+          </div>
         </div>
 
         {room && (
-          <div className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 transition-all">
-            <span className="text-xs text-slate-400">Phòng:</span>
-            <span className="font-mono font-bold text-amber-400 text-sm tracking-wider">
+          <div className="flex items-center gap-1.5 bg-white border-2 border-black rounded-xl px-2.5 py-1 shadow-neo-sm">
+            <span className="text-xs font-bold text-slate-600">Phòng:</span>
+            <span className="font-mono font-black text-black text-sm tracking-wider">
               {room.code}
             </span>
             <button
               onClick={handleCopyLink}
               title="Sao chép liên kết vào phòng"
-              className="p-1 text-slate-400 hover:text-white transition-colors"
+              className="p-1 hover:bg-[#E8FE36] rounded-md transition-colors text-black"
             >
-              {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+              {copied ? <Check size={14} className="text-emerald-700 stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
             </button>
           </div>
         )}
@@ -64,28 +69,28 @@ export const Navbar: React.FC = () => {
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Connection status */}
         <div
-          className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${
+          className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-xl border-2 border-black shadow-neo-sm ${
             connected
-              ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/60'
-              : 'bg-rose-950/40 text-rose-400 border-rose-800/60'
+              ? 'bg-[#7BF1A8] text-black'
+              : 'bg-rose-200 text-rose-950'
           }`}
         >
-          <Radio size={12} className={connected ? 'animate-pulse' : ''} />
+          <Radio size={12} className={`stroke-[2.5] ${connected ? 'animate-pulse' : ''}`} />
           <span className="hidden md:inline">{connected ? 'Đã kết nối' : 'Mất kết nối'}</span>
         </div>
 
         {/* Voice reading toggle */}
         <button
           onClick={toggleTts}
-          className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
+          className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-xl border-2 border-black transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none shadow-neo-sm ${
             ttsEnabled
-              ? 'bg-amber-950/60 border-amber-500/60 text-amber-300 hover:bg-amber-900/60 shadow-sm shadow-amber-500/20'
-              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+              ? 'bg-[#E8FE36] text-black'
+              : 'bg-white hover:bg-slate-100 text-slate-700'
           }`}
           title={ttsEnabled ? 'Tắt đọc câu hỏi (Tiếng Việt)' : 'Bật đọc câu hỏi (Tiếng Việt)'}
         >
-          <Headphones size={15} className={ttsEnabled ? 'text-amber-400' : ''} />
-          <span className="hidden sm:inline font-medium">
+          <Headphones size={15} className="stroke-[2.5]" />
+          <span className="hidden sm:inline">
             {ttsEnabled ? 'Giọng đọc: BẬT' : 'Giọng đọc: TẮT'}
           </span>
         </button>
@@ -93,63 +98,20 @@ export const Navbar: React.FC = () => {
         {/* Sound toggle */}
         <button
           onClick={toggleSound}
-          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+          className="p-2 rounded-xl bg-white hover:bg-[#E8FE36] text-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           title={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
         >
-          {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          {muted ? <VolumeX size={16} className="stroke-[2.5]" /> : <Volume2 size={16} className="stroke-[2.5]" />}
         </button>
-
-        {/* Nút tua giai đoạn (Tạm thời để test) */}
-        {room && (
-          <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/40 rounded-xl p-1">
-            <span className="text-[10px] font-bold text-amber-400 px-1 hidden lg:inline">TUA:</span>
-            <button
-              onClick={() => jumpToRound('VCNV')}
-              className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-black transition-all ${
-                room.state?.round === 'VCNV'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-800 hover:bg-amber-500/30 text-amber-300'
-              }`}
-              title="Tua sang Vòng 2: Vượt Chướng Ngại Vật"
-            >
-              <FastForward size={13} />
-              <span>VCNV</span>
-            </button>
-            <button
-              onClick={() => jumpToRound('TANG_TOC')}
-              className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-black transition-all ${
-                room.state?.round === 'TANG_TOC'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-800 hover:bg-amber-500/30 text-amber-300'
-              }`}
-              title="Tua sang Vòng 3: Tăng Tốc"
-            >
-              <FastForward size={13} />
-              <span>Tăng Tốc</span>
-            </button>
-            <button
-              onClick={() => jumpToRound('VE_DICH')}
-              className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-black transition-all ${
-                room.state?.round === 'VE_DICH'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-800 hover:bg-amber-500/30 text-amber-300'
-              }`}
-              title="Tua sang Vòng 4: Về Đích"
-            >
-              <FastForward size={13} />
-              <span>Về Đích</span>
-            </button>
-          </div>
-        )}
 
         {/* Leave room button */}
         {room && (
           <button
             onClick={leaveRoom}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-800/60 transition-colors"
+            className="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-xl bg-rose-200 hover:bg-rose-300 text-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
             title="Rời phòng"
           >
-            <LogOut size={14} />
+            <LogOut size={14} className="stroke-[2.5]" />
             <span className="hidden sm:inline">Rời phòng</span>
           </button>
         )}

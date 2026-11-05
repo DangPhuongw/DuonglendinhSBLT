@@ -12,7 +12,7 @@ export const Scoreboard: React.FC = () => {
   const seats = [1, 2, 3, 4, 5] as const;
 
   return (
-    <div className="w-full bg-slate-900/95 border-b border-slate-800/80 px-2 sm:px-4 py-2 shadow-md">
+    <div className="w-full bg-white border-b-2 border-black px-2 sm:px-4 py-2 shadow-neo-sm">
       <div className="max-w-6xl mx-auto grid grid-cols-5 gap-1.5 sm:gap-3">
         {seats.map((seatNum) => {
           const player = room.players.find((p) => p.seat === seatNum);
@@ -24,10 +24,10 @@ export const Scoreboard: React.FC = () => {
             return (
               <div
                 key={seatNum}
-                className="bg-slate-950/40 border border-slate-800/50 rounded-xl p-2 flex flex-col items-center justify-center opacity-40 min-h-[70px]"
+                className="bg-slate-100/60 border-2 border-dashed border-slate-300 rounded-xl p-2 flex flex-col items-center justify-center opacity-60 min-h-[70px]"
               >
                 <span className="text-[10px] text-slate-500 font-bold uppercase">Ghế {seatNum}</span>
-                <span className="text-xs text-slate-600 italic">Trống</span>
+                <span className="text-xs text-slate-400 italic">Trống</span>
               </div>
             );
           }
@@ -35,32 +35,30 @@ export const Scoreboard: React.FC = () => {
           return (
             <div
               key={seatNum}
-              className={`relative rounded-xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-300 min-h-[70px] ${
+              className={`relative rounded-xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 min-h-[70px] border-2 border-black ${
                 isActive
-                  ? 'bg-gradient-to-b from-amber-950/60 to-slate-900 border-2 border-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02]'
+                  ? 'bg-[#E8FE36] shadow-neo scale-[1.03] z-10'
                   : isMe
-                  ? 'bg-slate-800/90 border border-indigo-500/60 shadow'
-                  : 'bg-slate-900/80 border border-slate-800/80 hover:border-slate-700'
+                  ? 'bg-[#A5C9FF] shadow-neo-sm'
+                  : 'bg-white shadow-neo-sm hover:shadow-neo hover:-translate-y-0.5'
               }`}
             >
               {/* Header: Seat & Badges */}
               <div className="flex items-center justify-between gap-1 w-full">
                 <div className="flex items-center gap-1 min-w-0">
                   <span
-                    className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
+                    className={`text-[10px] font-black px-1.5 py-0.5 rounded border border-black shadow-[1px_1px_0px_#000] ${
                       isActive
-                        ? 'bg-amber-500 text-slate-950'
+                        ? 'bg-black text-[#E8FE36]'
                         : isMe
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-slate-800 text-slate-400'
+                        ? 'bg-black text-white'
+                        : 'bg-white text-black'
                     }`}
                   >
                     G{seatNum}
                   </span>
                   <span
-                    className={`text-xs sm:text-sm font-semibold truncate ${
-                      isMe ? 'text-indigo-300 font-bold' : 'text-slate-200'
-                    }`}
+                    className="text-xs sm:text-sm font-black truncate text-black"
                     title={player.name}
                   >
                     {player.name}
@@ -70,17 +68,17 @@ export const Scoreboard: React.FC = () => {
                 <div className="flex items-center gap-0.5 shrink-0">
                   {isHost && (
                     <span title="Chủ phòng">
-                      <Crown size={12} className="text-amber-400" />
+                      <Crown size={13} className="text-black fill-yellow-400" />
                     </span>
                   )}
                   {player.starUsed && (
                     <span title="Đã dùng Ngôi sao hy vọng">
-                      <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                      <Star size={13} className="text-black fill-yellow-400" />
                     </span>
                   )}
                   {!player.connected && (
                     <span title="Mất kết nối">
-                      <WifiOff size={12} className="text-rose-500 animate-pulse" />
+                      <WifiOff size={13} className="text-rose-600 animate-pulse stroke-[2.5]" />
                     </span>
                   )}
                 </div>
@@ -88,22 +86,14 @@ export const Scoreboard: React.FC = () => {
 
               {/* Score Display */}
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-medium">
+                <span className="text-[10px] uppercase tracking-wider text-black/70 font-black">
                   {player.eliminatedVcnv ? (
-                    <span className="text-rose-400 font-bold">Loại VCNV</span>
+                    <span className="text-rose-700 font-black bg-rose-100 px-1 rounded border border-rose-400">Loại VCNV</span>
                   ) : (
                     'Điểm'
                   )}
                 </span>
-                <span
-                  className={`text-lg sm:text-2xl font-black tracking-tight font-mono ${
-                    isActive
-                      ? 'text-amber-400 animate-pulse'
-                      : isMe
-                      ? 'text-indigo-200'
-                      : 'text-slate-100'
-                  }`}
-                >
+                <span className="text-lg sm:text-2xl font-black tracking-tight font-mono text-black">
                   {player.score}
                 </span>
               </div>
