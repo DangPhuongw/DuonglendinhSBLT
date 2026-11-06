@@ -179,18 +179,18 @@ export const KhoiDongRound: React.FC = () => {
                           : `${theme.bg} opacity-75 cursor-not-allowed shadow-neo-sm`
                       }`}
                     >
-                      {/* Top: Box Number Chip & Keyboard Shortcut Hint */}
-                      <div className="w-full flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-[#171717] bg-white/85 px-2 py-0.5 rounded border border-[#171717] shadow-[1px_1px_0px_#171717]">
-                          {isChosen ? 'Đã khóa' : `Ô ${num}`}
+                      {/* Top: Box Number Chip */}
+                      <div className="w-full flex items-center justify-center">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-[#171717] bg-white/90 px-3 py-0.5 rounded-full border border-[#171717] shadow-[1px_1px_0px_#171717] flex items-center gap-1">
+                          {isChosen ? (
+                            <>
+                              <Lock size={11} className="stroke-[2.5]" />
+                              <span>Đã khóa</span>
+                            </>
+                          ) : (
+                            <span>Ô {num}</span>
+                          )}
                         </span>
-                        {isChosen ? (
-                          <Lock size={13} className="text-[#171717]" />
-                        ) : canClick ? (
-                          <span className="text-[10px] font-mono font-black text-[#171717] bg-white/60 px-1.5 py-0.5 rounded border border-[#171717]/40">
-                            [{num}]
-                          </span>
-                        ) : null}
                       </div>
 
                       {/* Center: Iconic Mystery Box Question Mark */}
