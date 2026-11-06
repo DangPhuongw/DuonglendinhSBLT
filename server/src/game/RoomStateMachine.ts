@@ -51,6 +51,9 @@ export class RoomStateMachine {
   private veDichCurrentQuestionIndex: number = 0;
   private veDichCurrentQuestionPoints: number = 10;
   private veDichHopeStarActive: boolean = false;
+  private veDichCurrentPointsList: number[] = [];
+  private veDichCurrentTurnIndex: number = 0;
+  private veDichCurrentQuestion: Question | null = null;
   private tieBreakQuestionIndex: number = 0;
   private vcnvRowsAskedCount: number = 0;
   private vcnvQuestionsAppearedCount: number = 0;
@@ -1851,6 +1854,8 @@ export class RoomStateMachine {
     }
 
     this.veDichCurrentQuestionIndex = questionIdx;
+    this.veDichCurrentPointsList = pointsList;
+    this.veDichCurrentTurnIndex = turnIndex;
     const pValue = pointsList[questionIdx];
     this.veDichCurrentQuestionPoints = pValue;
     this.veDichHopeStarActive = false;
@@ -1864,8 +1869,9 @@ export class RoomStateMachine {
         : this.questionSet.veDich.pool30;
 
     const question = pool[Math.floor(Math.random() * pool.length)] || pool[0];
+    this.veDichCurrentQuestion = question;
 
-    // Star decision phase: 10s
+    // Star decision phase: 7s (không đếm số giây, bắt đầu luôn khi chọn)
     this.buzzedPlayerId = null;
     this.room.state = {
       round: 'VE_DICH',
@@ -1902,10 +1908,26 @@ export class RoomStateMachine {
     if (useStar) {
       player.starUsed = true;
       this.veDichHopeStarActive = true;
+    } else {
+      this.veDichHopeStarActive = false;
     }
+
+    // Bắt đầu câu hỏi ngay lập tức khi thí sinh đưa ra quyết định (chọn hoặc không chọn)
+    this.clearTimer();
+    const currentQ = this.veDichCurrentQuestion;
+    const pValue = this.veDichCurrentQuestionPoints;
+    const pointsList = this.veDichCurrentPointsList;
+    const turnIndex = this.veDichCurrentTurnIndex;
 
     this.persistSnapshot();
     this.callbacks.broadcastPlayerUpdate(this.room.players);
+
+    this.eventQueue.enqueue(async () => {
+      if (currentQ) {
+        await this.presentVeDichQuestion(playerId, currentQ, pValue, pointsList, turnIndex);
+      }
+    });
+
     return true;
   }
 

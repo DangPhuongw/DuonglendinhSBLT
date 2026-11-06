@@ -5,12 +5,16 @@ interface CountdownTimerProps {
   deadline: number | null;
   totalDurationSeconds?: number;
   className?: string;
+  showSeconds?: boolean;
+  label?: string;
 }
 
 export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   deadline,
   totalDurationSeconds = 15,
   className = '',
+  showSeconds = true,
+  label = 'Thời gian còn lại',
 }) => {
   const serverOffset = useGameStore((s) => s.serverOffset);
   const [remainingMs, setRemainingMs] = useState<number>(0);
@@ -40,21 +44,23 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const seconds = (remainingMs / 1000).toFixed(1);
   const totalMs = totalDurationSeconds * 1000;
   const percent = Math.min(100, Math.max(0, (remainingMs / totalMs) * 100));
-  const isUrgent = remainingMs <= 5000;
+  const isUrgent = remainingMs <= 3000;
 
   return (
     <div className={`w-full max-w-xl mx-auto flex flex-col items-center gap-1.5 ${className}`}>
-      <div className="flex justify-between items-center w-full px-1">
+      <div className={`flex ${showSeconds ? 'justify-between' : 'justify-center'} items-center w-full px-1`}>
         <span className="text-xs uppercase tracking-wider font-extrabold text-[#171717]">
-          Thời gian còn lại
+          {label}
         </span>
-        <span
-          className={`font-mono text-xl sm:text-2xl font-black tracking-tight tabular-nums px-3 py-0.5 rounded-lg border-2 border-[#171717] shadow-neo-sm ${
-            isUrgent ? 'bg-[#FF9292] text-[#171717] animate-pulse' : 'bg-[#FFE45C] text-[#171717]'
-          }`}
-        >
-          {seconds}s
-        </span>
+        {showSeconds && (
+          <span
+            className={`font-mono text-xl sm:text-2xl font-black tracking-tight tabular-nums px-3 py-0.5 rounded-lg border-2 border-[#171717] shadow-neo-sm ${
+              isUrgent ? 'bg-[#FF9292] text-[#171717] animate-pulse' : 'bg-[#FFE45C] text-[#171717]'
+            }`}
+          >
+            {seconds}s
+          </span>
+        )}
       </div>
       <div className="w-full bg-white rounded-full h-4 p-0.5 overflow-hidden border-2 border-[#171717] shadow-neo-sm">
         <div

@@ -47,7 +47,7 @@ export const GAME_CONFIG = {
       60: [10, 20, 30],
       80: [20, 30, 30],
     },
-    STAR_DECISION_SECONDS: 10,
+    STAR_DECISION_SECONDS: 7,
     QUESTION_TIME_BY_POINTS: {
       10: 10,
       20: 15,

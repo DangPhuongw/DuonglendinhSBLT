@@ -109,7 +109,7 @@ export const VeDichRound: React.FC = () => {
     );
   }
 
-  // --- 2. STAR DECISION (10s) ---
+  // --- 2. STAR DECISION (7s) ---
   if (subPhase === 'STAR_DECISION') {
     return (
       <div className="max-w-2xl mx-auto p-6 flex flex-col items-center justify-center min-h-[50vh] text-center">
@@ -122,7 +122,12 @@ export const VeDichRound: React.FC = () => {
             Mỗi thí sinh chỉ được sử dụng 1 lần trong cả vòng Về Đích.
           </p>
 
-          <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={10} className="mb-6" />
+          <CountdownTimer
+            deadline={room.state.deadline}
+            totalDurationSeconds={7}
+            showSeconds={false}
+            className="mb-6"
+          />
 
           {isMyTurn && !myPlayer.starUsed ? (
             <div className="flex gap-4">
