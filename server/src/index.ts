@@ -12,7 +12,7 @@ import {
 } from '@olympia/shared';
 import { RoomManager } from './game/RoomManager.js';
 import { SnapshotManager } from './game/SnapshotManager.js';
-import { parseExcelQuestionSet } from './game/questionParser.js';
+import { parseExcelQuestionSet, generateExcelTemplate } from './game/questionParser.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -103,6 +103,18 @@ app.post('/api/upload-media', upload.single('media'), (req, res) => {
   });
 });
 
+app.get('/api/question-template', (req, res) => {
+  try {
+    const buffer = generateExcelTemplate();
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="olympia_bo_de_mau.xlsx"');
+    res.send(buffer);
+  } catch (err: any) {
+    console.error('Error generating template:', err);
+    res.status(500).json({ error: 'Lỗi khi tạo file mẫu: ' + err.message });
+  }
+});
+
 app.post('/api/upload-questions', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Vui lòng chọn file đề thi.' });
@@ -122,7 +134,20 @@ app.post('/api/upload-questions', upload.single('file'), (req, res) => {
     // Clean temp file
     fs.unlinkSync(filePath);
 
-    res.json({ ok: true, questionSet });
+    // Gắn trực tiếp bộ đề vào phòng nếu có roomCode
+    const roomCode = req.body?.roomCode ? String(req.body.roomCode).toUpperCase() : null;
+    let roomUpdated = false;
+    if (roomCode) {
+      const machine = roomManager.getRoom(roomCode);
+      if (machine) {
+        machine.questionSet = questionSet;
+        machine.persistSnapshot();
+        roomUpdated = true;
+        console.log(`[Room ${roomCode}] Updated custom question set: ${questionSet.title}`);
+      }
+    }
+
+    res.json({ ok: true, questionSet, roomUpdated });
   } catch (err: any) {
     console.error('Error parsing question file:', err);
     res.status(500).json({ error: 'Lỗi đọc file đề thi: ' + err.message });

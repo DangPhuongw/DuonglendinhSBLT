@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { GAME_CONFIG } from '@olympia/shared';
-import { Users, Upload, Play, CheckCircle2, Copy, Check, X, Sparkles } from 'lucide-react';
+import { Users, Upload, Play, CheckCircle2, Copy, Check, X, Sparkles, Download } from 'lucide-react';
 
 export const Lobby: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -149,6 +149,7 @@ export const Lobby: React.FC = () => {
     setUploadStatus('Đang tải và xử lý bộ đề...');
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('roomCode', room.code);
 
     try {
       const res = await fetch('/api/upload-questions', {
@@ -157,7 +158,7 @@ export const Lobby: React.FC = () => {
       });
       const data = await res.json();
       if (data.ok) {
-        setUploadStatus(`Đã nạp bộ đề thành công: ${data.questionSet.title}`);
+        setUploadStatus(`Đã nạp và áp dụng thành công bộ đề: ${data.questionSet.title}`);
       } else {
         setUploadStatus(`Lỗi: ${data.error}`);
       }
@@ -275,16 +276,28 @@ export const Lobby: React.FC = () => {
                 Mặc định dùng Bộ đề mẫu Đấu Trường Trí Tuệ. Có thể nạp file Excel (6 sheet) hoặc JSON.
               </p>
             </div>
-            <label className="cursor-pointer shrink-0 flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#FFE45C] text-[#171717] text-xs font-extrabold rounded-lg border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
-              <Upload size={15} className="stroke-[2.5]" />
-              <span>Chọn file đề (.xlsx / .json)</span>
-              <input
-                type="file"
-                accept=".xlsx,.xls,.json"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <a
+                href="/api/question-template"
+                download="olympia_bo_de_mau.xlsx"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-[#171717] text-xs font-black rounded-lg border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+                title="Tải file mẫu Excel chuẩn với đầy đủ 6 sheet"
+              >
+                <Download size={15} className="stroke-[2.5]" />
+                <span>Tải file Excel mẫu</span>
+              </a>
+
+              <label className="cursor-pointer shrink-0 flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#FFE45C] text-[#171717] text-xs font-extrabold rounded-lg border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+                <Upload size={15} className="stroke-[2.5]" />
+                <span>Nạp file đề (.xlsx / .json)</span>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.json"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
           </div>
 
           {uploadStatus && (

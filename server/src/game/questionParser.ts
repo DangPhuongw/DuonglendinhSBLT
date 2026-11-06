@@ -1,5 +1,6 @@
 import xlsx from 'xlsx';
 import { Question, QuestionSet } from '@olympia/shared';
+import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
 
 export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đề tải lên'): QuestionSet {
   const workbook = xlsx.read(buffer, { type: 'buffer' });
@@ -197,4 +198,122 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
     },
     tieBreak,
   };
+}
+
+export function generateExcelTemplate(): Buffer {
+  const wb = xlsx.utils.book_new();
+
+  // 1. KhoiDong_Rieng
+  const kdRiengRows: any[] = [];
+  DEFAULT_QUESTION_SET.khoiDong.rieng.forEach((seatQuestions, seatIdx) => {
+    seatQuestions.forEach((q, orderIdx) => {
+      kdRiengRows.push({
+        Seat: seatIdx + 1,
+        Order: orderIdx + 1,
+        Prompt: q.prompt,
+        OptionA: q.options?.[0] || '',
+        OptionB: q.options?.[1] || '',
+        OptionC: q.options?.[2] || '',
+        OptionD: q.options?.[3] || '',
+        Answer: q.answer,
+        Alternatives: (q.alternatives || []).join('; '),
+      });
+    });
+  });
+  const wsRieng = xlsx.utils.json_to_sheet(kdRiengRows);
+  xlsx.utils.book_append_sheet(wb, wsRieng, 'KhoiDong_Rieng');
+
+  // 2. KhoiDong_Chung
+  const kdChungRows = DEFAULT_QUESTION_SET.khoiDong.chung.map((q, idx) => ({
+    Order: idx + 1,
+    Prompt: q.prompt,
+    OptionA: q.options?.[0] || '',
+    OptionB: q.options?.[1] || '',
+    OptionC: q.options?.[2] || '',
+    OptionD: q.options?.[3] || '',
+    Answer: q.answer,
+    Alternatives: (q.alternatives || []).join('; '),
+  }));
+  const wsChung = xlsx.utils.json_to_sheet(kdChungRows);
+  xlsx.utils.book_append_sheet(wb, wsChung, 'KhoiDong_Chung');
+
+  // 3. VCNV
+  const vcnvRows: any[] = [];
+  DEFAULT_QUESTION_SET.vcnv.rows.forEach((r, idx) => {
+    vcnvRows.push({
+      Type: `ROW_${idx + 1}`,
+      Prompt: r.prompt,
+      Answer: r.answer,
+      Alternatives: (r.alternatives || []).join('; '),
+      Image: idx === 0 ? (DEFAULT_QUESTION_SET.vcnv.image || '') : '',
+    });
+  });
+  vcnvRows.push({
+    Type: 'CENTER',
+    Prompt: DEFAULT_QUESTION_SET.vcnv.center.prompt,
+    Answer: DEFAULT_QUESTION_SET.vcnv.center.answer,
+    Alternatives: (DEFAULT_QUESTION_SET.vcnv.center.alternatives || []).join('; '),
+    Image: '',
+  });
+  vcnvRows.push({
+    Type: 'OBSTACLE',
+    Prompt: DEFAULT_QUESTION_SET.vcnv.obstacle.prompt,
+    Answer: DEFAULT_QUESTION_SET.vcnv.obstacle.answer,
+    Alternatives: (DEFAULT_QUESTION_SET.vcnv.obstacle.alternatives || []).join('; '),
+    Image: '',
+  });
+  const wsVcnv = xlsx.utils.json_to_sheet(vcnvRows);
+  xlsx.utils.book_append_sheet(wb, wsVcnv, 'VCNV');
+
+  // 4. TangToc
+  const ttRows = DEFAULT_QUESTION_SET.tangToc.map((q, idx) => ({
+    Order: idx + 1,
+    Prompt: q.prompt,
+    Answer: q.answer,
+    Alternatives: (q.alternatives || []).join('; '),
+    Media: q.media || '',
+  }));
+  const wsTt = xlsx.utils.json_to_sheet(ttRows);
+  xlsx.utils.book_append_sheet(wb, wsTt, 'TangToc');
+
+  // 5. VeDich
+  const vdRows: any[] = [];
+  DEFAULT_QUESTION_SET.veDich.pool10.forEach((q) => {
+    vdRows.push({
+      Points: 10,
+      Prompt: q.prompt,
+      Answer: q.answer,
+      Alternatives: (q.alternatives || []).join('; '),
+    });
+  });
+  DEFAULT_QUESTION_SET.veDich.pool20.forEach((q) => {
+    vdRows.push({
+      Points: 20,
+      Prompt: q.prompt,
+      Answer: q.answer,
+      Alternatives: (q.alternatives || []).join('; '),
+    });
+  });
+  DEFAULT_QUESTION_SET.veDich.pool30.forEach((q) => {
+    vdRows.push({
+      Points: 30,
+      Prompt: q.prompt,
+      Answer: q.answer,
+      Alternatives: (q.alternatives || []).join('; '),
+    });
+  });
+  const wsVd = xlsx.utils.json_to_sheet(vdRows);
+  xlsx.utils.book_append_sheet(wb, wsVd, 'VeDich');
+
+  // 6. TieBreak
+  const tbRows = DEFAULT_QUESTION_SET.tieBreak.map((q, idx) => ({
+    Order: idx + 1,
+    Prompt: q.prompt,
+    Answer: q.answer,
+    Alternatives: (q.alternatives || []).join('; '),
+  }));
+  const wsTb = xlsx.utils.json_to_sheet(tbRows);
+  xlsx.utils.book_append_sheet(wb, wsTb, 'TieBreak');
+
+  return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 }
