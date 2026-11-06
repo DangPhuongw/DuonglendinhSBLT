@@ -217,13 +217,19 @@ export const ReadyScreen: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+              <div className="space-y-1.5 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-start gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717] mt-1.5 shrink-0" />
+                  <span className="leading-snug text-[#171717]">
+                    Đoán từ khóa chính dựa trên 4 hàng gợi ý - Sau mỗi câu hỏi gợi ý được lật mở, số điểm nhận được khi đoán từ khóa chính sẽ giảm
+                  </span>
+                </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717] shrink-0" />
                   <span>Chuông mở sau khi câu 1 xuất hiện</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF9292]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF9292] shrink-0" />
                   <span className="text-rose-600 font-black">Đoán sai: Bị loại khỏi vòng VCNV</span>
                 </div>
               </div>

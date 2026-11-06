@@ -183,7 +183,7 @@ export const VcnvRound: React.FC = () => {
 
           <span
             className="text-xs sm:text-sm font-black bg-[#55D6C2] text-[#171717] px-2.5 py-1 rounded-lg border-2 border-[#171717] tabular-nums shadow-neo-sm"
-            title="Điểm khi đoán đúng từ khóa chính"
+            title="Đoán từ khóa chính dựa trên 4 hàng gợi ý - Sau mỗi câu hỏi gợi ý được lật mở, số điểm nhận được khi đoán từ khóa chính sẽ giảm"
           >
             +{currentCnvPoints}đ
           </span>
