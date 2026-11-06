@@ -136,9 +136,8 @@ export const Lobby: React.FC = () => {
   const connectedPlayers = room.players.filter((p) => p.connected);
   const canStart = isHost && connectedPlayers.length >= GAME_CONFIG.MIN_PLAYERS_FOR_TEST;
 
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}/?room=${room.code}`;
-    navigator.clipboard.writeText(url);
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(room.code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -183,11 +182,12 @@ export const Lobby: React.FC = () => {
             {room.code}
           </span>
           <button
-            onClick={handleCopyLink}
+            onClick={handleCopyCode}
             className="flex items-center gap-1.5 text-xs font-black bg-white hover:bg-slate-50 px-3.5 py-2 rounded-lg border-2 border-[#171717] text-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+            title="Sao chép mã phòng"
           >
             {copied ? <Check size={14} className="text-[#171717] stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
-            <span>{copied ? 'Đã sao chép' : 'Sao chép link'}</span>
+            <span>{copied ? 'Đã sao chép' : 'Sao chép'}</span>
           </button>
         </div>
       </div>
