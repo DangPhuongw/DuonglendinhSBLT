@@ -31,6 +31,21 @@ export const App: React.FC = () => {
   }, [initSocket]);
 
   const currentRound = room?.state?.round || 'LOBBY';
+  const targetRound = room?.state?.targetRound;
+
+  const isKdActive =
+    currentRound === 'KD_RIENG' ||
+    currentRound === 'KD_CHUNG' ||
+    (currentRound === 'READY' && targetRound === 'KD_RIENG');
+
+  const isVcnvActive =
+    currentRound === 'VCNV' || (currentRound === 'READY' && targetRound === 'VCNV');
+
+  const isTtActive =
+    currentRound === 'TANG_TOC' || (currentRound === 'READY' && targetRound === 'TANG_TOC');
+
+  const isVdActive =
+    currentRound === 'VE_DICH' || (currentRound === 'READY' && targetRound === 'VE_DICH');
 
   const renderCurrentView = () => {
     if (!room || currentRound === 'LOBBY') {
@@ -80,32 +95,46 @@ export const App: React.FC = () => {
           <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 bg-white border-2 border-[#171717] shadow-neo rounded-xl p-2">
             <span className="text-[11px] font-extrabold text-[#171717] px-1 uppercase tracking-wider">⏩ Tua:</span>
             <button
+              onClick={() => jumpToRound('KD_RIENG')}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
+                isKdActive
+                  ? 'bg-[#FF9292] text-[#171717] shadow-neo-sm font-black'
+                  : 'bg-white hover:bg-[#FF9292] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
+              }`}
+              title="Tua tới chuẩn bị Vòng 1: Khởi Động"
+            >
+              Khởi Động
+            </button>
+            <button
               onClick={() => jumpToRound('VCNV')}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
-                currentRound === 'VCNV'
-                  ? 'bg-[#FFE45C] text-[#171717] shadow-neo-sm'
+                isVcnvActive
+                  ? 'bg-[#FFE45C] text-[#171717] shadow-neo-sm font-black'
                   : 'bg-white hover:bg-[#FFE45C] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
               }`}
+              title="Tua tới chuẩn bị Vòng 2: Vượt Chướng Ngại Vật"
             >
               VCNV
             </button>
             <button
               onClick={() => jumpToRound('TANG_TOC')}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
-                currentRound === 'TANG_TOC'
-                  ? 'bg-[#66C7F2] text-[#171717] shadow-neo-sm'
+                isTtActive
+                  ? 'bg-[#66C7F2] text-[#171717] shadow-neo-sm font-black'
                   : 'bg-white hover:bg-[#66C7F2] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
               }`}
+              title="Tua tới chuẩn bị Vòng 3: Tăng Tốc"
             >
               Tăng Tốc
             </button>
             <button
               onClick={() => jumpToRound('VE_DICH')}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
-                currentRound === 'VE_DICH'
-                  ? 'bg-[#55D6C2] text-[#171717] shadow-neo-sm'
+                isVdActive
+                  ? 'bg-[#55D6C2] text-[#171717] shadow-neo-sm font-black'
                   : 'bg-white hover:bg-[#55D6C2] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
               }`}
+              title="Tua tới chuẩn bị Vòng 4: Về Đích"
             >
               Về Đích
             </button>

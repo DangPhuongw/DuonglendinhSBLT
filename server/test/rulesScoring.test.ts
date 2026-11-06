@@ -261,4 +261,44 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     expect(ansDeadline).toBeGreaterThan(Date.now() + 2000);
     expect(ansDeadline).toBeLessThanOrEqual(Date.now() + 3100);
   });
+
+  it('jumps to READY preparation screen for all rounds including KD_RIENG', async () => {
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine(
+      'JUMPREADY',
+      { id: 'p1', name: 'Player 1', token: 'tok-1' },
+      callbacks
+    );
+    machine.addPlayer('Player 2', 'tok-2');
+
+    // Jump to KD_RIENG (Round 1)
+    machine.jumpToRound('KD_RIENG');
+    await new Promise((r) => setTimeout(r, 30));
+    expect(machine.room.status).toBe('READY');
+    expect(machine.room.state.round).toBe('READY');
+    expect(machine.room.state.targetRound).toBe('KD_RIENG');
+
+    // Jump to VCNV (Round 2)
+    machine.jumpToRound('VCNV');
+    await new Promise((r) => setTimeout(r, 30));
+    expect(machine.room.status).toBe('READY');
+    expect(machine.room.state.targetRound).toBe('VCNV');
+
+    // Jump to TANG_TOC (Round 3)
+    machine.jumpToRound('TANG_TOC');
+    await new Promise((r) => setTimeout(r, 30));
+    expect(machine.room.status).toBe('READY');
+    expect(machine.room.state.targetRound).toBe('TANG_TOC');
+
+    // Jump to VE_DICH (Round 4)
+    machine.jumpToRound('VE_DICH');
+    await new Promise((r) => setTimeout(r, 30));
+    expect(machine.room.status).toBe('READY');
+    expect(machine.room.state.targetRound).toBe('VE_DICH');
+
+    // Force start ready round
+    machine.forceStartReadyRound();
+    expect(machine.room.state.subPhase).toBe('COUNTDOWN');
+    expect(machine.room.players.every((p) => p.ready)).toBe(true);
+  });
 });

@@ -171,5 +171,6 @@ export interface ClientToServerEvents {
   'host:skipAbsent': (data: { playerId: string }) => void;
   'host:kickPlayer': (data: { playerId: string }) => void;
   'dev:jumpRound': (data: { targetRound: string }) => void;
+  'dev:forceStartRound'?: () => void;
   'time:ping': (data: { clientSentAt: number }) => void;
 }

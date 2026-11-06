@@ -22,6 +22,7 @@ export const ReadyScreen: React.FC = () => {
   const myPlayer = useGameStore((s) => s.player);
   const setReady = useGameStore((s) => s.setReady);
   const skipAbsent = useGameStore((s) => s.skipAbsent);
+  const forceStartRound = useGameStore((s) => s.forceStartRound);
 
   if (!room || !myPlayer) return null;
 
@@ -446,7 +447,7 @@ export const ReadyScreen: React.FC = () => {
             <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={3} />
           </div>
         ) : (
-          <div className="w-full mb-5 flex justify-center">
+          <div className="w-full mb-5 flex flex-col items-center">
             <button
               onClick={() => setReady(true)}
               disabled={myPlayer.ready}
@@ -459,6 +460,15 @@ export const ReadyScreen: React.FC = () => {
               <CheckCircle2 size={18} />
               <span>{myPlayer.ready ? 'Bạn đã sẵn sàng' : 'Tôi đã sẵn sàng'}</span>
             </button>
+            {isHost && (
+              <button
+                onClick={forceStartRound}
+                className="mt-2.5 text-xs font-black text-gray-700 hover:text-black underline cursor-pointer hover:scale-105 transition-transform"
+                title="Bắt đầu vòng thi ngay lập tức không cần chờ"
+              >
+                ⚡ Bắt đầu vòng thi ngay (Chủ phòng)
+              </button>
+            )}
           </div>
         )}
 

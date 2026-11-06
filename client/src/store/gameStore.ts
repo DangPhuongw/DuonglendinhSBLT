@@ -39,6 +39,7 @@ interface GameStore {
   skipAbsent: (playerId: string) => void;
   kickPlayer: (playerId: string) => void;
   jumpToRound: (targetRound?: string) => void;
+  forceStartRound: () => void;
   leaveRoom: () => void;
 }
 
@@ -327,6 +328,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   jumpToRound: (targetRound = 'VCNV') => {
     get().socket?.emit('dev:jumpRound', { targetRound });
+  },
+
+  forceStartRound: () => {
+    get().socket?.emit('dev:forceStartRound');
   },
 
   leaveRoom: () => {

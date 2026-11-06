@@ -386,27 +386,43 @@ export class RoomStateMachine {
     return true;
   }
 
-  // --- Dev / Test shortcut: Tua nhanh vòng ---
+  // --- Dev / Test shortcut: Tua nhanh vòng tới màn hình chuẩn bị sẵn sàng ---
   public jumpToRound(targetRound: string = 'VCNV'): void {
     this.clearTimer();
     this.answersMap.clear();
     this.buzzedPlayerId = null;
     this.pendingCnvBuzzerId = null;
     this.eventQueue.enqueue(async () => {
-      if (targetRound === 'VCNV') {
-        await this.startVcnv();
-      } else if (targetRound === 'TANG_TOC') {
-        await this.startTangToc();
-      } else if (targetRound === 'VE_DICH') {
-        await this.startVeDich();
-      } else if (targetRound === 'KD_RIENG') {
-        await this.startKhoiDongRieng();
-      } else if (targetRound === 'KD_CHUNG') {
-        await this.startKhoiDongChung();
+      let nextRound: RoundType = 'VCNV';
+      const normalized = (targetRound || '').toUpperCase();
+      if (
+        normalized === 'KD_RIENG' ||
+        normalized === 'KHOI_DONG' ||
+        normalized === 'KD' ||
+        normalized === 'V1'
+      ) {
+        nextRound = 'KD_RIENG';
+      } else if (normalized === 'VCNV' || normalized === 'V2') {
+        nextRound = 'VCNV';
+      } else if (normalized === 'TANG_TOC' || normalized === 'TT' || normalized === 'V3') {
+        nextRound = 'TANG_TOC';
+      } else if (normalized === 'VE_DICH' || normalized === 'VD' || normalized === 'V4') {
+        nextRound = 'VE_DICH';
       } else {
-        await this.startVcnv();
+        nextRound = 'VCNV';
       }
+      this.transitionToReady(nextRound);
     });
+  }
+
+  public forceStartReadyRound(): void {
+    if (this.room.state.round === 'READY') {
+      for (const p of this.room.players) {
+        if (p.connected) p.ready = true;
+      }
+      this.callbacks.broadcastPlayerUpdate(this.room.players);
+      this.startReadyCountdown();
+    }
   }
 
   // --- Flow & Transitions ---

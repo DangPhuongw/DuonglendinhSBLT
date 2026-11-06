@@ -383,13 +383,22 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 14. Dev: Jump / Tua nhanh sang vòng khác (tạm thời để test)
+  // 14. Dev: Jump / Tua nhanh sang vòng khác (tới màn hình chuẩn bị sẵn sàng)
   socket.on('dev:jumpRound', ({ targetRound }) => {
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
       machine.jumpToRound(targetRound || 'VCNV');
+    }
+  });
+
+  socket.on('dev:forceStartRound', () => {
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return;
+    const machine = roomManager.getRoom(info.roomCode);
+    if (machine) {
+      machine.forceStartReadyRound();
     }
   });
 
