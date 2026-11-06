@@ -228,4 +228,37 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     await (machine as any).evaluateCnvGuess('p1', (machine as any).questionSet.vcnv.obstacle.answer);
     expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(20);
   });
+
+  it('configures KD_CHUNG with 15 seconds to buzz and 3 seconds to answer', async () => {
+    expect(GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS).toBe(15);
+    expect(GAME_CONFIG.KHOI_DONG.CHUNG_ANSWER_SECONDS).toBe(3);
+
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine(
+      'KDCHUNG3S',
+      { id: 'p1', name: 'Player 1', token: 'tok-1' },
+      callbacks
+    );
+    machine.addPlayer('Player 2', 'tok-2');
+
+    // Start KD_CHUNG question
+    machine.room.status = 'KD_CHUNG';
+    await (machine as any).runKdChungQuestion(0);
+    expect(machine.room.state.subPhase).toBe('QUESTION_BUZZ');
+    // Buzz window: 15s deadline set
+    const buzzDeadline = machine.room.state.deadline;
+    expect(buzzDeadline).toBeGreaterThan(Date.now() + 14000);
+    expect(buzzDeadline).toBeLessThanOrEqual(Date.now() + 15100);
+
+    // Player 1 buzzes
+    const buzzed = machine.handleBuzzer('p1');
+    expect(buzzed).toBe(true);
+    expect(machine.room.state.subPhase).toBe('ANSWERING');
+    expect(machine.room.state.activePlayerId).toBe('p1');
+
+    // Answer window: exactly 3s deadline set
+    const ansDeadline = machine.room.state.deadline;
+    expect(ansDeadline).toBeGreaterThan(Date.now() + 2000);
+    expect(ansDeadline).toBeLessThanOrEqual(Date.now() + 3100);
+  });
 });

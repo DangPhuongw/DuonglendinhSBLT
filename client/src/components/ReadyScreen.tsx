@@ -1,80 +1,21 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
-import { CheckCircle2, AlertCircle, UserX, BookOpen, Zap } from 'lucide-react';
-
-interface RoundRule {
-  tagline: string;
-  points: { title: string; desc: string; badge?: string }[];
-}
-
-const ROUND_RULES: Record<string, RoundRule> = {
-  KD_RIENG: {
-    tagline: 'Vòng thi gồm 2 phần: Khởi động Riêng và Khởi động Chung',
-    points: [
-      {
-        title: 'Khởi động Riêng',
-        desc: 'Mỗi thí sinh chọn 1 trong 5 ô câu hỏi (mỗi ô 5 câu, 15s/câu). Ô đã chọn sẽ bị khóa và người sau không thể chọn lại. Đúng +10đ/câu, sai không bị trừ điểm.',
-        badge: '+10đ / 0đ',
-      },
-      {
-        title: 'Khởi động Chung',
-        desc: 'Gồm 10 câu hỏi chung cho tất cả. Bấm chuông (phím Space) để giành quyền trả lời trong 3 giây. Đúng +10 điểm, sai/hết giờ -5 điểm.',
-        badge: '+10đ / -5đ',
-      },
-    ],
-  },
-  VCNV: {
-    tagline: 'Tìm từ khóa Chướng ngại vật qua 4 hàng ngang và bức tranh bí ẩn',
-    points: [
-      {
-        title: 'Lượt chọn & Trả lời Hàng ngang',
-        desc: 'Lần lượt từng thí sinh chọn 1 hàng ngang. Sau khi chọn, tất cả thí sinh cùng nhập câu trả lời trong 15s. Đúng được +10 điểm và mở 1 góc hình ảnh.',
-        badge: '+10đ / hàng',
-      },
-      {
-        title: 'Chuông Chướng ngại vật (CNV)',
-        desc: 'Mở từ sau khi giải xong hàng ngang 1. Bấm chuông để đoán từ khóa chính: Đúng nhận 60/50/40/30 điểm (theo số hàng đã mở); Đoán sai bị loại khỏi vòng VCNV.',
-        badge: '60/50/40/30đ',
-      },
-    ],
-  },
-  TANG_TOC: {
-    tagline: 'Chạy đua tốc độ qua 4 câu hỏi thời gian thực cho tất cả thí sinh',
-    points: [
-      {
-        title: 'Thi đấu đồng thời',
-        desc: 'Gồm 4 câu hỏi. Tất cả thí sinh cùng trả lời đồng thời trong 30 giây cho mỗi câu.',
-        badge: '30 giây / câu',
-      },
-      {
-        title: 'Cộng điểm theo thứ tự tốc độ',
-        desc: 'Trả lời đúng nhanh nhất nhận +30 điểm; nhanh thứ hai +25 điểm; thứ ba +20 điểm; thứ tư +15 điểm; thứ năm +10 điểm. Sai không bị trừ điểm.',
-        badge: '+30 / +25 / +20...',
-      },
-    ],
-  },
-  VE_DICH: {
-    tagline: 'Lượt thi cá nhân theo thứ tự điểm số từ cao xuống thấp',
-    points: [
-      {
-        title: 'Chọn gói câu hỏi',
-        desc: 'Thí sinh chọn 1 trong 3 gói: 40 điểm (10-10-20), 60 điểm (10-20-30), hoặc 80 điểm (20-30-30). Thời gian suy nghĩ: 10đ/15s, 20đ/20s, 30đ/30s.',
-        badge: 'Gói 40/60/80đ',
-      },
-      {
-        title: 'Ngôi sao hy vọng (dùng 1 lần duy nhất)',
-        desc: 'Đặt trước khi trả lời câu hỏi: Trả lời đúng nhận x2 điểm câu hỏi, trả lời sai bị trừ đúng số điểm của câu đó.',
-        badge: 'x2 hoặc -điểm',
-      },
-      {
-        title: 'Giành quyền trả lời (Cướp điểm)',
-        desc: 'Khi thí sinh chính trả lời sai/hết giờ, các thí sinh khác có 5s bấm chuông: Trả lời đúng nhận trọn điểm câu hỏi; Trả lời sai bị trừ 1/2 số điểm.',
-        badge: 'Chuông 5s',
-      },
-    ],
-  },
-};
+import {
+  CheckCircle2,
+  AlertCircle,
+  UserX,
+  BookOpen,
+  Package,
+  Bell,
+  Layers,
+  Key,
+  Clock,
+  Award,
+  Trophy,
+  Star,
+  Zap,
+} from 'lucide-react';
 
 export const ReadyScreen: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -96,11 +37,392 @@ export const ReadyScreen: React.FC = () => {
   };
 
   const currentRoundTitle = roundNames[targetRound] || 'VÒNG TIẾP THEO';
-  const currentRule = ROUND_RULES[targetRound];
+
+  // Render visual infographic cards for each round's rules
+  const renderRuleInfographics = () => {
+    switch (targetRound) {
+      case 'KD_RIENG':
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            {/* Box 1: Khởi Động Riêng */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Package size={15} className="text-[#171717]" />
+                    Khởi Động Riêng
+                  </span>
+                </div>
+
+                {/* Mini illustration: 5 Mystery Boxes with '?' */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-between gap-1.5 shadow-neo-sm">
+                  {[
+                    { bg: 'bg-[#FFE45C]' },
+                    { bg: 'bg-[#66C7F2]' },
+                    { bg: 'bg-[#FF9292]' },
+                    { bg: 'bg-[#55D6C2]' },
+                    { bg: 'bg-[#A98BFF]' },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex-1 flex items-center justify-center py-1 sm:py-1.5 ${item.bg} border-2 border-[#171717] rounded-lg shadow-neo-sm font-black text-sm sm:text-base text-[#171717] leading-none select-none`}
+                    >
+                      ?
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>Chọn 1 ô • 5 câu (15s/câu)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#55D6C2]" />
+                  <span className="text-[#171717]">
+                    Đúng: <strong className="text-emerald-600">+10đ</strong> | Sai: <strong>0đ</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF9292]" />
+                  <span>Ô đã chọn sẽ bị khóa</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box 2: Khởi Động Chung */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Bell size={15} className="text-[#171717]" />
+                    Khởi Động Chung
+                  </span>
+                </div>
+
+                {/* Mini illustration: Buzzer bell */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-center gap-2.5 shadow-neo-sm">
+                  <div className="w-8 h-8 rounded-full bg-[#FFE45C] border-2 border-[#171717] flex items-center justify-center shadow-neo-sm">
+                    <Bell size={15} className="text-[#171717] animate-bounce" />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs font-black uppercase block">Bấm Chuông (Space)</span>
+                    <span className="text-[10px] text-gray-600 font-bold">Giành quyền trong 3 giây</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>10 câu hỏi chung cho tất cả</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#55D6C2]" />
+                  <span className="text-[#171717]">
+                    Đúng: <strong className="text-emerald-600">+10đ</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF9292]" />
+                  <span className="text-[#171717]">
+                    Sai / Hết giờ: <strong className="text-rose-600">-5đ</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'VCNV':
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            {/* Box 1: 4 Hàng Ngang */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Layers size={15} />
+                    4 Hàng Ngang (Gợi Ý)
+                  </span>
+                  <span className="text-[10px] font-black bg-[#FFE45C] text-[#171717] px-2 py-0.5 rounded border border-[#171717] tabular-nums">
+                    +10đ / hàng
+                  </span>
+                </div>
+
+                {/* Mini illustration: 4 Rows */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 space-y-1 shadow-neo-sm">
+                  {[1, 2, 3, 4].map((r) => (
+                    <div key={r} className="flex items-center gap-1.5 bg-white border border-[#171717] px-2 py-0.5 rounded">
+                      <span className="text-[9px] font-black w-3.5 h-3.5 rounded-full bg-[#FFE45C] flex items-center justify-center border border-[#171717]">
+                        {r}
+                      </span>
+                      <div className="flex gap-0.5 flex-1">
+                        {Array.from({ length: 6 }).map((_, c) => (
+                          <div key={c} className="w-2.5 h-2.5 rounded-[2px] bg-gray-200 border border-[#171717]/40" />
+                        ))}
+                      </div>
+                      <span className="text-[9px] font-bold text-gray-500 tabular-nums">15s</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>Chọn hàng • Cùng trả lời 15s</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#55D6C2]" />
+                  <span className="text-[#171717]">
+                    Đúng: <strong className="text-emerald-600">+10đ</strong> & mở 1 góc ảnh
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box 2: Từ Khóa Chướng Ngại Vật */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Key size={15} />
+                    Từ Khóa Chính
+                  </span>
+                  <span className="text-[10px] font-black bg-[#55D6C2] text-[#171717] px-2 py-0.5 rounded border border-[#171717] tabular-nums">
+                    60đ ➔ 20đ
+                  </span>
+                </div>
+
+                {/* Mini illustration: Score ladder */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-between gap-1 shadow-neo-sm">
+                  {[
+                    { q: 'C1', pts: '60đ' },
+                    { q: 'C2', pts: '50đ' },
+                    { q: 'C3', pts: '40đ' },
+                    { q: 'C4', pts: '30đ' },
+                    { q: 'TT', pts: '20đ' },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex-1 flex flex-col items-center py-0.5 bg-white border border-[#171717] rounded"
+                    >
+                      <span className="text-[8px] text-gray-500 font-bold">{item.q}</span>
+                      <span className="text-[10px] font-black text-[#171717] tabular-nums">{item.pts}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>Chuông mở sau khi câu 1 xuất hiện</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF9292]" />
+                  <span className="text-rose-600 font-black">Đoán sai: Bị loại khỏi vòng VCNV</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'TANG_TOC':
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            {/* Box 1: Thể thức thi đấu */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Clock size={15} />
+                    Chạy Đua Tốc Độ
+                  </span>
+                  <span className="text-[10px] font-black bg-[#FFE45C] text-[#171717] px-2 py-0.5 rounded border border-[#171717] tabular-nums">
+                    30s / câu
+                  </span>
+                </div>
+
+                {/* Mini illustration: 4 questions */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-between gap-1 shadow-neo-sm">
+                  {[1, 2, 3, 4].map((q) => (
+                    <div
+                      key={q}
+                      className="flex-1 flex flex-col items-center py-1 bg-white border border-[#171717] rounded-lg"
+                    >
+                      <Zap size={14} className="text-[#FFE45C] fill-[#FFE45C] stroke-[#171717]" />
+                      <span className="text-[10px] font-black">Câu {q}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>4 câu hỏi • Cùng nộp trong 30s</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#55D6C2]" />
+                  <span>Càng nhanh càng nhiều điểm</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>Sai không bị trừ điểm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box 2: Thang Điểm Tốc Độ */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Award size={15} />
+                    Thang Điểm Tốc Độ
+                  </span>
+                  <span className="text-[10px] font-black bg-[#55D6C2] text-[#171717] px-2 py-0.5 rounded border border-[#171717]">
+                    Top 1 ➔ 5
+                  </span>
+                </div>
+
+                {/* Mini illustration: Speed ranks */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-between gap-1 shadow-neo-sm">
+                  {[
+                    { rank: '#1', pts: '+30đ', bg: 'bg-[#FFE45C]' },
+                    { rank: '#2', pts: '+25đ', bg: 'bg-[#66C7F2]' },
+                    { rank: '#3', pts: '+20đ', bg: 'bg-[#55D6C2]' },
+                    { rank: '#4', pts: '+15đ', bg: 'bg-white' },
+                    { rank: '#5', pts: '+10đ', bg: 'bg-white' },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex-1 flex flex-col items-center py-1 rounded border border-[#171717] ${item.bg}`}
+                    >
+                      <span className="text-[9px] font-black">{item.rank}</span>
+                      <span className="text-[10px] font-black tabular-nums">{item.pts}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>Chỉ tính câu trả lời đúng</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFE45C]" />
+                  <span className="text-[#171717]">Xếp hạng theo giây nộp bài chính xác</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'VE_DICH':
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            {/* Box 1: Chọn gói câu hỏi */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Trophy size={15} />
+                    Chọn Gói Điểm
+                  </span>
+                  <span className="text-[10px] font-black bg-[#FFE45C] text-[#171717] px-2 py-0.5 rounded border border-[#171717] tabular-nums">
+                    40 / 60 / 80đ
+                  </span>
+                </div>
+
+                {/* Mini illustration: 3 packages */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-between gap-1.5 shadow-neo-sm">
+                  {[
+                    { pts: '40 ĐIỂM', sub: '10-10-20' },
+                    { pts: '60 ĐIỂM', sub: '10-20-30' },
+                    { pts: '80 ĐIỂM', sub: '20-30-30' },
+                  ].map((pkg, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 flex flex-col items-center py-1 bg-white border border-[#171717] rounded-lg"
+                    >
+                      <span className="text-[11px] font-black text-[#171717]">{pkg.pts}</span>
+                      <span className="text-[9px] text-gray-500 font-mono font-bold">{pkg.sub}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#171717]" />
+                  <span>Thời gian: 10đ/15s • 20đ/20s • 30đ/30s</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFE45C]" />
+                  <span>Thi đấu theo thứ tự điểm số</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box 2: Ngôi Sao Hy Vọng & Cướp Điểm */}
+            <div className="bg-white border-2 border-[#171717] rounded-2xl p-3.5 shadow-neo flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-black text-xs uppercase tracking-wider text-[#171717] flex items-center gap-1.5">
+                    <Star size={15} />
+                    Ngôi Sao & Giành Quyền
+                  </span>
+                  <span className="text-[10px] font-black bg-[#55D6C2] text-[#171717] px-2 py-0.5 rounded border border-[#171717]">
+                    x2 / cướp điểm
+                  </span>
+                </div>
+
+                {/* Mini illustration: Star & Buzzer */}
+                <div className="bg-[#FFFDF7] border-2 border-[#171717] rounded-xl p-2 my-2 flex items-center justify-around gap-2 shadow-neo-sm">
+                  <div className="flex items-center gap-1.5 bg-white border border-[#171717] px-2.5 py-1 rounded-lg">
+                    <Star size={14} className="fill-[#FFE45C] text-[#171717]" />
+                    <div className="text-left">
+                      <span className="text-[10px] font-black block">Ngôi Sao</span>
+                      <span className="text-[9px] text-gray-500 font-bold">1 lần / vòng</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white border border-[#171717] px-2.5 py-1 rounded-lg">
+                    <Bell size={14} className="text-[#171717]" />
+                    <div className="text-left">
+                      <span className="text-[10px] font-black block">Chuông 5s</span>
+                      <span className="text-[9px] text-gray-500 font-bold">Cướp điểm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1 text-left text-xs font-bold text-gray-700 mt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFE45C]" />
+                  <span>Ngôi sao: Đúng x2 | Sai trừ số điểm</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#55D6C2]" />
+                  <span>Chuông: Đúng nhận trọn | Sai trừ 1/2đ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="w-full bg-white border-3 border-[#171717] rounded-3xl p-6 sm:p-8 shadow-neo-lg text-center flex flex-col items-center">
+    <div className="max-w-2xl mx-auto p-3 sm:p-5 flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="w-full bg-white border-3 border-[#171717] rounded-3xl p-5 sm:p-7 shadow-neo-lg text-center flex flex-col items-center">
         <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3.5 py-1 rounded-full border-2 border-[#171717] shadow-neo-sm mb-2">
           Chuẩn bị bước vào
         </span>
@@ -108,41 +430,15 @@ export const ReadyScreen: React.FC = () => {
           {currentRoundTitle}
         </h2>
 
-        {/* Rule Box */}
-        {currentRule && (
-          <div className="w-full mb-6 p-4 sm:p-5 rounded-2xl bg-[#FFFDF7] border-2 border-[#171717] text-left shadow-neo">
-            <div className="flex items-center gap-2 mb-2 text-[#171717] font-black text-xs uppercase tracking-wider">
-              <BookOpen size={16} />
-              <span>Luật chơi ngắn gọn</span>
-            </div>
-            <p className="text-xs text-gray-700 font-bold mb-3 italic">
-              {currentRule.tagline}
-            </p>
-            <div className="space-y-2.5">
-              {currentRule.points.map((pt, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-xl bg-white border-2 border-[#171717] shadow-neo-sm flex flex-col gap-1 text-xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-black text-[#171717] flex items-center gap-1.5">
-                      <Zap size={14} className="text-[#FFE45C] fill-[#FFE45C] stroke-[#171717] shrink-0" />
-                      {pt.title}
-                    </span>
-                    {pt.badge && (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#FFE45C] text-[#171717] border border-[#171717] tabular-nums">
-                        {pt.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-700 font-medium text-[11px] sm:text-xs leading-relaxed pl-5">
-                    {pt.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
+        {/* Rule Box with Visual Infographics */}
+        <div className="w-full mb-5 p-3.5 sm:p-4 rounded-2xl bg-[#FFFDF7] border-2 border-[#171717] text-left shadow-neo">
+          <div className="flex items-center gap-2 mb-2.5 text-[#171717] font-black text-xs uppercase tracking-wider">
+            <BookOpen size={16} />
+            <span>Luật chơi tóm tắt</span>
           </div>
-        )}
+
+          {renderRuleInfographics()}
+        </div>
 
         {isCountdown ? (
           <div className="my-4 flex flex-col items-center">
@@ -150,15 +446,11 @@ export const ReadyScreen: React.FC = () => {
             <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={3} />
           </div>
         ) : (
-          <div className="w-full space-y-4 mb-6">
-            <p className="text-xs sm:text-sm text-gray-700 font-bold">
-              Vui lòng bấm nút <b>Sẵn sàng</b> để xác nhận và nạp phương tiện cho vòng đấu.
-            </p>
-
+          <div className="w-full mb-5 flex justify-center">
             <button
               onClick={() => setReady(true)}
               disabled={myPlayer.ready}
-              className={`w-full max-w-xs mx-auto py-3.5 px-6 rounded-xl font-black uppercase tracking-wider text-sm flex items-center justify-center gap-2 border-2 border-[#171717] transition-all ${
+              className={`w-full max-w-xs py-3 px-6 rounded-xl font-black uppercase tracking-wider text-sm flex items-center justify-center gap-2 border-2 border-[#171717] transition-all ${
                 myPlayer.ready
                   ? 'bg-[#55D6C2] text-[#171717] shadow-neo cursor-default'
                   : 'bg-[#FFE45C] hover:bg-[#ffe040] text-[#171717] shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer'
@@ -171,18 +463,18 @@ export const ReadyScreen: React.FC = () => {
         )}
 
         {/* Players Readiness List */}
-        <div className="w-full border-t-2 border-[#171717] pt-4 mt-2">
-          <h4 className="text-[11px] uppercase tracking-wider font-black text-gray-700 mb-3 text-left">
+        <div className="w-full border-t-2 border-[#171717] pt-4 mt-1">
+          <h4 className="text-[11px] uppercase tracking-wider font-black text-gray-700 mb-2.5 text-left">
             Trạng thái sẵn sàng của các thí sinh:
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {room.players.map((p) => {
               const isAbsent = !p.connected && p.disconnectedAt && Date.now() - p.disconnectedAt > 60000;
 
               return (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#171717] shadow-neo-sm text-xs font-bold"
+                  className="flex items-center justify-between p-2.5 bg-[#FFFDF7] rounded-xl border-2 border-[#171717] shadow-neo-sm text-xs font-bold"
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-black text-gray-600">G{p.seat}</span>

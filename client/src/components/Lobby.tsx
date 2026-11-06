@@ -54,12 +54,12 @@ export const Lobby: React.FC = () => {
           <div className="text-center mb-6">
             <div className="inline-block relative mb-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717] tracking-tight relative z-10">
-                QUIZ ARENA
+                ĐẤU TRƯỜNG TRÍ TUỆ
               </h1>
               <div className="absolute bottom-0.5 left-0 right-0 h-3 bg-[#FFE45C] z-0 -rotate-1 rounded" />
             </div>
-            <p className="text-xs sm:text-sm font-bold text-[#666666] mt-1">
-              Knowledge is a Game • Đấu trường trắc nghiệm trực tuyến
+            <p className="text-xs sm:text-sm font-bold text-[#666666] mt-1 leading-relaxed">
+              Mô phỏng theo format chương trình Đường lên đỉnh Olympia
             </p>
           </div>
 
@@ -272,7 +272,7 @@ export const Lobby: React.FC = () => {
             <div>
               <h4 className="font-extrabold text-base text-[#171717]">Nạp bộ đề thi tùy chỉnh</h4>
               <p className="text-xs font-semibold text-[#666666]">
-                Mặc định dùng Bộ đề mẫu Quiz Arena. Có thể nạp file Excel (6 sheet) hoặc JSON.
+                Mặc định dùng Bộ đề mẫu Đấu Trường Trí Tuệ. Có thể nạp file Excel (6 sheet) hoặc JSON.
               </p>
             </div>
             <label className="cursor-pointer shrink-0 flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#FFE45C] text-[#171717] text-xs font-extrabold rounded-lg border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">

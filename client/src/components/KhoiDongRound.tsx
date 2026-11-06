@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
-import { Bell, CheckCircle, XCircle, Package, Sparkles, Lock } from 'lucide-react';
+import { Bell, Sparkles, Lock } from 'lucide-react';
 
 export const KhoiDongRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -42,7 +42,7 @@ export const KhoiDongRound: React.FC = () => {
     };
   }, []);
 
-  // Keyboard shortcut listener (1-4 for options, Space for buzzer)
+  // Keyboard shortcut listener (1-5 for packages, 1-4 for options, Space for buzzer)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Space for buzzer
@@ -95,6 +95,15 @@ export const KhoiDongRound: React.FC = () => {
     D: 'bg-[#55D6C2] text-[#171717]',
   };
 
+  // 5 Palette Colors for 5 Mystery Boxes
+  const packageThemes = [
+    { bg: 'bg-[#FFE45C]', hover: 'hover:bg-[#ffe040]' }, // Ô 1: Vàng
+    { bg: 'bg-[#66C7F2]', hover: 'hover:bg-[#52bbe8]' }, // Ô 2: Xanh dương
+    { bg: 'bg-[#FF9292]', hover: 'hover:bg-[#ff7b7b]' }, // Ô 3: Hồng Coral
+    { bg: 'bg-[#55D6C2]', hover: 'hover:bg-[#43c4b0]' }, // Ô 4: Xanh Mint
+    { bg: 'bg-[#A98BFF]', hover: 'hover:bg-[#9775ff]' }, // Ô 5: Tím Lavender
+  ];
+
   // --- 1. CHOOSE PACKAGE (CHỌN Ô CÂU HỎI KHỞI ĐỘNG - 5 Ô TỔNG) ---
   if (subPhase === 'CHOOSE_PACKAGE' || subPhase === 'PACKAGE_CONFIRMED' || subPhase === 'TURN_INTRO') {
     const packages = room.state.kdPackages || [
@@ -116,9 +125,14 @@ export const KhoiDongRound: React.FC = () => {
           <h2 className="text-2xl sm:text-3xl font-black text-[#171717] mb-1">
             LƯỢT THI CỦA: {activePlayer?.name}
           </h2>
-          <span className="text-xs font-bold text-[#171717] bg-[#FFFDF7] px-3 py-0.5 rounded-full border-2 border-[#171717] shadow-neo-sm mb-4">
-            Ghế số {activePlayer?.seat}
-          </span>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xs font-bold text-[#171717] bg-[#FFFDF7] px-3 py-0.5 rounded-full border-2 border-[#171717] shadow-neo-sm">
+              Ghế số {activePlayer?.seat}
+            </span>
+            <span className="text-xs font-bold text-gray-600 bg-gray-100 px-3 py-0.5 rounded-full border border-gray-300">
+              5 câu hỏi • 15s/câu
+            </span>
+          </div>
 
           {subPhase === 'PACKAGE_CONFIRMED' ? (
             <div className="my-6 p-6 rounded-2xl bg-[#FFE45C] border-3 border-[#171717] shadow-neo-lg flex flex-col items-center gap-2 animate-bounce">
@@ -135,90 +149,81 @@ export const KhoiDongRound: React.FC = () => {
               <p className="text-xs sm:text-sm text-[#171717] mb-4 max-w-lg font-medium">
                 {isMyTurn ? (
                   <span className="text-[#171717] font-black bg-[#FFE45C] px-3 py-1 rounded-lg border-2 border-[#171717] inline-block shadow-neo-sm">
-                    Đến lượt bạn! Hãy chọn 1 trong 5 ô câu hỏi dưới đây (10 giây):
+                    Đến lượt bạn! Bấm chọn 1 ô hoặc nhấn phím 1 - 5 (10 giây):
                   </span>
                 ) : (
-                  <span>Đang chờ thí sinh chọn ô câu hỏi...</span>
+                  <span className="text-gray-600 font-bold">Đang chờ thí sinh chọn ô câu hỏi...</span>
                 )}
               </p>
 
               <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={10} className="mb-6" />
 
-              {/* 5 Ô câu hỏi tổng */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 w-full">
+              {/* 5 MYSTERY BOXES - COLORFUL & CLEAN */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-3.5 w-full">
                 {packages.map((pkg) => {
                   const isChosen = Boolean(pkg.chosenBy);
                   const canClick = isMyTurn && !isChosen;
+                  const num = pkg.index + 1;
+                  const theme = packageThemes[pkg.index % packageThemes.length];
 
                   return (
                     <button
                       key={pkg.index}
                       disabled={!canClick}
                       onClick={() => chooseKdPackage(pkg.index)}
-                      className={`relative p-4 rounded-2xl flex flex-col items-center justify-between min-h-[160px] border-2 border-[#171717] transition-all ${
+                      className={`group relative p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-between min-h-[145px] sm:min-h-[160px] border-2 border-[#171717] transition-all ${
                         isChosen
-                          ? 'bg-gray-100 opacity-60 cursor-not-allowed select-none shadow-none text-gray-500'
+                          ? 'bg-gray-100 opacity-40 cursor-not-allowed select-none shadow-none text-gray-400 border-gray-300'
                           : canClick
-                          ? 'bg-white hover:bg-[#FFFDF7] shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer'
-                          : 'bg-[#FFFDF7] opacity-80 cursor-not-allowed shadow-neo-sm'
+                          ? `${theme.bg} ${theme.hover} shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer`
+                          : `${theme.bg} opacity-75 cursor-not-allowed shadow-neo-sm`
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full">
-                        <div
-                          className={`w-7 h-7 rounded-full border-2 border-[#171717] flex items-center justify-center font-black text-xs ${
+                      {/* Top: Box Number Chip & Keyboard Shortcut Hint */}
+                      <div className="w-full flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#171717] bg-white/85 px-2 py-0.5 rounded border border-[#171717] shadow-[1px_1px_0px_#171717]">
+                          {isChosen ? 'Đã khóa' : `Ô ${num}`}
+                        </span>
+                        {isChosen ? (
+                          <Lock size={13} className="text-[#171717]" />
+                        ) : canClick ? (
+                          <span className="text-[10px] font-mono font-black text-[#171717] bg-white/60 px-1.5 py-0.5 rounded border border-[#171717]/40">
+                            [{num}]
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {/* Center: Iconic Mystery Box Question Mark */}
+                      <div className="my-2 flex flex-col items-center justify-center">
+                        <span
+                          className={`text-4xl sm:text-5xl font-black font-mono tracking-tight transition-transform duration-200 select-none ${
                             isChosen
-                              ? 'bg-gray-200 text-gray-500'
-                              : 'bg-[#FFE45C] text-[#171717] shadow-neo-sm'
+                              ? 'text-gray-400 line-through'
+                              : canClick
+                              ? 'text-[#171717] group-hover:scale-125'
+                              : 'text-[#171717]'
                           }`}
                         >
-                          {pkg.index + 1}
-                        </div>
+                          ?
+                        </span>
+                      </div>
 
+                      {/* Bottom: Action / Status Badge */}
+                      <div className="w-full">
                         {isChosen ? (
-                          <Lock size={15} className="text-[#FF9292]" />
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-white/90 text-[#171717] border border-[#171717] font-bold truncate block w-full text-center">
+                            🔒 {pkg.chosenByName ? pkg.chosenByName : 'Đã chọn'}
+                          </span>
+                        ) : canClick ? (
+                          <span className="text-[10px] px-2.5 py-1 rounded-lg bg-white text-[#171717] border-2 border-[#171717] font-black uppercase tracking-wider block text-center shadow-neo-sm group-hover:bg-[#171717] group-hover:text-white transition-colors">
+                            Chọn
+                          </span>
                         ) : (
-                          <span className="text-[10px] text-gray-600 font-bold tabular-nums">15s/câu</span>
+                          <span className="text-[10px] text-[#171717]/70 font-bold italic block text-center">
+                            Chờ chọn
+                          </span>
                         )}
                       </div>
-
-                      <div className="flex flex-col items-center my-1.5">
-                        <Package
-                          size={28}
-                          className={
-                            canClick
-                              ? 'text-[#171717] animate-pulse'
-                              : isChosen
-                              ? 'text-gray-400'
-                              : 'text-gray-600'
-                          }
-                        />
-                        <span
-                          className={`font-black text-sm sm:text-base tracking-wide mt-1 text-[#171717] ${
-                            isChosen ? 'line-through opacity-50' : ''
-                          }`}
-                        >
-                          {pkg.name}
-                        </span>
-                        <span className="text-[11px] text-gray-600 font-bold">
-                          5 câu hỏi
-                        </span>
-                      </div>
-
-                      {isChosen ? (
-                        <div className="w-full">
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FF9292] text-[#171717] border border-[#171717] font-bold truncate block w-full text-center">
-                            {pkg.chosenByName ? `Đã chọn: ${pkg.chosenByName}` : 'Đã khóa'}
-                          </span>
-                        </div>
-                      ) : canClick ? (
-                        <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#FFE45C] text-[#171717] border-2 border-[#171717] font-black uppercase tracking-wider shadow-neo-sm">
-                          Bấm chọn
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-gray-500 font-semibold italic">
-                          Chưa mở
-                        </span>
-                      )}
                     </button>
                   );
                 })}
@@ -251,7 +256,7 @@ export const KhoiDongRound: React.FC = () => {
           subPhase === 'QUESTION_BUZZ'
             ? 15
             : subPhase === 'ANSWERING'
-            ? 15
+            ? 3
             : 15
         }
         className="mb-6"
@@ -284,7 +289,7 @@ export const KhoiDongRound: React.FC = () => {
       {/* Buzzer Winner Announcement */}
       {subPhase === 'ANSWERING' && Boolean(room.state.buzzerLockedBy) && (
         <div className="w-full p-3 mb-4 bg-[#FFE45C] border-2 border-[#171717] rounded-xl text-center text-xs sm:text-sm font-black text-[#171717] shadow-neo animate-bounce">
-          🔔 {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành được quyền trả lời!
+          🔔 {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành được quyền trả lời (3 giây)!
         </div>
       )}
 
