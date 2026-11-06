@@ -100,42 +100,42 @@ export const ReadyScreen: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur text-center flex flex-col items-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-1">
+      <div className="w-full bg-white border-3 border-[#171717] rounded-3xl p-6 sm:p-8 shadow-neo-lg text-center flex flex-col items-center">
+        <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3.5 py-1 rounded-full border-2 border-[#171717] shadow-neo-sm mb-2">
           Chuẩn bị bước vào
         </span>
-        <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200 mb-4">
+        <h2 className="text-2xl sm:text-3xl font-black text-[#171717] mb-4">
           {currentRoundTitle}
         </h2>
 
         {/* Rule Box */}
         {currentRule && (
-          <div className="w-full mb-6 p-4 rounded-2xl bg-slate-950/70 border border-amber-500/30 text-left shadow-lg">
-            <div className="flex items-center gap-2 mb-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+          <div className="w-full mb-6 p-4 sm:p-5 rounded-2xl bg-[#FFFDF7] border-2 border-[#171717] text-left shadow-neo">
+            <div className="flex items-center gap-2 mb-2 text-[#171717] font-black text-xs uppercase tracking-wider">
               <BookOpen size={16} />
               <span>Luật chơi ngắn gọn</span>
             </div>
-            <p className="text-xs text-amber-200/90 font-medium mb-3 italic">
+            <p className="text-xs text-gray-700 font-bold mb-3 italic">
               {currentRule.tagline}
             </p>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {currentRule.points.map((pt, idx) => (
                 <div
                   key={idx}
-                  className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col gap-1 text-xs"
+                  className="p-3 rounded-xl bg-white border-2 border-[#171717] shadow-neo-sm flex flex-col gap-1 text-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-amber-300 flex items-center gap-1.5">
-                      <Zap size={13} className="text-amber-400 shrink-0" />
+                    <span className="font-black text-[#171717] flex items-center gap-1.5">
+                      <Zap size={14} className="text-[#FFE45C] fill-[#FFE45C] stroke-[#171717] shrink-0" />
                       {pt.title}
                     </span>
                     {pt.badge && (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-950/80 text-amber-400 border border-amber-500/30 font-mono">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#FFE45C] text-[#171717] border border-[#171717] tabular-nums">
                         {pt.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-300 text-[11px] sm:text-xs leading-relaxed pl-4">
+                  <p className="text-gray-700 font-medium text-[11px] sm:text-xs leading-relaxed pl-5">
                     {pt.desc}
                   </p>
                 </div>
@@ -146,22 +146,22 @@ export const ReadyScreen: React.FC = () => {
 
         {isCountdown ? (
           <div className="my-4 flex flex-col items-center">
-            <span className="text-xs uppercase font-bold text-slate-400 mb-2">Trận đấu bắt đầu sau</span>
+            <span className="text-xs uppercase font-black text-gray-700 mb-2">Trận đấu bắt đầu sau</span>
             <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={3} />
           </div>
         ) : (
           <div className="w-full space-y-4 mb-6">
-            <p className="text-xs sm:text-sm text-slate-300">
+            <p className="text-xs sm:text-sm text-gray-700 font-bold">
               Vui lòng bấm nút <b>Sẵn sàng</b> để xác nhận và nạp phương tiện cho vòng đấu.
             </p>
 
             <button
               onClick={() => setReady(true)}
               disabled={myPlayer.ready}
-              className={`w-full max-w-xs mx-auto py-3.5 px-6 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all ${
+              className={`w-full max-w-xs mx-auto py-3.5 px-6 rounded-xl font-black uppercase tracking-wider text-sm flex items-center justify-center gap-2 border-2 border-[#171717] transition-all ${
                 myPlayer.ready
-                  ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-400 cursor-default'
-                  : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-lg shadow-amber-500/20 cursor-pointer active:scale-95'
+                  ? 'bg-[#55D6C2] text-[#171717] shadow-neo cursor-default'
+                  : 'bg-[#FFE45C] hover:bg-[#ffe040] text-[#171717] shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer'
               }`}
             >
               <CheckCircle2 size={18} />
@@ -171,8 +171,8 @@ export const ReadyScreen: React.FC = () => {
         )}
 
         {/* Players Readiness List */}
-        <div className="w-full border-t border-slate-800/80 pt-4 mt-2">
-          <h4 className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 text-left">
+        <div className="w-full border-t-2 border-[#171717] pt-4 mt-2">
+          <h4 className="text-[11px] uppercase tracking-wider font-black text-gray-700 mb-3 text-left">
             Trạng thái sẵn sàng của các thí sinh:
           </h4>
           <div className="space-y-2">
@@ -182,13 +182,13 @@ export const ReadyScreen: React.FC = () => {
               return (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-xl border border-slate-800/80 text-xs"
+                  className="flex items-center justify-between p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#171717] shadow-neo-sm text-xs font-bold"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-400">G{p.seat}</span>
-                    <span className="font-semibold text-slate-200">{p.name}</span>
+                    <span className="font-black text-gray-600">G{p.seat}</span>
+                    <span className="font-black text-[#171717]">{p.name}</span>
                     {!p.connected && (
-                      <span className="flex items-center gap-1 text-[10px] text-rose-400">
+                      <span className="flex items-center gap-1 text-[10px] text-[#FF9292] font-black bg-white border border-[#171717] px-1.5 py-0.5 rounded">
                         <AlertCircle size={10} /> Mất kết nối
                       </span>
                     )}
@@ -196,10 +196,10 @@ export const ReadyScreen: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     <span
-                      className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      className={`px-2.5 py-0.5 rounded-full font-black text-[10px] border border-[#171717] ${
                         p.ready
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
-                          : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                          ? 'bg-[#55D6C2] text-[#171717]'
+                          : 'bg-white text-gray-600'
                       }`}
                     >
                       {p.ready ? 'Sẵn sàng' : 'Chưa sẵn sàng'}
@@ -209,7 +209,7 @@ export const ReadyScreen: React.FC = () => {
                     {isHost && isAbsent && !p.ready && (
                       <button
                         onClick={() => skipAbsent(p.id)}
-                        className="flex items-center gap-1 px-2 py-1 rounded bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[10px] font-semibold transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#FF9292] hover:bg-[#ff7b7b] border border-[#171717] text-[#171717] text-[10px] font-black transition-all cursor-pointer shadow-neo-sm"
                         title="Bỏ qua thí sinh mất kết nối quá 60s"
                       >
                         <UserX size={10} />

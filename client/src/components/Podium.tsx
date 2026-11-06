@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import confetti from 'canvas-confetti';
-import { Trophy, Download, Award, Medal } from 'lucide-react';
+import { Trophy, Download } from 'lucide-react';
 import { soundManager } from '../utils/soundEffects';
 
 export const Podium: React.FC = () => {
@@ -10,24 +10,24 @@ export const Podium: React.FC = () => {
   useEffect(() => {
     soundManager.playFanfare();
 
-    // Trigger confetti
+    // Trigger confetti with Neo-Brutalism vibrant palette
     const duration = 4 * 1000;
     const end = Date.now() + duration;
 
     const frame = () => {
       confetti({
-        particleCount: 4,
+        particleCount: 5,
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#FFD700', '#FFA500', '#1E3A8A'],
+        colors: ['#FFE45C', '#FF9292', '#55D6C2', '#66C7F2', '#171717'],
       });
       confetti({
-        particleCount: 4,
+        particleCount: 5,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#FFD700', '#FFA500', '#1E3A8A'],
+        colors: ['#FFE45C', '#FF9292', '#55D6C2', '#66C7F2', '#171717'],
       });
 
       if (Date.now() < end) {
@@ -47,40 +47,40 @@ export const Podium: React.FC = () => {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 flex flex-col items-center">
       {/* Title */}
       <div className="text-center mb-8">
-        <span className="text-xs font-bold uppercase tracking-widest text-amber-500">
+        <span className="text-xs font-black uppercase tracking-widest bg-[#FFE45C] text-[#171717] px-3.5 py-1 rounded-full border-2 border-[#171717] shadow-neo-sm mb-2 inline-block">
           CHUNG CUỘC TRẬN ĐẤU
         </span>
-        <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 mt-1">
+        <h1 className="text-3xl sm:text-5xl font-black text-[#171717] mt-1">
           BỤC VINH QUANG OLYMPIA
         </h1>
       </div>
 
       {/* Champion Laurel Box */}
       {champ && (
-        <div className="w-full max-w-md bg-gradient-to-b from-amber-950/40 to-slate-900 border-2 border-amber-500 rounded-3xl p-6 mb-8 text-center shadow-2xl shadow-amber-500/20 flex flex-col items-center relative overflow-hidden">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 mb-3 shadow-lg shadow-amber-500/40 animate-bounce">
-            <Trophy size={40} />
+        <div className="w-full max-w-md bg-[#FFE45C] border-3 border-[#171717] rounded-3xl p-6 sm:p-8 mb-8 text-center shadow-neo-lg flex flex-col items-center relative">
+          <div className="w-20 h-20 rounded-2xl bg-white border-3 border-[#171717] flex items-center justify-center text-[#171717] mb-3 shadow-neo animate-bounce">
+            <Trophy size={42} />
           </div>
-          <span className="text-xs font-black uppercase tracking-wider text-amber-400 mb-1">
+          <span className="text-xs font-black uppercase tracking-wider bg-white px-3 py-0.5 rounded-full border border-[#171717] text-[#171717] mb-1.5 shadow-neo-sm">
             QUÁN QUÂN VÒNG NGUYỆT QUẾ
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">{champ.name}</h2>
-          <span className="text-4xl font-black font-mono text-amber-300 mt-2">
-            {champ.score} <span className="text-base text-amber-500">ĐIỂM</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#171717]">{champ.name}</h2>
+          <span className="text-4xl sm:text-5xl font-black tabular-nums text-[#171717] mt-2">
+            {champ.score} <span className="text-base text-gray-800">ĐIỂM</span>
           </span>
         </div>
       )}
 
       {/* Full Score Breakdown Table */}
-      <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur mb-6">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+      <div className="w-full bg-white border-3 border-[#171717] rounded-2xl p-6 shadow-neo-lg mb-6">
+        <h3 className="text-xs font-black uppercase tracking-wider text-[#171717] mb-4">
           Bảng tổng kết điểm từng vòng thi:
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+              <tr className="border-b-2 border-[#171717] text-[#171717] font-black uppercase text-xs tracking-wider">
                 <th className="py-2.5 px-3">Hạng</th>
                 <th className="py-2.5 px-3">Thí sinh</th>
                 <th className="py-2.5 px-3 text-center">Khởi Động</th>
@@ -90,24 +90,24 @@ export const Podium: React.FC = () => {
                 <th className="py-2.5 px-3 text-right">Tổng Điểm</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y border-[#171717]">
               {sorted.map((p, idx) => (
                 <tr
                   key={p.id}
-                  className={`hover:bg-slate-800/40 transition-colors ${
-                    idx === 0 ? 'bg-amber-950/20 font-bold' : ''
+                  className={`transition-colors ${
+                    idx === 0 ? 'bg-[#FFE45C]/20 font-black' : 'hover:bg-gray-50'
                   }`}
                 >
                   <td className="py-3 px-3">
                     <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs ${
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-lg font-black text-xs border border-[#171717] ${
                         idx === 0
-                          ? 'bg-amber-500 text-slate-950'
+                          ? 'bg-[#FFE45C] text-[#171717] shadow-neo-sm'
                           : idx === 1
-                          ? 'bg-slate-300 text-slate-950'
+                          ? 'bg-[#66C7F2] text-[#171717]'
                           : idx === 2
-                          ? 'bg-amber-700 text-white'
-                          : 'bg-slate-800 text-slate-400'
+                          ? 'bg-[#55D6C2] text-[#171717]'
+                          : 'bg-white text-gray-700'
                       }`}
                     >
                       {idx + 1}
@@ -115,15 +115,15 @@ export const Podium: React.FC = () => {
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-200">{p.name}</span>
-                      <span className="text-[10px] text-slate-500">(G{p.seat})</span>
+                      <span className="font-black text-[#171717]">{p.name}</span>
+                      <span className="text-[10px] text-gray-600 font-bold tabular-nums">(G{p.seat})</span>
                     </div>
                   </td>
-                  <td className="py-3 px-3 text-center font-mono">{p.roundScores.kd}</td>
-                  <td className="py-3 px-3 text-center font-mono">{p.roundScores.vcnv}</td>
-                  <td className="py-3 px-3 text-center font-mono">{p.roundScores.tt}</td>
-                  <td className="py-3 px-3 text-center font-mono">{p.roundScores.vd}</td>
-                  <td className="py-3 px-3 text-right font-mono font-black text-amber-400 text-base">
+                  <td className="py-3 px-3 text-center tabular-nums font-bold">{p.roundScores.kd}</td>
+                  <td className="py-3 px-3 text-center tabular-nums font-bold">{p.roundScores.vcnv}</td>
+                  <td className="py-3 px-3 text-center tabular-nums font-bold">{p.roundScores.tt}</td>
+                  <td className="py-3 px-3 text-center tabular-nums font-bold">{p.roundScores.vd}</td>
+                  <td className="py-3 px-3 text-right tabular-nums font-black text-[#171717] text-base">
                     {p.score}
                   </td>
                 </tr>
@@ -137,7 +137,7 @@ export const Podium: React.FC = () => {
       <a
         href={`/api/room/${room.code}/export-csv`}
         download={`bien-ban-tran-dau-${room.code}.csv`}
-        className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 text-slate-200 hover:text-white transition-all shadow-md"
+        className="px-6 py-3.5 bg-white hover:bg-[#FFE45C] text-[#171717] border-2 border-[#171717] shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
       >
         <Download size={16} />
         <span>Tải Biên Bản Trận Đấu (CSV)</span>

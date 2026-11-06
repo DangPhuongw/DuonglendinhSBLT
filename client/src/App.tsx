@@ -70,41 +70,41 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#F8F7EE] text-black flex flex-col selection:bg-[#E8FE36] selection:text-black relative">
+      <div className="min-h-screen bg-[#FFFDF7] text-[#171717] flex flex-col selection:bg-[#FFE45C] selection:text-[#171717] relative">
         <Navbar />
         {room && currentRound !== 'LOBBY' && <Scoreboard />}
-        <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 flex flex-col justify-center">
+        <main className="flex-1 w-full max-w-6xl mx-auto px-3 py-3 sm:px-6 sm:py-4 flex flex-col justify-start">
           {renderCurrentView()}
         </main>
         {room && currentRound !== 'LOBBY' && (
-          <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 bg-white border-2 border-black shadow-neo rounded-2xl p-2">
-            <span className="text-[11px] font-black text-black px-1 uppercase">⏩ Tua:</span>
+          <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 bg-white border-2 border-[#171717] shadow-neo rounded-xl p-2">
+            <span className="text-[11px] font-extrabold text-[#171717] px-1 uppercase tracking-wider">⏩ Tua:</span>
             <button
               onClick={() => jumpToRound('VCNV')}
-              className={`px-2.5 py-1 text-xs font-black rounded-xl border-2 border-black transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
                 currentRound === 'VCNV'
-                  ? 'bg-[#E8FE36] text-black shadow-neo-sm'
-                  : 'bg-white hover:bg-[#E8FE36] text-black active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#FFE45C] text-[#171717] shadow-neo-sm'
+                  : 'bg-white hover:bg-[#FFE45C] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
               }`}
             >
               VCNV
             </button>
             <button
               onClick={() => jumpToRound('TANG_TOC')}
-              className={`px-2.5 py-1 text-xs font-black rounded-xl border-2 border-black transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
                 currentRound === 'TANG_TOC'
-                  ? 'bg-[#A5C9FF] text-black shadow-neo-sm'
-                  : 'bg-white hover:bg-[#A5C9FF] text-black active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#66C7F2] text-[#171717] shadow-neo-sm'
+                  : 'bg-white hover:bg-[#66C7F2] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
               }`}
             >
               Tăng Tốc
             </button>
             <button
               onClick={() => jumpToRound('VE_DICH')}
-              className={`px-2.5 py-1 text-xs font-black rounded-xl border-2 border-black transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
                 currentRound === 'VE_DICH'
-                  ? 'bg-[#7BF1A8] text-black shadow-neo-sm'
-                  : 'bg-white hover:bg-[#7BF1A8] text-black active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#55D6C2] text-[#171717] shadow-neo-sm'
+                  : 'bg-white hover:bg-[#55D6C2] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
               }`}
             >
               Về Đích
