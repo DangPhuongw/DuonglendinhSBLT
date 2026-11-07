@@ -24,6 +24,16 @@ export const KhoiDongRound: React.FC = () => {
   const isViewer = myPlayer?.role === 'viewer';
   const isMyTurn = Boolean(!isViewer && myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
+  // Active player result from lastReveal or room.state or local selectedOption
+  const activeResult =
+    lastReveal?.results?.find((r) => r.playerId === activePlayer?.id) ||
+    lastReveal?.results?.[0];
+  const activeAnswer =
+    (room?.state?.activeAnswer || activeResult?.answer || (isMyTurn ? selectedOption : null))
+      ?.toString()
+      ?.toUpperCase()
+      ?.trim() || null;
+
   // Clear local selected option when question changes
   useEffect(() => {
     setSelectedOption(null);
@@ -332,43 +342,68 @@ export const KhoiDongRound: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {currentQ.options.map((opt, idx) => {
                 const letter = ['A', 'B', 'C', 'D'][idx];
-                const isSelected = selectedOption === letter;
+                const isChosenByActive = activeAnswer === letter || (isMyTurn && selectedOption === letter);
                 const isAnswer =
                   subPhase === 'REVEAL' && lastReveal?.correctAnswer === letter;
                 const isWrongSelection =
-                  subPhase === 'REVEAL' && isSelected && !isAnswer;
+                  subPhase === 'REVEAL' && isChosenByActive && !isAnswer;
+                const isCorrectSelection =
+                  subPhase === 'REVEAL' && isChosenByActive && isAnswer;
 
                 return (
                   <button
                     key={letter}
                     onClick={() => handleSelectOption(letter)}
                     disabled={!isMyTurn || selectedOption !== null || subPhase === 'REVEAL'}
-                    className={`p-3.5 sm:p-4 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                    className={`p-3.5 sm:p-4 rounded-xl border text-left flex items-start justify-between gap-3 transition-all ${
                       isAnswer
-                        ? 'bg-[#20D6A0]/20 border-[#20D6A0] text-[#20D6A0] font-bold shadow-glow-success scale-[1.02]'
+                        ? 'bg-[#20D6A0]/20 border-2 border-[#20D6A0] text-[#20D6A0] font-bold shadow-glow-success scale-[1.02]'
                         : isWrongSelection
-                        ? 'bg-[#FF496C]/20 border-[#FF496C] text-[#FF496C] font-bold shadow-glow-danger'
-                        : isSelected
-                        ? 'bg-[#FFD43B]/20 border-[#FFD43B] text-[#FFD43B] font-bold shadow-glow-yellow'
+                        ? 'bg-[#FF496C]/20 border-2 border-[#FF496C] text-[#FF496C] font-bold shadow-glow-danger'
+                        : isChosenByActive && subPhase !== 'REVEAL'
+                        ? 'bg-[#FFD43B]/20 border-2 border-[#FFD43B] text-[#FFD43B] font-bold shadow-glow-yellow'
                         : isMyTurn && subPhase !== 'REVEAL'
                         ? 'bg-[#111827] hover:bg-[#162132] border-[#303D52] hover:border-[#00D9FF] hover:shadow-glow-cyan text-[#F8FAFC] cursor-pointer active:scale-95'
                         : 'bg-[#111827]/60 text-[#64748B] border-[#303D52]/40 cursor-default opacity-80'
                     }`}
                   >
-                    <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-heading font-bold text-xs shrink-0 ${
-                        isAnswer
-                          ? 'bg-[#20D6A0] text-[#090D18]'
-                          : isWrongSelection
-                          ? 'bg-[#FF496C] text-[#090D18]'
-                          : isSelected
-                          ? 'bg-[#FFD43B] text-[#090D18]'
-                          : optionBadgeColors[letter] || 'bg-[#1C2638] text-[#F8FAFC] border border-[#303D52]'
-                      }`}
-                    >
-                      {letter}
-                    </span>
-                    <span className="text-sm font-medium leading-snug pt-0.5">{opt}</span>
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-heading font-bold text-xs shrink-0 ${
+                          isAnswer
+                            ? 'bg-[#20D6A0] text-[#090D18]'
+                            : isWrongSelection
+                            ? 'bg-[#FF496C] text-[#090D18]'
+                            : isChosenByActive
+                            ? 'bg-[#FFD43B] text-[#090D18]'
+                            : optionBadgeColors[letter] || 'bg-[#1C2638] text-[#F8FAFC] border border-[#303D52]'
+                        }`}
+                      >
+                        {letter}
+                      </span>
+                      <span className="text-sm font-medium leading-snug pt-0.5">{opt}</span>
+                    </div>
+
+                    {/* Badge indicator on option for who selected it */}
+                    {subPhase === 'REVEAL' && (
+                      <div className="shrink-0 pt-0.5">
+                        {isWrongSelection && (
+                          <span className="text-[10px] sm:text-xs font-heading font-extrabold px-2 py-0.5 rounded-md bg-[#FF496C] text-white shadow-glow-danger flex items-center gap-1">
+                            ✕ {activePlayer?.name || 'Thí sinh'} chọn
+                          </span>
+                        )}
+                        {isCorrectSelection && (
+                          <span className="text-[10px] sm:text-xs font-heading font-extrabold px-2 py-0.5 rounded-md bg-[#20D6A0] text-[#090D18] shadow-glow-success flex items-center gap-1">
+                            ✓ {activePlayer?.name || 'Thí sinh'} chọn đúng
+                          </span>
+                        )}
+                        {isAnswer && !isCorrectSelection && (
+                          <span className="text-[10px] sm:text-xs font-heading font-extrabold px-2 py-0.5 rounded-md bg-[#20D6A0] text-[#090D18] shadow-glow-success flex items-center gap-1">
+                            ✓ Đáp án chính xác
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -377,12 +412,31 @@ export const KhoiDongRound: React.FC = () => {
 
           {/* Reveal Result Info */}
           {subPhase === 'REVEAL' && lastReveal && (
-            <div className="mt-6 pt-4 border-t border-[#303D52] flex flex-col items-center">
-              <div className="flex items-center gap-2 text-sm font-bold">
-                <span className="text-[#94A3B8] font-heading uppercase tracking-wider">Đáp án chính xác:</span>
-                <span className="bg-[#20D6A0] text-[#090D18] px-4 py-1 rounded-xl font-heading font-black text-lg shadow-glow-success">
-                  {lastReveal.correctAnswer}
-                </span>
+            <div className="mt-6 pt-4 border-t border-[#303D52] flex flex-col items-center gap-2.5">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {activePlayer && (
+                  <div className="flex items-center gap-2 text-xs sm:text-sm font-bold bg-[#111827] px-4 py-2 rounded-xl border border-[#303D52] shadow-md">
+                    <span className="text-[#94A3B8] font-heading uppercase tracking-wider">
+                      {activePlayer.name} đã chọn:
+                    </span>
+                    <span
+                      className={`px-3 py-0.5 rounded-lg font-heading font-black text-sm sm:text-base border ${
+                        activeResult?.isCorrect
+                          ? 'bg-[#20D6A0]/20 text-[#20D6A0] border-[#20D6A0]/50 shadow-glow-success'
+                          : 'bg-[#FF496C]/20 text-[#FF496C] border-[#FF496C]/50 shadow-glow-danger'
+                      }`}
+                    >
+                      {activeAnswer ? `${activeAnswer}` : 'Không trả lời'}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold bg-[#111827] px-4 py-2 rounded-xl border border-[#303D52] shadow-md">
+                  <span className="text-[#94A3B8] font-heading uppercase tracking-wider">Đáp án chính xác:</span>
+                  <span className="bg-[#20D6A0] text-[#090D18] px-3.5 py-0.5 rounded-lg font-heading font-black text-sm sm:text-base shadow-glow-success">
+                    {lastReveal.correctAnswer}
+                  </span>
+                </div>
               </div>
             </div>
           )}

@@ -287,11 +287,40 @@ export const VeDichRound: React.FC = () => {
 
           {/* Reveal */}
           {subPhase === 'REVEAL' && lastReveal && (
-            <div className="mt-6 pt-4 border-t border-[#303D52] flex items-center justify-between">
-              <span className="text-xs text-[#94A3B8] font-heading font-bold uppercase tracking-wider">Đáp án chính xác:</span>
-              <span className="text-base font-heading font-black text-[#090D18] bg-[#20D6A0] px-3.5 py-1 rounded-xl shadow-glow-success tracking-wider">
-                {lastReveal.correctAnswer}
-              </span>
+            <div className="mt-6 pt-4 border-t border-[#303D52] flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[#94A3B8] font-heading font-bold uppercase tracking-wider">Đáp án chính xác:</span>
+                <span className="text-base font-heading font-black text-[#090D18] bg-[#20D6A0] px-3.5 py-1 rounded-xl shadow-glow-success tracking-wider">
+                  {lastReveal.correctAnswer}
+                </span>
+              </div>
+
+              {lastReveal.results && lastReveal.results.length > 0 && (
+                <div className="flex flex-col gap-2 pt-2 border-t border-[#303D52]/60">
+                  {lastReveal.results.map((res) => {
+                    const p = room.players.find((pl) => pl.id === res.playerId);
+                    return (
+                      <div key={res.playerId} className="flex items-center justify-between text-xs sm:text-sm bg-[#111827] px-3.5 py-2 rounded-xl border border-[#303D52]">
+                        <span className="font-heading font-bold text-[#F8FAFC]">
+                          {p?.name || 'Thí sinh'} đã trả lời:
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#94A3B8] font-mono">
+                            "{res.answer || 'Không trả lời'}"
+                          </span>
+                          <span className={`px-2 py-0.5 rounded font-bold font-digital ${
+                            res.isCorrect
+                              ? 'bg-[#20D6A0]/20 text-[#20D6A0] border border-[#20D6A0]/40'
+                              : 'bg-[#FF496C]/20 text-[#FF496C] border border-[#FF496C]/40'
+                          }`}>
+                            {res.delta > 0 ? `+${res.delta}đ` : `${res.delta}đ`}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -730,6 +730,7 @@ export class RoomStateMachine {
       currentQuestion: question,
       kdChosenPackageIndex: pkgIdx,
       questionIndex,
+      activeAnswer: undefined,
     };
 
     const durationMs = GAME_CONFIG.KHOI_DONG.RIENG_TIME_SECONDS * 1000;
@@ -767,6 +768,9 @@ export class RoomStateMachine {
       if (!this.answersMap.has(playerId)) {
         this.answersMap.set(playerId, { answer, timestamp: now });
         this.callbacks.emitAnswerAck(playerId, { questionId, receivedAt: now });
+        this.room.state.activeAnswer = answer;
+        this.persistSnapshot();
+        this.syncRoom();
         // Immediately trigger reveal early since choice is locked
         this.clearTimer();
         this.eventQueue.enqueue(async () => {
@@ -917,6 +921,7 @@ export class RoomStateMachine {
       currentQuestion: question,
       kdChosenPackageIndex: pkgIdx,
       questionIndex,
+      activeAnswer: playerAns,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
@@ -1169,6 +1174,7 @@ export class RoomStateMachine {
       deadline: null,
       currentQuestion: question,
       questionIndex: qIdx >= 0 ? qIdx : 0,
+      activeAnswer: ans,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
