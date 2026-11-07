@@ -355,7 +355,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
       alternatives: ['TRONG DONG', 'TRỐNGĐỒNG'],
       ignoreDiacritics: true,
     },
-    image: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
+    image: '',
   },
   tangToc: [
     {

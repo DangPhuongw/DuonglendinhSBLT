@@ -1250,12 +1250,10 @@ export class RoomStateMachine {
       deadline: null,
       buzzerLockedBy: null,
       activePlayerId: this.vcnvPlayerQueue[0],
-      openedPieces: [], // indices of opened pieces (0..4)
       rowsRevealed: [false, false, false, false],
       rowLetterCounts,
       rowAnswersRevealed: [null, null, null, null],
       stepIndex: 0,
-      vcnvImage: this.questionSet.vcnv.image || '',
       obstacleLetterCount,
       obstacleAnswerRevealed: null,
       vcnvQuestionsAppearedCount: 0,
@@ -1405,14 +1403,9 @@ export class RoomStateMachine {
       });
     }
 
-    // Open row and piece if at least 1 correct
-    const openedPieces: number[] = [...(this.room.state.openedPieces || [])];
+    // Mark row as played/revealed
     const rowsRevealed: boolean[] = [...(this.room.state.rowsRevealed || [false, false, false, false])];
     rowsRevealed[rowIndex] = true;
-
-    if (atLeastOneCorrect && !openedPieces.includes(rowIndex)) {
-      openedPieces.push(rowIndex);
-    }
 
     // Reveal letters for this row if at least one correct (Olympia rule: không ai đúng thì giữ kín đáp án)
     const rowAnswersRevealed: (string[] | null)[] = [
@@ -1437,7 +1430,6 @@ export class RoomStateMachine {
       subPhase: 'ROW_REVEAL',
       deadline: null,
       currentQuestion: question,
-      openedPieces,
       rowsRevealed,
       rowAnswersRevealed,
       activeRowIndex: rowIndex,
@@ -1511,7 +1503,7 @@ export class RoomStateMachine {
 
       this.addScore(playerId, 'VCNV', obsQuestion.id, delta, 'correct');
 
-      // Reveal all pieces (0..4), all rows, all letters, and obstacle answer
+      // Reveal all rows, all letters, and obstacle answer
       const allRowLetters = this.questionSet.vcnv.rows.map((r) =>
         r.answer.toUpperCase().replace(/\s+/g, '').split('')
       );
@@ -1520,7 +1512,6 @@ export class RoomStateMachine {
         ...this.room.state,
         round: 'VCNV',
         subPhase: 'CNV_RESULT',
-        openedPieces: [0, 1, 2, 3, 4],
         rowsRevealed: [true, true, true, true],
         rowAnswersRevealed: allRowLetters,
         obstacleSolved: true,
@@ -1638,11 +1629,6 @@ export class RoomStateMachine {
       results.push({ playerId: p.id, answer: ans, isCorrect, delta });
     }
 
-    const openedPieces: number[] = this.room.state.openedPieces || [];
-    if (atLeastOneCorrect && !openedPieces.includes(4)) {
-      openedPieces.push(4); // Center piece index = 4
-    }
-
     const revealPayload: RevealPayload = {
       questionId: question.id,
       correctAnswer: atLeastOneCorrect ? question.answer : '',
@@ -1656,7 +1642,6 @@ export class RoomStateMachine {
       subPhase: 'CENTER_REVEAL',
       deadline: null,
       currentQuestion: question,
-      openedPieces,
       vcnvQuestionsAppearedCount: 5,
     };
 

@@ -22,7 +22,6 @@ export const VcnvRound: React.FC = () => {
 
   const subPhase = room?.state?.subPhase;
   const currentQ = room?.state?.currentQuestion;
-  const openedPieces: number[] = room?.state?.openedPieces || [];
   const rowsRevealed: boolean[] = room?.state?.rowsRevealed || [false, false, false, false];
   const rowLetterCounts: number[] = room?.state?.rowLetterCounts || [6, 5, 9, 7];
   const rowAnswersRevealed = room?.state?.rowAnswersRevealed;
@@ -143,10 +142,6 @@ export const VcnvRound: React.FC = () => {
     }
   };
 
-  const sampleImage =
-    room?.state?.vcnvImage ||
-    'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80';
-
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col items-center pb-32 sm:pb-36">
       {/* ======================================================== */}
@@ -225,173 +220,109 @@ export const VcnvRound: React.FC = () => {
       )}
 
       {/* ======================================================== */}
-      {/* 2. GAME BOARD: 4 Rows (Left) & 5-Piece Image (Right)     */}
+      {/* 2. GAME BOARD: 4 HÀNG NGANG (GỢI Ý TÌM TỪ KHÓA)          */}
       {/* ======================================================== */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 mb-3.5">
-        {/* Left: 4 Rows */}
-        <div className="bg-[#111827] border border-[#303D52] rounded-2xl p-3.5 sm:p-4 shadow-xl flex flex-col justify-between min-h-[260px] sm:min-h-[280px]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-heading font-bold uppercase tracking-wider text-[#F8FAFC]">
-              4 Hàng Ngang (Gợi Ý)
-            </span>
-            <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2 py-0.5 rounded-lg border border-[#303D52]">
-              {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
-            </span>
-          </div>
-
-          <div className="flex-1 flex flex-col justify-between gap-2">
-            {[0, 1, 2, 3].map((idx) => {
-              const isRevealed = rowsRevealed[idx];
-              const isCurrent =
-                activeRowIdx === idx &&
-                (subPhase === 'ROW_QUESTION' || subPhase === 'ROW_REVEAL');
-              const letterCount = rowLetterCounts[idx] || 6;
-              const revealedLetters = rowAnswersRevealed ? rowAnswersRevealed[idx] : null;
-              const isClickable = subPhase === 'PICK_ROW' && isMyTurnToPick && !isRevealed;
-
-              return (
-                <div
-                  key={idx}
-                  onClick={() => isClickable && pickVcnvRow(idx)}
-                  className={`p-2 sm:p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
-                    isClickable
-                      ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] cursor-pointer active:scale-95 animate-pulse'
-                      : isCurrent
-                      ? 'bg-[#1C2638] border border-[#00D9FF] shadow-glow-cyan font-bold'
-                      : isRevealed
-                      ? 'bg-[#162132] border border-[#303D52]'
-                      : 'bg-[#0E1524] border-[#303D52]/40 opacity-70'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span
-                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-heading font-bold text-xs shrink-0 ${
-                        isClickable || isCurrent
-                          ? 'bg-[#FFD43B] text-[#090D18]'
-                          : isRevealed && revealedLetters
-                          ? 'bg-[#20D6A0] text-[#090D18]'
-                          : 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
-                      }`}
-                    >
-                      {idx + 1}
-                    </span>
-
-                    {/* Letter boxes */}
-                    <div className="flex flex-wrap gap-1">
-                      {Array.from({ length: letterCount }).map((_, charIdx) => {
-                        const char = isRevealed && revealedLetters ? revealedLetters[charIdx] : null;
-                        return (
-                          <div
-                            key={charIdx}
-                            className={`w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center font-digital font-bold text-xs border transition-all ${
-                              char
-                                ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0]'
-                                : isCurrent
-                                ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF]'
-                                : 'bg-[#1C2638] text-[#64748B] border-[#303D52]'
-                            }`}
-                          >
-                            {char || (isCurrent ? '?' : '•')}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Row Status Badge */}
-                  <div className="shrink-0">
-                    {isClickable ? (
-                      <button
-                        type="button"
-                        className="px-2.5 py-1 bg-[#FFD43B] text-[#090D18] font-heading font-black text-[10px] sm:text-xs uppercase tracking-wider rounded-lg shadow-glow-yellow hover:scale-105 transition-transform"
-                      >
-                        Chọn
-                      </button>
-                    ) : isRevealed ? (
-                      revealedLetters ? (
-                        <span className="px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-heading font-bold bg-[#20D6A0]/20 text-[#20D6A0] border border-[#20D6A0]/40 tracking-wider">
-                          ĐÃ MỞ
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-heading font-bold bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30 tracking-wider">
-                          KHÓA
-                        </span>
-                      )
-                    ) : isCurrent ? (
-                      <span className="px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-heading font-bold bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/40 tracking-wider animate-pulse">
-                        ĐANG GIẢI
-                      </span>
-                    ) : (
-                      <span className="text-[#64748B] text-xs font-heading font-bold tracking-widest px-1">
-                        CHƯA MỞ
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-4 sm:p-5 shadow-xl mb-3.5 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider text-[#F8FAFC]">
+            4 Hàng Ngang (Gợi Ý Tìm Từ Khóa)
+          </span>
+          <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2.5 py-1 rounded-lg border border-[#303D52]">
+            {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
+          </span>
         </div>
 
-        {/* Right: 5-Piece Image */}
-        <div className="bg-[#111827] border border-[#303D52] rounded-2xl p-3.5 sm:p-4 shadow-xl flex flex-col justify-between min-h-[260px] sm:min-h-[280px]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-heading font-bold uppercase tracking-wider text-[#F8FAFC]">
-              Hình Ảnh Gợi Ý (5 Mảnh Ghép)
-            </span>
-            <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2 py-0.5 rounded-lg border border-[#303D52]">
-              {openedPieces.length}/5 mảnh đã mở
-            </span>
-          </div>
+        <div className="flex flex-col gap-2.5">
+          {[0, 1, 2, 3].map((idx) => {
+            const isRevealed = rowsRevealed[idx];
+            const isCurrent =
+              activeRowIdx === idx &&
+              (subPhase === 'ROW_QUESTION' || subPhase === 'ROW_REVEAL');
+            const letterCount = rowLetterCounts[idx] || 6;
+            const revealedLetters = rowAnswersRevealed ? rowAnswersRevealed[idx] : null;
+            const isClickable = subPhase === 'PICK_ROW' && isMyTurnToPick && !isRevealed;
 
-          <div className="relative flex-1 min-h-[210px] rounded-xl overflow-hidden border border-[#303D52] bg-[#090D18]">
-            <img
-              src={sampleImage}
-              alt="Chướng ngại vật"
-              className="w-full h-full object-cover select-none"
-            />
+            return (
+              <div
+                key={idx}
+                onClick={() => isClickable && pickVcnvRow(idx)}
+                className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                  isClickable
+                    ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] cursor-pointer active:scale-95 animate-pulse'
+                    : isCurrent
+                    ? 'bg-[#1C2638] border border-[#00D9FF] shadow-glow-cyan font-bold'
+                    : isRevealed
+                    ? 'bg-[#162132] border border-[#303D52]'
+                    : 'bg-[#0E1524] border-[#303D52]/40 opacity-75'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                  <span
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-heading font-black text-xs sm:text-sm shrink-0 ${
+                      isClickable || isCurrent
+                        ? 'bg-[#FFD43B] text-[#090D18]'
+                        : isRevealed && revealedLetters
+                        ? 'bg-[#20D6A0] text-[#090D18]'
+                        : 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
+                    }`}
+                  >
+                    {idx + 1}
+                  </span>
 
-            {/* 4 Quadrants */}
-            <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-              {[0, 1, 2, 3].map((pieceIdx) => (
-                <div
-                  key={pieceIdx}
-                  className={`transition-opacity duration-500 border border-[#303D52] flex items-center justify-center p-2 ${
-                    openedPieces.includes(pieceIdx)
-                      ? 'opacity-0 pointer-events-none'
-                      : 'bg-[#1C2638]/95 opacity-100 backdrop-blur-sm'
-                  }`}
-                >
-                  {!openedPieces.includes(pieceIdx) && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#FFD43B] text-[#090D18] flex items-center justify-center font-heading font-bold text-xs sm:text-sm shadow-glow-yellow">
-                        {pieceIdx + 1}
+                  {/* Letter boxes */}
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                    {Array.from({ length: letterCount }).map((_, charIdx) => {
+                      const char = isRevealed && revealedLetters ? revealedLetters[charIdx] : null;
+                      return (
+                        <div
+                          key={charIdx}
+                          className={`w-7 h-8 sm:w-8 sm:h-9 rounded-lg flex items-center justify-center font-digital font-bold text-xs sm:text-sm border transition-all ${
+                            char
+                              ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success font-black'
+                              : isCurrent
+                              ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF] shadow-glow-cyan'
+                              : 'bg-[#1C2638] text-[#64748B] border-[#303D52]'
+                          }`}
+                        >
+                          {char || (isCurrent ? '?' : '•')}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Row Status Badge */}
+                <div className="shrink-0">
+                  {isClickable ? (
+                    <button
+                      type="button"
+                      className="px-3 py-1.5 bg-[#FFD43B] text-[#090D18] font-heading font-black text-xs uppercase tracking-wider rounded-xl shadow-glow-yellow hover:scale-105 transition-transform cursor-pointer"
+                    >
+                      Chọn
+                    </button>
+                  ) : isRevealed ? (
+                    revealedLetters ? (
+                      <span className="px-3 py-1 rounded-xl text-xs font-heading font-extrabold bg-[#20D6A0]/20 text-[#20D6A0] border border-[#20D6A0]/40 tracking-wider">
+                        ĐÃ MỞ
                       </span>
-                      <span className="text-[#F8FAFC] font-heading font-bold text-xs uppercase tracking-wide">Mảnh {pieceIdx + 1}</span>
-                    </div>
+                    ) : (
+                      <span className="px-3 py-1 rounded-xl text-xs font-heading font-extrabold bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30 tracking-wider">
+                        KHÓA
+                      </span>
+                    )
+                  ) : isCurrent ? (
+                    <span className="px-3 py-1 rounded-xl text-xs font-heading font-extrabold bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/40 tracking-wider animate-pulse">
+                      ĐANG GIẢI
+                    </span>
+                  ) : (
+                    <span className="text-[#64748B] text-xs font-heading font-bold tracking-widest px-2">
+                      CHƯA MỞ
+                    </span>
                   )}
                 </div>
-              ))}
-            </div>
-
-            {/* Center Piece 4 */}
-            <div
-              className={`absolute inset-[18%] rounded-xl transition-opacity duration-500 border-2 border-[#FFD43B] flex flex-col items-center justify-center shadow-glow-yellow ${
-                openedPieces.includes(4) ? 'opacity-0 pointer-events-none' : 'bg-[#111827]/95 opacity-100 backdrop-blur-md'
-              }`}
-            >
-              {!openedPieces.includes(4) && (
-                <div className="flex items-center gap-2 text-center p-1 sm:p-2">
-                  <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#FFD43B] text-[#090D18] font-heading font-bold text-xs sm:text-sm flex items-center justify-center shadow-glow-yellow">
-                    5
-                  </span>
-                  <span className="text-[#FFD43B] font-heading font-black text-xs sm:text-sm uppercase tracking-wider">
-                    Ô Trung Tâm
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

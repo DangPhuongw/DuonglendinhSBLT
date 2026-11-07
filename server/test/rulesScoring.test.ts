@@ -259,11 +259,10 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     const lastReveal = (machine as any).lastRevealedPayload;
     expect(lastReveal.correctAnswer).toBe('');
 
-    // Row answer letters must be null (hidden)
+    // Row answer letters must be null (hidden when nobody answers correctly)
     expect(machine.room.state.rowAnswersRevealed?.[0]).toBeNull();
-
-    // Piece must NOT be opened
-    expect(machine.room.state.openedPieces).not.toContain(0);
+    // Image hint feature removed: openedPieces is not used
+    expect(machine.room.state.openedPieces).toBeUndefined();
   });
 
   it('configures KD_CHUNG with 15 seconds to buzz and 3 seconds to answer', async () => {

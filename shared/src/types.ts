@@ -58,7 +58,7 @@ export interface QuestionSet {
     rows: Question[];    // 4 hàng ngang
     center: Question;    // 1 câu trung tâm
     obstacle: Question;  // Chướng ngại vật (CNV)
-    image: string;       // Hình ảnh chia 5 mảnh
+    image?: string;      // Tùy chọn (đã bỏ tính năng hé mở ảnh)
   };
   tangToc: Question[];   // 4 câu
   veDich: {
