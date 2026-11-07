@@ -22,11 +22,11 @@ export const GAME_CONFIG = {
 
   VCNV: {
     ROW_COUNT: 4,
-    ROW_TIME_SECONDS: 15,
+    ROW_TIME_SECONDS: 30,             // 30 giây suy nghĩ và trả lời cho mỗi câu hỏi hàng ngang
     ROW_CORRECT_POINTS: 10,
     CNV_ANSWER_SECONDS: 15,
     CNV_POINTS_BY_ROWS_DONE: [60, 60, 50, 40, 30], // Index = số hàng ngang đã hỏi xong (1->60, 2->50, 3->40, 4->30)
-    CENTER_TIME_SECONDS: 15,
+    CENTER_TIME_SECONDS: 30,          // 30 giây suy nghĩ và trả lời cho câu hỏi ô trung tâm
     CENTER_CORRECT_POINTS: 10,
     FINAL_GUESS_SECONDS: 15,
     FINAL_GUESS_CORRECT_POINTS: 20,

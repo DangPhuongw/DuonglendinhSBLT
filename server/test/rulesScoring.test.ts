@@ -229,6 +229,43 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     expect(machine.room.players.find((p) => p.id === 'p1')?.score).toBe(20);
   });
 
+  it('keeps VCNV row answer hidden and piece closed when nobody answers correctly (30s timer)', async () => {
+    expect(GAME_CONFIG.VCNV.ROW_TIME_SECONDS).toBe(30);
+
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine(
+      'VCNV_NO_ANS',
+      { id: 'p1', name: 'Player 1', token: 'tok-1' },
+      callbacks
+    );
+    machine.addPlayer('Player 2', 'tok-2');
+
+    await (machine as any).startVcnv();
+    await (machine as any).presentVcnvRow(0, 0);
+
+    // Verify 30s deadline
+    const deadline = machine.room.state.deadline;
+    expect(deadline).toBeGreaterThan(Date.now() + 29000);
+    expect(deadline).toBeLessThanOrEqual(Date.now() + 30100);
+
+    // Both players submit WRONG answers
+    machine.submitAnswer('p1', 'SAI HOAN TOAN');
+    machine.submitAnswer('p2', 'CUNG SAI');
+
+    const question = (machine as any).questionSet.vcnv.rows[0];
+    await (machine as any).revealVcnvRow(0, 0, question);
+
+    // Reveal payload must NOT disclose correct answer
+    const lastReveal = (machine as any).lastRevealedPayload;
+    expect(lastReveal.correctAnswer).toBe('');
+
+    // Row answer letters must be null (hidden)
+    expect(machine.room.state.rowAnswersRevealed?.[0]).toBeNull();
+
+    // Piece must NOT be opened
+    expect(machine.room.state.openedPieces).not.toContain(0);
+  });
+
   it('configures KD_CHUNG with 15 seconds to buzz and 3 seconds to answer', async () => {
     expect(GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS).toBe(15);
     expect(GAME_CONFIG.KHOI_DONG.CHUNG_ANSWER_SECONDS).toBe(3);

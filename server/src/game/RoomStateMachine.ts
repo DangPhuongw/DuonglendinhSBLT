@@ -1402,7 +1402,7 @@ export class RoomStateMachine {
       openedPieces.push(rowIndex);
     }
 
-    // Reveal letters for this row if at least one correct (Olympia rule)
+    // Reveal letters for this row if at least one correct (Olympia rule: không ai đúng thì giữ kín đáp án)
     const rowAnswersRevealed: (string[] | null)[] = [
       ...(this.room.state.rowAnswersRevealed || [null, null, null, null]),
     ];
@@ -1414,7 +1414,7 @@ export class RoomStateMachine {
 
     const revealPayload: RevealPayload = {
       questionId: question.id,
-      correctAnswer: question.answer,
+      correctAnswer: atLeastOneCorrect ? question.answer : '',
       results,
     };
     this.lastRevealedPayload = revealPayload;
@@ -1633,7 +1633,7 @@ export class RoomStateMachine {
 
     const revealPayload: RevealPayload = {
       questionId: question.id,
-      correctAnswer: question.answer,
+      correctAnswer: atLeastOneCorrect ? question.answer : '',
       results,
     };
     this.lastRevealedPayload = revealPayload;
