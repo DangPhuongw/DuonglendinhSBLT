@@ -244,10 +244,10 @@ export const KhoiDongRound: React.FC = () => {
     <div className="max-w-3xl mx-auto p-4 sm:p-6 flex flex-col items-center">
       {/* Round Header */}
       <div className="w-full flex items-center justify-between mb-4 px-1 gap-2 flex-wrap">
-        <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
+        <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1.5 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
           {currentRound === 'KD_RIENG'
-            ? `Khởi Động Riêng - ${activePlayer?.name} (Ghế ${activePlayer?.seat} • Ô ${(room.state.kdChosenPackageIndex ?? 0) + 1} • Câu ${(room.state.questionIndex ?? 0) + 1}/5)`
-            : 'Khởi Động Chung - Giành Chuông (10 Câu)'}
+            ? `KHỞI ĐỘNG RIÊNG - LƯỢT CỦA ${activePlayer?.name?.toUpperCase() || 'THÍ SINH'} - ${(room.state.questionIndex ?? 0) + 1}/5 CÂU`
+            : 'KHỞI ĐỘNG CHUNG - GIÀNH CHUÔNG (10 CÂU)'}
         </span>
         <span className="text-xs text-[#94A3B8] font-bold bg-[#1C2638] border border-[#303D52] px-2.5 py-1 rounded-lg tabular-nums">
           {currentRound === 'KD_RIENG' ? 'Đúng +10đ | Sai 0đ' : 'Đúng +10đ | Sai -5đ'}

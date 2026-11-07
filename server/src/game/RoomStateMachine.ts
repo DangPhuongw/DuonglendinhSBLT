@@ -775,8 +775,9 @@ export class RoomStateMachine {
           const pkgIdx = this.chosenKdPackages.get(playerId) ?? (players[activeIdx].seat - 1);
           const questionsInPkg = this.questionSet.khoiDong.rieng[pkgIdx] || [];
           const qIdx = questionsInPkg.findIndex((q) => q.id === questionId);
-          const fullQuestion = questionsInPkg[qIdx] || questionsInPkg[0];
-          await this.revealKdRiengQuestion(players, activeIdx, qIdx, fullQuestion);
+          const currentQuestionIndex = typeof this.room.state.questionIndex === 'number' ? this.room.state.questionIndex : (qIdx >= 0 ? qIdx : 0);
+          const fullQuestion = questionsInPkg[currentQuestionIndex] || questionsInPkg[0];
+          await this.revealKdRiengQuestion(players, activeIdx, currentQuestionIndex, fullQuestion);
         });
         return true;
       }
@@ -907,12 +908,15 @@ export class RoomStateMachine {
     };
     this.lastRevealedPayload = revealPayload;
 
+    const pkgIdx = this.chosenKdPackages.get(currentPlayer.id) ?? (currentPlayer.seat - 1);
     this.room.state = {
       round: 'KD_RIENG',
       subPhase: 'REVEAL',
       activePlayerId: currentPlayer.id,
       deadline: null,
       currentQuestion: question,
+      kdChosenPackageIndex: pkgIdx,
+      questionIndex,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
@@ -1157,21 +1161,22 @@ export class RoomStateMachine {
     };
     this.lastRevealedPayload = revealPayload;
 
+    const qIdx = this.questionSet.khoiDong.chung.findIndex((q) => q.id === questionId);
     this.room.state = {
       round: 'KD_CHUNG',
       subPhase: 'REVEAL',
       activePlayerId: winnerId,
       deadline: null,
       currentQuestion: question,
+      questionIndex: qIdx >= 0 ? qIdx : 0,
     };
 
     this.callbacks.broadcastReveal(revealPayload);
     this.persistSnapshot();
     this.syncRoom();
 
-    const qIdx = this.questionSet.khoiDong.chung.findIndex((q) => q.id === questionId);
     this.setDeadline(3000, async () => {
-      await this.runKdChungQuestion(qIdx + 1);
+      await this.runKdChungQuestion((qIdx >= 0 ? qIdx : 0) + 1);
     });
   }
 
@@ -1181,6 +1186,7 @@ export class RoomStateMachine {
       subPhase: 'SKIP_REVEAL',
       deadline: null,
       currentQuestion: question,
+      questionIndex,
     };
 
     const revealPayload: RevealPayload = {
