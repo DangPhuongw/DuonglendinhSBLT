@@ -194,8 +194,8 @@ export const VcnvRound: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Timer & Quick Buzzer Button */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right: Countdown Timer */}
+        <div className="flex items-center">
           <div className="w-32 sm:w-44">
             <CountdownTimer
               deadline={room.state.deadline}
@@ -215,20 +215,6 @@ export const VcnvRound: React.FC = () => {
               className="mb-0"
             />
           </div>
-
-          <button
-            onClick={buzz}
-            disabled={!canBuzz}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-heading font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all border shrink-0 ${
-              !canBuzz
-                ? 'bg-[#1C2638] text-[#64748B] border-[#303D52] cursor-not-allowed opacity-50'
-                : 'bg-[#FF496C] hover:bg-[#ff6584] text-white border-[#FF496C] shadow-glow-danger cursor-pointer animate-pulse active:scale-95'
-            }`}
-            title={canBuzz ? 'Bấm chuông đoán từ khóa chính (Phím Space)' : 'Chuông chưa mở'}
-          >
-            <Bell size={15} />
-            <span>Chuông CNV</span>
-          </button>
         </div>
       </div>
 
@@ -640,13 +626,13 @@ export const VcnvRound: React.FC = () => {
         </div>
       )}
       {/* ======================================================== */}
-      {/* 5. PROMINENT CENTER FOOTER BUZZER DOCK                   */}
+      {/* 5. PROMINENT CENTER FOOTER BUZZER DOCK (DUY NHẤT)       */}
       {/* ======================================================== */}
       {subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-[95vw] sm:max-w-xl w-full flex justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-[#0B101B]/95 backdrop-blur-xl border-2 border-[#303D52] hover:border-[#FF496C]/60 transition-all rounded-3xl px-3.5 py-2 sm:px-5 sm:py-3 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_30px_rgba(255,73,108,0.25)] flex items-center justify-between gap-3 sm:gap-4 w-full">
+        <div className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-[92vw] flex justify-center pointer-events-none">
+          <div className="pointer-events-auto bg-[#0B101B]/95 backdrop-blur-xl border-2 border-[#303D52] hover:border-[#FF496C]/60 transition-all rounded-full px-4 py-2 sm:px-6 sm:py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_30px_rgba(255,73,108,0.25)] flex items-center justify-between gap-3 sm:gap-6">
             {/* Left: Status / Incentive info */}
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 pr-1">
               <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-extrabold text-[#F8FAFC]">
                 <Key size={16} className="text-[#FFD43B] shrink-0" />
                 <span className="truncate">Giải Chướng Ngại Vật:</span>
@@ -671,9 +657,9 @@ export const VcnvRound: React.FC = () => {
             <button
               onClick={buzz}
               disabled={!canBuzz}
-              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
+              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
                 canBuzz
-                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_6px_0_#881337,0_0_25px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-1 active:shadow-[0_1px_0_#881337] animate-pulse hover:animate-none'
+                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_5px_0_#881337,0_0_25px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-1 active:shadow-[0_1px_0_#881337] animate-pulse hover:animate-none'
                   : isBuzzerLocked
                   ? 'bg-[#1C2638] text-[#FF496C] border border-[#FF496C]/40 opacity-70 cursor-not-allowed'
                   : 'bg-[#1C2638] text-[#64748B] border border-[#303D52] opacity-60 cursor-not-allowed'
