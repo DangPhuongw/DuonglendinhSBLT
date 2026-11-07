@@ -50,9 +50,9 @@ export const GAME_CONFIG = {
     },
     STAR_DECISION_SECONDS: 7,
     QUESTION_TIME_BY_POINTS: {
-      10: 10,
-      20: 15,
-      30: 20,
+      10: 30,
+      20: 30,
+      30: 30,
     } as Record<number, number>,
     STEAL_BUZZ_SECONDS: 5,
     STEAL_ANSWER_SECONDS: 10,

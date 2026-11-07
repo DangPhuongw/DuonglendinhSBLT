@@ -89,7 +89,7 @@ export const App: React.FC = () => {
       <div className="h-screen h-[100dvh] max-h-screen w-full overflow-hidden text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative">
         <GalaxyBackground />
         <Navbar />
-        <main className="flex-1 min-h-0 w-full max-w-6xl mx-auto px-2 py-1 sm:px-4 sm:py-2 flex flex-col items-center justify-center overflow-hidden relative">
+        <main className="flex-1 min-h-0 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1450px] mx-auto px-2 py-1 sm:px-4 sm:py-2 flex flex-col items-center justify-center overflow-hidden relative">
           {renderCurrentView()}
         </main>
         {room && currentRound !== 'LOBBY' && currentRound !== 'FINISHED' && (
@@ -98,11 +98,11 @@ export const App: React.FC = () => {
           </footer>
         )}
         {room && currentRound !== 'LOBBY' && (
-          <div className="fixed top-1.5 right-36 sm:right-40 z-50 flex items-center gap-1 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-xl rounded-lg px-2 py-0.5">
-            <span className="text-[10px] font-bold text-[#94A3B8] font-heading uppercase tracking-wider">Tua:</span>
+          <div className="fixed top-3 right-44 sm:right-48 z-50 flex items-center gap-1.5 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-xl rounded-xl px-2.5 py-1">
+            <span className="text-xs font-bold text-[#94A3B8] font-heading uppercase tracking-wider">Tua:</span>
             <button
               onClick={() => jumpToRound('KD_RIENG')}
-              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
+              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
                 isKdActive
                   ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
                   : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
@@ -113,7 +113,7 @@ export const App: React.FC = () => {
             </button>
             <button
               onClick={() => jumpToRound('VCNV')}
-              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
+              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
                 isVcnvActive
                   ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
                   : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
@@ -124,7 +124,7 @@ export const App: React.FC = () => {
             </button>
             <button
               onClick={() => jumpToRound('TANG_TOC')}
-              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
+              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
                 isTtActive
                   ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
                   : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
@@ -135,7 +135,7 @@ export const App: React.FC = () => {
             </button>
             <button
               onClick={() => jumpToRound('VE_DICH')}
-              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
+              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
                 isVdActive
                   ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
                   : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'

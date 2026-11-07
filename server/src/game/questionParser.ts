@@ -153,7 +153,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       answer: String(row.Answer || row.answer || '').trim(),
       alternatives,
       points: points as any,
-      timeLimit: points === 10 ? 10 : points === 20 ? 15 : 20,
+      timeLimit: 30,
       ignoreDiacritics: true,
     };
     if (points === 10) pool10.push(q);

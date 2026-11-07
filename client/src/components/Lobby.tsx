@@ -65,29 +65,29 @@ export const Lobby: React.FC = () => {
 
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-2 sm:p-4">
-        <div className="w-full max-w-md bg-[#111827]/95 backdrop-blur-xl border border-[#303D52]/80 rounded-2xl p-5 sm:p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] text-[#F8FAFC] relative">
+        <div className="w-full max-w-md bg-[#111827]/95 backdrop-blur-xl border-2 border-[#303D52] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] text-[#F8FAFC] relative">
           {/* Header */}
-          <div className="text-center mb-4">
-            <div className="inline-block relative mb-1">
-              <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#F8FAFC] tracking-tight relative z-10">
+          <div className="text-center mb-5">
+            <div className="inline-block relative mb-1.5">
+              <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#F8FAFC] tracking-tight relative z-10">
                 ĐẤU TRƯỜNG TRÍ TUỆ
               </h1>
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#FFD43B]/30 blur-sm rounded" />
+              <div className="absolute bottom-0 left-0 right-0 h-2.5 bg-[#FFD43B]/30 blur-sm rounded" />
             </div>
-            <p className="text-xs font-medium text-[#94A3B8] leading-relaxed">
+            <p className="text-xs sm:text-sm font-medium text-[#94A3B8] leading-relaxed">
               Mô phỏng theo format chương trình Đường lên đỉnh Olympia
             </p>
           </div>
 
           {errorMsg && (
-            <div className="mb-3 p-2.5 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-[#FF496C] text-xs font-bold shadow-glow-danger">
+            <div className="mb-4 p-3 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-[#FF496C] text-xs sm:text-sm font-bold shadow-glow-danger text-center">
               {errorMsg}
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-[11px] font-heading font-bold text-[#94A3B8] uppercase tracking-wider mb-1">
+              <label className="block text-xs sm:text-sm font-heading font-bold text-[#F8FAFC] uppercase tracking-wider mb-1.5">
                 Tên hiển thị của bạn
               </label>
               <input
@@ -96,7 +96,7 @@ export const Lobby: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={24}
-                className="w-full h-11 px-3.5 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] font-bold placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-sm"
+                className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] font-bold placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-sm sm:text-base"
               />
             </div>
 
@@ -104,23 +104,23 @@ export const Lobby: React.FC = () => {
               <button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="w-full h-11 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-extrabold rounded-xl border border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] active:scale-95 transition-all text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full h-12 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-extrabold rounded-xl border border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Users size={16} className="stroke-[2.5]" />
+                <Users size={18} className="stroke-[2.5]" />
                 <span>{isCreating ? 'Đang tạo phòng...' : 'Tạo phòng mới'}</span>
               </button>
             </div>
 
-            <div className="relative my-2.5 flex items-center justify-center">
+            <div className="relative my-3 flex items-center justify-center">
               <div className="border-t border-[#303D52] w-full" />
-              <span className="bg-[#111827] px-2.5 text-[10px] text-[#64748B] uppercase font-heading font-bold absolute border border-[#303D52] rounded">
+              <span className="bg-[#111827] px-3 text-xs text-[#64748B] uppercase font-heading font-bold absolute border border-[#303D52] rounded-md">
                 HOẶC
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div>
-                <label className="block text-[11px] font-heading font-bold text-[#94A3B8] uppercase tracking-wider mb-1">
+                <label className="block text-xs sm:text-sm font-heading font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">
                   Mã phòng thi
                 </label>
                 <input
@@ -129,14 +129,14 @@ export const Lobby: React.FC = () => {
                   value={roomCodeInput}
                   onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
                   maxLength={6}
-                  className="w-full h-11 px-3.5 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] uppercase font-digital font-bold tracking-widest placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-sm text-center tabular-nums"
+                  className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] uppercase font-digital font-bold tracking-widest placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-base text-center tabular-nums"
                 />
               </div>
 
               <button
                 onClick={handleJoin}
                 disabled={isJoining}
-                className="w-full h-11 bg-[#1C2638] hover:bg-[#24324a] text-[#F8FAFC] font-heading font-extrabold rounded-xl border border-[#303D52] hover:border-[#00D9FF] hover:shadow-glow-cyan active:scale-95 transition-all text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full h-12 bg-[#1C2638] hover:bg-[#24324a] text-[#F8FAFC] font-heading font-extrabold rounded-xl border border-[#303D52] hover:border-[#00D9FF] hover:shadow-glow-cyan active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>{isJoining ? 'Đang vào phòng...' : 'Vào phòng thi'}</span>
               </button>
@@ -210,40 +210,40 @@ export const Lobby: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between py-1 px-1 sm:px-2 max-w-5xl mx-auto overflow-hidden">
+    <div className="w-full h-full flex flex-col justify-between py-1.5 px-2 sm:px-3 max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto overflow-hidden">
       {/* Top Header Bar */}
-      <div className="w-full bg-[#111827] border border-[#303D52] rounded-xl px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 shadow-lg shrink-0">
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm sm:text-base font-heading font-black text-[#F8FAFC] tracking-tight">
+      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl px-5 py-3 flex flex-wrap items-center justify-between gap-3 shadow-lg shrink-0">
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-heading font-black text-[#F8FAFC] tracking-tight">
             SẢNH CHỜ TRẬN ĐẤU
           </h2>
-          <div className="flex items-center gap-1.5 text-xs">
+          <div className="flex items-center gap-2 text-sm sm:text-base">
             <span className="font-heading font-bold uppercase text-[#94A3B8]">Mã phòng:</span>
-            <span className="font-digital text-lg font-bold tracking-widest text-[#090D18] bg-[#FFD43B] px-2 py-0.2 rounded border border-[#FFD43B] shadow-glow-yellow tabular-nums">
+            <span className="font-digital text-2xl sm:text-3xl lg:text-4xl font-bold tracking-widest text-[#090D18] bg-[#FFD43B] px-3.5 py-0.5 rounded-xl border border-[#FFD43B] shadow-glow-yellow tabular-nums">
               {room.code}
             </span>
             <button
               onClick={handleCopyCode}
-              className="p-1 rounded bg-[#1C2638] text-[#F8FAFC] hover:text-[#00D9FF] border border-[#303D52] transition-all cursor-pointer active:scale-95"
+              className="p-2 rounded-xl bg-[#1C2638] text-[#F8FAFC] hover:text-[#00D9FF] border border-[#303D52] transition-all cursor-pointer active:scale-95"
               title="Sao chép mã phòng"
             >
-              {copied ? <Check size={13} className="text-[#20D6A0] stroke-[3]" /> : <Copy size={13} />}
+              {copied ? <Check size={16} className="text-[#20D6A0] stroke-[3]" /> : <Copy size={16} />}
             </button>
           </div>
         </div>
 
         {/* Quick Role & Tip Info */}
-        <div className="flex items-center gap-2 text-xs">
-          <div className="hidden md:flex items-center gap-1 text-[#94A3B8] text-[11px]">
-            <Info size={13} className="text-[#00D9FF] shrink-0" />
+        <div className="flex items-center gap-2.5 text-xs sm:text-sm">
+          <div className="hidden md:flex items-center gap-1.5 text-[#94A3B8] text-xs sm:text-sm">
+            <Info size={15} className="text-[#00D9FF] shrink-0" />
             <span>Bấm ô trống để đổi ghế</span>
           </div>
           {myRole === 'viewer' ? (
-            <span className="bg-[#00D9FF]/15 text-[#00D9FF] border border-[#00D9FF]/40 px-2 py-0.5 rounded-full font-heading font-bold text-[10px] shadow-glow-cyan">
+            <span className="bg-[#00D9FF]/15 text-[#00D9FF] border border-[#00D9FF]/40 px-3 py-1 rounded-full font-heading font-bold text-xs sm:text-sm shadow-glow-cyan">
               👁️ Bạn: Khán giả {isHost ? '(Chủ phòng)' : ''}
             </span>
           ) : (
-            <span className="bg-[#FFD43B]/15 text-[#FFD43B] border border-[#FFD43B]/40 px-2 py-0.5 rounded-full font-heading font-bold text-[10px] shadow-glow-yellow">
+            <span className="bg-[#FFD43B]/15 text-[#FFD43B] border border-[#FFD43B]/40 px-3 py-1 rounded-full font-heading font-bold text-xs sm:text-sm shadow-glow-yellow">
               🏆 Bạn: Ghế {myPlayer.seat} (Thí sinh)
             </span>
           )}
@@ -251,29 +251,29 @@ export const Lobby: React.FC = () => {
       </div>
 
       {seatNotice && (
-        <div className="w-full my-1 p-2 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-lg text-[#FF496C] text-xs font-bold shadow-glow-danger flex items-center justify-between shrink-0">
+        <div className="w-full my-1.5 p-2.5 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-[#FF496C] text-xs sm:text-sm font-bold shadow-glow-danger flex items-center justify-between shrink-0">
           <span>{seatNotice}</span>
           <button onClick={() => setSeatNotice('')} className="text-[#FF496C] hover:text-white">
-            <X size={13} />
+            <X size={15} />
           </button>
         </div>
       )}
 
       {/* Center Seats Area: Fitted neatly in the canvas */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center gap-2 sm:gap-2.5 my-1.5 w-full">
+      <div className="flex-1 min-h-0 flex flex-col justify-center gap-3 sm:gap-4 my-2 w-full">
         {/* SECTION 1: 5 CONTESTANT SEATS */}
         <div className="w-full">
-          <div className="flex items-center justify-between mb-1.5 px-1">
-            <h3 className="text-xs uppercase font-heading font-bold text-[#F8FAFC] tracking-wider flex items-center gap-1.5">
-              <Trophy size={14} className="text-[#FFD43B]" />
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h3 className="text-xs sm:text-sm lg:text-base uppercase font-heading font-black text-[#F8FAFC] tracking-wider flex items-center gap-2">
+              <Trophy size={18} className="text-[#FFD43B]" />
               <span>Bàn Thí Sinh (Thi đấu)</span>
-              <span className="bg-[#FFD43B] text-[#090D18] px-1.5 py-0.2 rounded-full font-heading font-black text-[10px] shadow-glow-yellow">
+              <span className="bg-[#FFD43B] text-[#090D18] px-2.5 py-0.5 rounded-full font-heading font-black text-xs sm:text-sm shadow-glow-yellow">
                 {contestants.length}/5
               </span>
             </h3>
-            <span className="text-[10px] text-[#94A3B8]">Trực tiếp thi đấu & tính điểm</span>
+            <span className="text-xs sm:text-sm text-[#94A3B8]">Trực tiếp thi đấu & tính điểm</span>
           </div>
-          <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-5 gap-2.5 sm:gap-3.5">
             {([1, 2, 3, 4, 5] as const).map((seatNum) => {
               const player = room.players.find((p) => (p.role || 'player') === 'player' && p.seat === seatNum);
               const isMe = player && player.id === myPlayer.id;
@@ -282,7 +282,7 @@ export const Lobby: React.FC = () => {
                 <div
                   key={`player-${seatNum}`}
                   onClick={() => !player && handleSeatClick('player', seatNum)}
-                  className={`relative p-2 rounded-xl border flex flex-col items-center justify-center h-[82px] sm:h-[92px] transition-all group ${
+                  className={`relative p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center h-[104px] sm:h-[118px] lg:h-[128px] transition-all group ${
                     player
                       ? isMe
                         ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow scale-[1.02]'
@@ -299,14 +299,14 @@ export const Lobby: React.FC = () => {
                         kickPlayer(player.id);
                       }}
                       title={`Mời ${player.name} ra khỏi phòng`}
-                      className="absolute top-1 right-1 p-0.5 rounded bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 transition-all z-10"
+                      className="absolute top-2 right-2 p-1 rounded-md bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 transition-all z-10"
                     >
-                      <X size={10} className="stroke-[2.5]" />
+                      <X size={13} className="stroke-[2.5]" />
                     </button>
                   )}
 
                   <div
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-heading font-extrabold text-xs mb-1 border transition-all ${
+                    className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl flex items-center justify-center font-heading font-black text-sm sm:text-base lg:text-lg mb-1.5 border transition-all ${
                       player
                         ? isMe
                           ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow'
@@ -317,12 +317,12 @@ export const Lobby: React.FC = () => {
                     {seatNum}
                   </div>
 
-                  <span className="font-bold text-xs sm:text-sm text-center truncate max-w-full px-1 text-[#F8FAFC]">
+                  <span className="font-bold text-xs sm:text-sm md:text-base lg:text-lg text-center truncate max-w-full px-1 text-[#F8FAFC]">
                     {player ? player.name : 'Ghế trống'}
                   </span>
 
                   {player ? (
-                    <span className="text-[9px] font-medium flex items-center gap-1">
+                    <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1.5 mt-0.5">
                       {room.hostId === player.id && (
                         <span className="text-[#FFD43B] font-heading font-bold">Host</span>
                       )}
@@ -330,7 +330,7 @@ export const Lobby: React.FC = () => {
                       {!player.connected && <span className="text-[#FF496C] font-bold">Offline</span>}
                     </span>
                   ) : (
-                    <span className="text-[9px] text-[#FFD43B] opacity-0 group-hover:opacity-100 font-bold transition-opacity">
+                    <span className="text-xs text-[#FFD43B] opacity-0 group-hover:opacity-100 font-bold transition-opacity mt-0.5">
                       + Chọn ghế
                     </span>
                   )}
@@ -342,17 +342,17 @@ export const Lobby: React.FC = () => {
 
         {/* SECTION 2: 5 VIEWER SEATS */}
         <div className="w-full">
-          <div className="flex items-center justify-between mb-1.5 px-1">
-            <h3 className="text-xs uppercase font-heading font-bold text-[#F8FAFC] tracking-wider flex items-center gap-1.5">
-              <Eye size={14} className="text-[#00D9FF]" />
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h3 className="text-xs sm:text-sm lg:text-base uppercase font-heading font-black text-[#F8FAFC] tracking-wider flex items-center gap-2">
+              <Eye size={18} className="text-[#00D9FF]" />
               <span>Khu Vực Người Theo Dõi (Khán giả)</span>
-              <span className="bg-[#00D9FF] text-[#090D18] px-1.5 py-0.2 rounded-full font-heading font-black text-[10px] shadow-glow-cyan">
+              <span className="bg-[#00D9FF] text-[#090D18] px-2.5 py-0.5 rounded-full font-heading font-black text-xs sm:text-sm shadow-glow-cyan">
                 {viewers.length}/5
               </span>
             </h3>
-            <span className="text-[10px] text-[#94A3B8]">Chỉ xem trực tiếp • Không thi đấu</span>
+            <span className="text-xs sm:text-sm text-[#94A3B8]">Chỉ xem trực tiếp • Không thi đấu</span>
           </div>
-          <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-5 gap-2.5 sm:gap-3.5">
             {([1, 2, 3, 4, 5] as const).map((seatNum) => {
               const player = room.players.find((p) => p.role === 'viewer' && p.seat === seatNum);
               const isMe = player && player.id === myPlayer.id;
@@ -361,7 +361,7 @@ export const Lobby: React.FC = () => {
                 <div
                   key={`viewer-${seatNum}`}
                   onClick={() => !player && handleSeatClick('viewer', seatNum)}
-                  className={`relative p-2 rounded-xl border flex flex-col items-center justify-center h-[82px] sm:h-[92px] transition-all group ${
+                  className={`relative p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center h-[104px] sm:h-[118px] lg:h-[128px] transition-all group ${
                     player
                       ? isMe
                         ? 'bg-[#1C2638] border-2 border-[#00D9FF] shadow-glow-cyan scale-[1.02]'
@@ -378,14 +378,14 @@ export const Lobby: React.FC = () => {
                         kickPlayer(player.id);
                       }}
                       title={`Mời ${player.name} ra khỏi phòng`}
-                      className="absolute top-1 right-1 p-0.5 rounded bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 transition-all z-10"
+                      className="absolute top-2 right-2 p-1 rounded-md bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 transition-all z-10"
                     >
-                      <X size={10} className="stroke-[2.5]" />
+                      <X size={13} className="stroke-[2.5]" />
                     </button>
                   )}
 
                   <div
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-heading font-extrabold text-xs mb-1 border transition-all ${
+                    className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl flex items-center justify-center font-heading font-black text-sm sm:text-base lg:text-lg mb-1.5 border transition-all ${
                       player
                         ? isMe
                           ? 'bg-[#00D9FF] text-[#090D18] border-[#00D9FF] shadow-glow-cyan'
@@ -393,18 +393,18 @@ export const Lobby: React.FC = () => {
                         : 'bg-[#0E1524] text-[#64748B] border-[#303D52] group-hover:border-[#00D9FF]/60 group-hover:text-[#00D9FF]'
                     }`}
                   >
-                    <div className="flex items-center gap-0.5">
-                      <Eye size={11} className="opacity-80" />
+                    <div className="flex items-center gap-1">
+                      <Eye size={15} className="opacity-80" />
                       <span>{seatNum}</span>
                     </div>
                   </div>
 
-                  <span className="font-bold text-xs sm:text-sm text-center truncate max-w-full px-1 text-[#F8FAFC]">
+                  <span className="font-bold text-xs sm:text-sm md:text-base lg:text-lg text-center truncate max-w-full px-1 text-[#F8FAFC]">
                     {player ? player.name : 'Ghế trống'}
                   </span>
 
                   {player ? (
-                    <span className="text-[9px] font-medium flex items-center gap-1">
+                    <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1.5 mt-0.5">
                       {room.hostId === player.id && (
                         <span className="text-[#FFD43B] font-heading font-bold">Host</span>
                       )}
@@ -412,7 +412,7 @@ export const Lobby: React.FC = () => {
                       {!player.connected && <span className="text-[#FF496C] font-bold">Offline</span>}
                     </span>
                   ) : (
-                    <span className="text-[9px] text-[#00D9FF] opacity-0 group-hover:opacity-100 font-bold transition-opacity">
+                    <span className="text-[10px] sm:text-xs text-[#00D9FF] opacity-0 group-hover:opacity-100 font-bold transition-opacity mt-0.5">
                       + Khán giả
                     </span>
                   )}
@@ -425,33 +425,33 @@ export const Lobby: React.FC = () => {
 
       {/* Bottom Host / Waiting Control Bar */}
       {isHost ? (
-        <div className="w-full bg-[#111827] border border-[#303D52] rounded-xl px-3.5 py-2 sm:py-2.5 shadow-xl flex flex-wrap items-center justify-between gap-2.5 shrink-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 text-xs font-heading font-bold text-[#F8FAFC]">
-              <Shield size={14} className="text-[#FFD43B]" />
+        <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl px-4 py-2.5 sm:py-3 shadow-xl flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-[#F8FAFC]">
+              <Shield size={16} className="text-[#FFD43B]" />
               <span>Nạp đề:</span>
             </div>
             <a
               href="/api/question-template"
               download="olympia_bo_de_mau.xlsx"
-              className="flex items-center gap-1 px-2.5 py-1 bg-[#1C2638] hover:bg-[#24324a] text-[#F8FAFC] text-[11px] font-heading font-bold rounded-lg border border-[#303D52] hover:border-[#00D9FF] transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1C2638] hover:bg-[#24324a] text-[#F8FAFC] text-xs font-heading font-bold rounded-xl border border-[#303D52] hover:border-[#00D9FF] transition-all cursor-pointer"
               title="Tải file mẫu Excel chuẩn"
             >
-              <Download size={12} />
+              <Download size={14} />
               <span>Excel mẫu</span>
             </a>
-            <label className="cursor-pointer flex items-center gap-1 px-2.5 py-1 bg-[#1C2638] hover:bg-[#24324a] text-[#00D9FF] text-[11px] font-heading font-bold rounded-lg border border-[#00D9FF]/50 hover:border-[#00D9FF] transition-all">
-              <Upload size={12} />
+            <label className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-[#1C2638] hover:bg-[#24324a] text-[#00D9FF] text-xs font-heading font-bold rounded-xl border border-[#00D9FF]/50 hover:border-[#00D9FF] transition-all">
+              <Upload size={14} />
               <span>Nạp file (.xlsx / .json)</span>
               <input type="file" accept=".xlsx,.xls,.json" onChange={handleFileUpload} className="hidden" />
             </label>
             {uploadStatus && (
-              <span className="text-[11px] font-bold text-[#FFD43B] truncate max-w-xs">{uploadStatus}</span>
+              <span className="text-xs font-bold text-[#FFD43B] truncate max-w-xs">{uploadStatus}</span>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-[#94A3B8]">
+            <span className="text-xs text-[#94A3B8]">
               Thí sinh:{' '}
               <strong className={connectedContestants.length >= 2 ? 'text-[#20D6A0]' : 'text-[#FFD43B]'}>
                 {connectedContestants.length}/{GAME_CONFIG.MIN_PLAYERS_FOR_TEST}
@@ -460,22 +460,22 @@ export const Lobby: React.FC = () => {
             <button
               onClick={startGame}
               disabled={!canStart}
-              className={`px-5 py-2 rounded-xl font-heading font-extrabold uppercase tracking-wider text-xs flex items-center gap-1.5 border transition-all ${
+              className={`px-6 py-2.5 rounded-xl font-heading font-extrabold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2 border transition-all ${
                 canStart
                   ? 'bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] border-[#FFD43B] shadow-glow-yellow hover:scale-105 active:scale-95 cursor-pointer'
                   : 'bg-[#1C2638] text-[#64748B] border-[#303D52] cursor-not-allowed'
               }`}
             >
-              <Play size={14} fill="currentColor" />
+              <Play size={16} fill="currentColor" />
               <span>Bắt đầu trận đấu</span>
             </button>
           </div>
         </div>
       ) : (
-        <div className="w-full bg-[#111827] border border-[#303D52] rounded-xl px-4 py-2 text-center text-xs font-heading font-bold text-[#94A3B8] shadow-lg shrink-0 flex items-center justify-center gap-2">
+        <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl px-4 py-2.5 text-center text-xs sm:text-sm font-heading font-bold text-[#94A3B8] shadow-lg shrink-0 flex items-center justify-center gap-2">
           <span>⏳ Đang chờ chủ phòng bắt đầu trận đấu...</span>
           {myRole === 'viewer' && (
-            <span className="text-[#00D9FF] bg-[#00D9FF]/10 px-2 py-0.2 rounded border border-[#00D9FF]/30">
+            <span className="text-[#00D9FF] bg-[#00D9FF]/10 px-2.5 py-0.5 rounded-md border border-[#00D9FF]/30">
               (Bạn đang ở vị trí Người theo dõi)
             </span>
           )}

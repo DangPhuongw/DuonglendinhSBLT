@@ -347,4 +347,24 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     expect(machine.room.state.subPhase).toBe('COUNTDOWN');
     expect(machine.room.players.every((p) => p.ready)).toBe(true);
   });
+
+  it('configures VE_DICH so that 10d, 20d, and 30d questions all have 30s to answer', async () => {
+    expect(GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[10]).toBe(30);
+    expect(GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[20]).toBe(30);
+    expect(GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[30]).toBe(30);
+
+    const callbacks = createMockCallbacks();
+    const machine = new RoomStateMachine(
+      'VD30STEST',
+      { id: 'p1', name: 'Player 1', token: 'tok-1' },
+      callbacks
+    );
+    machine.addPlayer('Player 2', 'tok-2');
+
+    const sampleQ = (machine as any).questionSet.veDich.pool10[0];
+    await (machine as any).presentVeDichQuestion('p1', sampleQ, 10, [10, 10, 20], 0);
+    const deadline10 = machine.room.state.deadline;
+    expect(deadline10).toBeGreaterThan(Date.now() + 29000);
+    expect(deadline10).toBeLessThanOrEqual(Date.now() + 30100);
+  });
 });

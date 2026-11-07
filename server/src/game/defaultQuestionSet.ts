@@ -456,7 +456,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['HAI PHONG'],
         ignoreDiacritics: true,
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-2',
@@ -466,7 +466,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['HUY CAN'],
         ignoreDiacritics: true,
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-3',
@@ -476,7 +476,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['MÀU TÍM', 'TÍM', 'TIM'],
         ignoreDiacritics: true,
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-4',
@@ -486,7 +486,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['SAO THO', 'SATURN'],
         ignoreDiacritics: true,
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-5',
@@ -496,7 +496,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['WOLFRAM', 'W', 'VON-FRAM'],
         ignoreDiacritics: true,
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-6',
@@ -505,7 +505,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: 'THẾ KỶ 15',
         alternatives: ['15', 'XV', 'THẾ KỶ XV'],
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-7',
@@ -514,7 +514,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: 'APOLLO 11',
         alternatives: ['APOLLO11', 'A-PÔ-LÔ 11'],
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-8',
@@ -523,7 +523,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: '7',
         alternatives: ['BẢY', 'BAY'],
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-9',
@@ -533,7 +533,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['CA MAU'],
         ignoreDiacritics: true,
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
       {
         id: 'vd-10-10',
@@ -542,7 +542,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: 'N2O',
         alternatives: ['DINITROGEN MONOXIDE'],
         points: 10,
-        timeLimit: 10,
+        timeLimit: 30,
       },
     ],
     pool20: [
@@ -554,7 +554,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['OXYGEN', 'O'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-2',
@@ -564,7 +564,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['Ơ-CLÍT', 'Ơ CLÍT', 'EUCLIDE'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-3',
@@ -573,7 +573,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: 'ĐẠI HỘI VI',
         alternatives: ['ĐẠI HỘI 6', 'LẦN THỨ 6', 'LẦN THỨ VI', '6', 'VI'],
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-4',
@@ -583,7 +583,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['OXYGEN', 'O2'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-5',
@@ -593,7 +593,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['MICHAEL FARADAY', 'PHA-RA-ĐÂY'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-6',
@@ -603,7 +603,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['CA-NA-ĐA'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-7',
@@ -613,7 +613,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['VUA HÀM NGHI', 'HAM NGHI'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-8',
@@ -623,7 +623,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['HỢP LỰC', 'LUC'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-9',
@@ -632,7 +632,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: '100',
         alternatives: ['100 ĐỘ', '100 ĐỘ C'],
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
       {
         id: 'vd-20-10',
@@ -642,7 +642,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['GI-BRAN-TA'],
         ignoreDiacritics: true,
         points: 20,
-        timeLimit: 15,
+        timeLimit: 30,
       },
     ],
     pool30: [
@@ -653,7 +653,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: 'QUARK CHARM',
         alternatives: ['CHARM', 'TOP', 'QUARK UP', 'UP'],
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-2',
@@ -663,7 +663,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['TRẬN STALINGRAD', 'XA-TAN-LIN-GRAT'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-3',
@@ -673,7 +673,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['HOI DONG BAO AN', 'UNSC'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-4',
@@ -682,7 +682,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         answer: 'X',
         alternatives: ['NHIỄM SẮC THỂ X', 'NST X'],
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-5',
@@ -692,7 +692,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['WILES', 'AN-ĐRUU OAI-LƠ'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-6',
@@ -702,7 +702,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['A-RÍT-XTỐT', 'ARISTOTE'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-7',
@@ -712,7 +712,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['URANIUM', 'U'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-8',
@@ -722,7 +722,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['JOoc-ĐA-NI', 'GIÓC-ĐAN'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-9',
@@ -732,7 +732,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['XÁC SUẤT', 'THỐNG KÊ'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
       {
         id: 'vd-30-10',
@@ -742,7 +742,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         alternatives: ['NGUYEN TRAI'],
         ignoreDiacritics: true,
         points: 30,
-        timeLimit: 20,
+        timeLimit: 30,
       },
     ],
   },
