@@ -23,8 +23,8 @@ export const Scoreboard: React.FC = () => {
   const hasActiveTurn = Boolean(activePlayerId);
 
   return (
-    <div className="w-full bg-[#0D1322]/95 backdrop-blur-md border-t border-[#303D52] px-3 sm:px-6 py-2 shadow-[0_-4px_25px_rgba(0,0,0,0.6)]">
-      <div className="max-w-6xl mx-auto grid grid-cols-5 gap-2 sm:gap-3">
+    <div className="w-full bg-[#0D1322]/95 backdrop-blur-md border-t border-[#303D52] px-3 sm:px-6 py-1.5 shadow-[0_-4px_25px_rgba(0,0,0,0.6)]">
+      <div className="max-w-6xl mx-auto grid grid-cols-5 gap-2 sm:gap-2.5">
         {seats.map((seatNum) => {
           const player = contestants.find((p) => p.seat === seatNum);
           const isMe = myPlayer && player && player.id === myPlayer.id;
@@ -37,12 +37,12 @@ export const Scoreboard: React.FC = () => {
             return (
               <div
                 key={seatNum}
-                className={`bg-[#090D18]/60 border border-dashed border-[#303D52]/40 rounded-xl px-2 py-1.5 flex flex-col items-center justify-center min-h-[58px] transition-opacity duration-300 ${
+                className={`bg-[#090D18]/60 border border-dashed border-[#303D52]/40 rounded-xl px-2 py-1 flex flex-col items-center justify-center min-h-[50px] transition-opacity duration-300 ${
                   hasActiveTurn ? 'opacity-20' : 'opacity-40'
                 }`}
               >
-                <span className="text-[10px] text-[#64748B] font-heading font-bold uppercase tracking-wider">GHẾ {seatNum}</span>
-                <span className="text-xs text-[#475569] italic">Trống</span>
+                <span className="text-[9px] text-[#64748B] font-heading font-bold uppercase tracking-wider">GHẾ {seatNum}</span>
+                <span className="text-[11px] text-[#475569] italic">Trống</span>
               </div>
             );
           }
@@ -50,7 +50,7 @@ export const Scoreboard: React.FC = () => {
           return (
             <div
               key={seatNum}
-              className={`relative rounded-xl px-3 py-1.5 sm:py-2 flex flex-col justify-between transition-all duration-300 min-h-[58px] ${
+              className={`relative rounded-xl px-2.5 py-1 sm:py-1.5 flex flex-col justify-between transition-all duration-300 min-h-[50px] ${
                 isTurn
                   ? 'bg-gradient-to-b from-[#223147] to-[#162235] border-2 border-[#FFD43B] shadow-[0_0_25px_rgba(255,212,59,0.5),inset_0_0_15px_rgba(255,212,59,0.15)] scale-[1.04] z-10'
                   : isDimmed

@@ -5,6 +5,14 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: #090D18;
@@ -13,7 +21,6 @@
       radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 217, 255, 0.08), transparent),
       radial-gradient(ellipse 60% 40% at 50% 120%, rgba(255, 212, 59, 0.05), transparent);
     background-attachment: fixed;
-    min-height: 100vh;
   }
 
   h1, h2, h3, h4, .font-heading {

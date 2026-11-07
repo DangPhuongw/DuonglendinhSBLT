@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { soundManager } from '../utils/soundEffects';
 import { voiceReader } from '../utils/voiceReader';
-import { Volume2, VolumeX, LogOut, Headphones } from 'lucide-react';
+import { Volume2, VolumeX, LogOut, Headphones, Maximize, Minimize } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -10,6 +10,15 @@ export const Navbar: React.FC = () => {
 
   const [muted, setMuted] = useState(soundManager.isMuted);
   const [ttsEnabled, setTtsEnabled] = useState(voiceReader.isEnabled);
+  const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const toggleSound = () => {
     soundManager.isMuted = !soundManager.isMuted;
@@ -21,15 +30,27 @@ export const Navbar: React.FC = () => {
     setTtsEnabled(next);
   };
 
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.warn('Lỗi khi chuyển chế độ toàn màn hình:', err);
+    }
+  };
+
   return (
-    <header className="w-full bg-[#111827]/95 backdrop-blur-md border-b border-[#303D52] px-4 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-      <div className="flex items-center gap-3">
+    <header className="w-full h-12 shrink-0 bg-[#111827]/95 backdrop-blur-md border-b border-[#303D52] px-3 sm:px-6 flex items-center justify-between z-50 shadow-[0_2px_15px_rgba(0,0,0,0.5)]">
+      <div className="flex items-center gap-2.5">
         {/* Brand Logo ĐẤU TRƯỜNG TRÍ TUỆ */}
-        <div className="flex items-center gap-2.5 cursor-pointer group">
-          <div className="w-9 h-9 rounded-lg bg-[#FFD43B] text-[#090D18] border border-[#FFD43B] flex items-center justify-center font-extrabold font-heading text-sm sm:text-base shadow-glow-yellow transition-transform duration-200 group-hover:scale-105">
+        <div className="flex items-center gap-2 cursor-pointer group">
+          <div className="w-7 h-7 rounded-lg bg-[#FFD43B] text-[#090D18] border border-[#FFD43B] flex items-center justify-center font-extrabold font-heading text-xs shadow-glow-yellow transition-transform duration-200 group-hover:scale-105">
             ĐT
           </div>
-          <span className="font-heading font-extrabold tracking-tight text-[#F8FAFC] text-base sm:text-lg leading-none group-hover:text-[#FFD43B] transition-colors">
+          <span className="font-heading font-extrabold tracking-tight text-[#F8FAFC] text-sm sm:text-base leading-none group-hover:text-[#FFD43B] transition-colors">
             ĐẤU TRƯỜNG TRÍ TUỆ
           </span>
         </div>
@@ -59,6 +80,24 @@ export const Navbar: React.FC = () => {
           title={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
         >
           {muted ? <VolumeX size={16} className="stroke-[2.5]" /> : <Volume2 size={16} className="stroke-[2.5]" />}
+        </button>
+
+        {/* Fullscreen toggle */}
+        <button
+          onClick={toggleFullscreen}
+          className={`p-2 rounded-lg border transition-all active:scale-95 flex items-center justify-center ${
+            isFullscreen
+              ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF] shadow-glow-cyan'
+              : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#00D9FF] hover:border-[#00D9FF] border-[#303D52] hover:shadow-glow-cyan'
+          }`}
+          title={isFullscreen ? 'Thu nhỏ màn hình (Esc)' : 'Mở toàn màn hình (F11)'}
+          aria-label={isFullscreen ? 'Thu nhỏ màn hình' : 'Mở toàn màn hình'}
+        >
+          {isFullscreen ? (
+            <Minimize size={16} className="stroke-[2.5]" />
+          ) : (
+            <Maximize size={16} className="stroke-[2.5]" />
+          )}
         </button>
 
         {/* Leave room button */}

@@ -86,63 +86,63 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative overflow-x-hidden">
+      <div className="h-screen h-[100dvh] max-h-screen w-full overflow-hidden text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative">
         <GalaxyBackground />
         <Navbar />
-        <main className="flex-1 w-full max-w-6xl mx-auto px-3 py-3 sm:px-6 sm:py-4 flex flex-col justify-start pb-16 sm:pb-20">
+        <main className="flex-1 min-h-0 w-full max-w-6xl mx-auto px-2 py-1 sm:px-4 sm:py-2 flex flex-col items-center justify-center overflow-hidden relative">
           {renderCurrentView()}
         </main>
         {room && currentRound !== 'LOBBY' && currentRound !== 'FINISHED' && (
-          <footer className="sticky bottom-0 z-30 w-full mt-auto">
+          <footer className="shrink-0 w-full z-30">
             <Scoreboard />
           </footer>
         )}
         {room && currentRound !== 'LOBBY' && (
-          <div className="fixed top-14 right-3 z-50 flex items-center gap-1.5 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-2xl rounded-xl p-1.5">
-            <span className="text-[11px] font-bold text-[#94A3B8] px-1 font-heading uppercase tracking-wider">⏩ Tua:</span>
+          <div className="fixed top-1.5 right-36 sm:right-40 z-50 flex items-center gap-1 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-xl rounded-lg px-2 py-0.5">
+            <span className="text-[10px] font-bold text-[#94A3B8] font-heading uppercase tracking-wider">Tua:</span>
             <button
               onClick={() => jumpToRound('KD_RIENG')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
                 isKdActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
-                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
+                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
-              title="Tua tới chuẩn bị Vòng 1: Khởi Động"
+              title="Tua tới Vòng 1: Khởi Động"
             >
-              Khởi Động
+              V1
             </button>
             <button
               onClick={() => jumpToRound('VCNV')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
                 isVcnvActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
-                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
+                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
-              title="Tua tới chuẩn bị Vòng 2: Vượt Chướng Ngại Vật"
+              title="Tua tới Vòng 2: Vượt Chướng Ngại Vật"
             >
-              VCNV
+              V2
             </button>
             <button
               onClick={() => jumpToRound('TANG_TOC')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
                 isTtActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
-                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
+                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
-              title="Tua tới chuẩn bị Vòng 3: Tăng Tốc"
+              title="Tua tới Vòng 3: Tăng Tốc"
             >
-              Tăng Tốc
+              V3
             </button>
             <button
               onClick={() => jumpToRound('VE_DICH')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+              className={`px-1.5 py-0.5 text-[10px] font-bold rounded border transition-all ${
                 isVdActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
-                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
+                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
-              title="Tua tới chuẩn bị Vòng 4: Về Đích"
+              title="Tua tới Vòng 4: Về Đích"
             >
-              Về Đích
+              V4
             </button>
           </div>
         )}
