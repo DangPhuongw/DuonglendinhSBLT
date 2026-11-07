@@ -45,7 +45,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
           prompt: 'Đơn vị đo cường độ dòng điện trong hệ SI là gì?',
           options: ['Vôn (V)', 'Ampe (A)', 'Ôm (Ω)', 'Oát (W)'],
           answer: 'B',
-          alternatives: ['AMPE', 'A'],
+          alternatives: ['AMPE'],
         },
       ],
       // Ghế 2 (5 câu)

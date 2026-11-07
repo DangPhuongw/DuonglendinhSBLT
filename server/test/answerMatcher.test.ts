@@ -40,4 +40,12 @@ describe('answerMatcher', () => {
     expect(matchAnswer('', 'HÀ NỘI')).toBe(false);
     expect(matchAnswer('   ', 'HÀ NỘI')).toBe(false);
   });
+
+  it('strictly rejects incorrect MCQ letters even if alternatives contain conflicting letters', () => {
+    // When correct answer is B, selecting A must NEVER be true
+    expect(matchAnswer('A', 'B', ['AMPE', 'A'])).toBe(false);
+    expect(matchAnswer('B', 'B', ['AMPE', 'A'])).toBe(true);
+    expect(matchAnswer('C', 'B', ['AMPE', 'A'])).toBe(false);
+    expect(matchAnswer('D', 'B', ['AMPE', 'A'])).toBe(false);
+  });
 });
