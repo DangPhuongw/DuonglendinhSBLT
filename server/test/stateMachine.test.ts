@@ -41,10 +41,23 @@ describe('Room & Player lifecycle', () => {
     expect(p5.ok).toBe(true);
     expect(p5.player?.seat).toBe(5);
 
-    // 6th player rejected
-    const p6 = machine.addPlayer('Player 6', 'tok-6');
-    expect(p6.ok).toBe(false);
-    expect(p6.error).toContain('đủ 5 người');
+    // 6th participant joins as viewer
+    const p6 = machine.addPlayer('Viewer 1', 'tok-6');
+    expect(p6.ok).toBe(true);
+    expect(p6.player?.role).toBe('viewer');
+    expect(p6.player?.seat).toBe(1);
+
+    // Fill remaining viewers up to max 5 viewers
+    machine.addPlayer('Viewer 2', 'tok-7');
+    machine.addPlayer('Viewer 3', 'tok-8');
+    machine.addPlayer('Viewer 4', 'tok-9');
+    const p10 = machine.addPlayer('Viewer 5', 'tok-10');
+    expect(p10.ok).toBe(true);
+
+    // 11th participant rejected when both players and viewers are full
+    const p11 = machine.addPlayer('Participant 11', 'tok-11');
+    expect(p11.ok).toBe(false);
+    expect(p11.error).toContain('Phòng đã đầy');
   });
 
   it('transfers host automatically when host disconnects', () => {

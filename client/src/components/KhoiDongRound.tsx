@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
-import { Bell, Sparkles, Lock } from 'lucide-react';
+import { Bell, Sparkles, Lock, Eye } from 'lucide-react';
 
 export const KhoiDongRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -21,7 +21,8 @@ export const KhoiDongRound: React.FC = () => {
   const subPhase = room?.state?.subPhase;
   const currentQ = room?.state?.currentQuestion;
   const activePlayer = room?.players.find((p) => p.id === room.state.activePlayerId);
-  const isMyTurn = Boolean(myPlayer && room?.state?.activePlayerId === myPlayer.id);
+  const isViewer = myPlayer?.role === 'viewer';
+  const isMyTurn = Boolean(!isViewer && myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
   // Clear local selected option when question changes
   useEffect(() => {
@@ -45,8 +46,8 @@ export const KhoiDongRound: React.FC = () => {
   // Keyboard shortcut listener (1-5 for packages, 1-4 for options, Space for buzzer)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Space for buzzer
-      if (e.code === 'Space' && currentRound === 'KD_CHUNG' && subPhase === 'QUESTION_BUZZ') {
+      // Space for buzzer (contestants only)
+      if (e.code === 'Space' && !isViewer && currentRound === 'KD_CHUNG' && subPhase === 'QUESTION_BUZZ') {
         e.preventDefault();
         buzz();
         return;
@@ -269,18 +270,30 @@ export const KhoiDongRound: React.FC = () => {
       {/* BUZZER SCREEN FOR KD_CHUNG */}
       {currentRound === 'KD_CHUNG' && subPhase === 'QUESTION_BUZZ' && (
         <div className="w-full flex flex-col items-center my-4">
-          <button
-            onClick={buzz}
-            className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
-          >
-            <Bell size={36} className="text-[#090D18] animate-bounce" />
-            <span className="font-heading font-black text-[#090D18] text-base tracking-wider uppercase">
-              BẤM CHUÔNG
-            </span>
-            <span className="text-[11px] text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2 py-0.5 rounded-full mt-1">
-              Phím Space
-            </span>
-          </button>
+          {isViewer ? (
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#1C2638] border-2 border-[#00D9FF]/50 shadow-glow-cyan flex flex-col items-center justify-center gap-1.5 p-4 text-center">
+              <Eye size={32} className="text-[#00D9FF] animate-pulse" />
+              <span className="font-heading font-black text-xs uppercase tracking-wider text-[#00D9FF]">
+                KHÁN GIẢ
+              </span>
+              <span className="text-[10px] text-[#94A3B8] leading-tight">
+                Đang chờ thí sinh bấm chuông giành quyền trả lời
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={buzz}
+              className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
+            >
+              <Bell size={36} className="text-[#090D18] animate-bounce" />
+              <span className="font-heading font-black text-[#090D18] text-base tracking-wider uppercase">
+                BẤM CHUÔNG
+              </span>
+              <span className="text-[11px] text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2 py-0.5 rounded-full mt-1">
+                Phím Space
+              </span>
+            </button>
+          )}
 
           {buzzRejectedReason && (
             <span className="text-xs text-[#FF496C] font-bold mt-3 animate-pulse bg-[#FF496C]/10 border border-[#FF496C]/40 px-3 py-1 rounded-lg">

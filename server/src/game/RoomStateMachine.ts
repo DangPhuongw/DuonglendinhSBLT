@@ -76,6 +76,7 @@ export class RoomStateMachine {
       id: hostPlayer.id,
       name: hostPlayer.name,
       seat: 1,
+      role: 'player',
       token: hostPlayer.token,
       connected: true,
       ready: false,
@@ -170,20 +171,44 @@ export class RoomStateMachine {
   // --- Player Management ---
 
   public addPlayer(name: string, token: string): { ok: boolean; player?: Player; error?: string } {
-    if (this.room.players.length >= GAME_CONFIG.MAX_PLAYERS) {
-      return { ok: false, error: 'Phòng đã đủ 5 người chơi.' };
-    }
-
     if (this.room.status !== 'LOBBY') {
       return { ok: false, error: 'Trận đấu đã bắt đầu, không thể tham gia.' };
     }
 
-    const takenSeats = new Set(this.room.players.map((p) => p.seat));
+    const playerSeatsTaken = new Set(
+      this.room.players.filter((p) => (p.role || 'player') === 'player').map((p) => p.seat)
+    );
+    const viewerSeatsTaken = new Set(
+      this.room.players.filter((p) => p.role === 'viewer').map((p) => p.seat)
+    );
+
+    let assignedRole: 'player' | 'viewer' = 'player';
     let nextSeat: 1 | 2 | 3 | 4 | 5 = 1;
+
+    // Ưu tiên xếp vào ghế thí sinh 1-5
+    let foundPlayerSeat = false;
     for (let s = 1; s <= GAME_CONFIG.MAX_PLAYERS; s++) {
-      if (!takenSeats.has(s as any)) {
+      if (!playerSeatsTaken.has(s as any)) {
         nextSeat = s as any;
+        assignedRole = 'player';
+        foundPlayerSeat = true;
         break;
+      }
+    }
+
+    // Nếu ghế thí sinh đã đầy, xếp vào ghế khán giả 1-5
+    if (!foundPlayerSeat) {
+      let foundViewerSeat = false;
+      for (let s = 1; s <= (GAME_CONFIG.MAX_VIEWERS || 5); s++) {
+        if (!viewerSeatsTaken.has(s as any)) {
+          nextSeat = s as any;
+          assignedRole = 'viewer';
+          foundViewerSeat = true;
+          break;
+        }
+      }
+      if (!foundViewerSeat) {
+        return { ok: false, error: 'Phòng đã đầy (tối đa 5 thí sinh và 5 người theo dõi).' };
       }
     }
 
@@ -191,6 +216,7 @@ export class RoomStateMachine {
       id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: name.trim(),
       seat: nextSeat,
+      role: assignedRole,
       token,
       connected: true,
       ready: false,
@@ -204,6 +230,51 @@ export class RoomStateMachine {
     this.persistSnapshot();
     this.syncRoom();
     return { ok: true, player: newPlayer };
+  }
+
+  public switchSeat(
+    playerId: string,
+    targetRole: 'player' | 'viewer',
+    targetSeat: number
+  ): { ok: boolean; error?: string } {
+    if (this.room.status !== 'LOBBY') {
+      return { ok: false, error: 'Chỉ có thể đổi vị trí/vai trò ở Sảnh chờ.' };
+    }
+
+    const player = this.room.players.find((p) => p.id === playerId);
+    if (!player) {
+      return { ok: false, error: 'Không tìm thấy thông tin người chơi.' };
+    }
+
+    if (targetSeat < 1 || targetSeat > 5) {
+      return { ok: false, error: 'Vị trí ghế không hợp lệ (1-5).' };
+    }
+
+    if (targetRole !== 'player' && targetRole !== 'viewer') {
+      return { ok: false, error: 'Vai trò không hợp lệ.' };
+    }
+
+    // Kiểm tra xem vị trí ghế đích đã có người khác ngồi hay chưa
+    const isTaken = this.room.players.some(
+      (p) =>
+        p.id !== playerId &&
+        (p.role || 'player') === targetRole &&
+        p.seat === targetSeat
+    );
+
+    if (isTaken) {
+      return { ok: false, error: 'Vị trí ghế này đã có người ngồi.' };
+    }
+
+    // Cập nhật vị trí ghế và vai trò
+    player.role = targetRole;
+    player.seat = targetSeat as 1 | 2 | 3 | 4 | 5;
+
+    this.persistSnapshot();
+    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.syncRoom();
+
+    return { ok: true };
   }
 
   public handleDisconnect(playerId: string): void {
@@ -250,10 +321,13 @@ export class RoomStateMachine {
 
     this.callbacks.broadcastPlayerUpdate(this.room.players);
 
-    // If in READY screen, check if all connected players are ready
+    // If in READY screen, check if all connected contestants (not viewers) are ready
     if (this.room.state.round === 'READY') {
-      const connectedPlayers = this.room.players.filter((p) => p.connected);
-      const allReady = connectedPlayers.length > 0 && connectedPlayers.every((p) => p.ready);
+      const connectedContestants = this.room.players.filter(
+        (p) => p.connected && p.role !== 'viewer'
+      );
+      const allReady =
+        connectedContestants.length > 0 && connectedContestants.every((p) => p.ready);
       if (allReady) {
         this.startReadyCountdown();
       }
@@ -270,8 +344,10 @@ export class RoomStateMachine {
     this.callbacks.broadcastPlayerUpdate(this.room.players);
 
     if (this.room.state.round === 'READY') {
-      const activePlayers = this.room.players.filter((p) => p.connected || p.ready);
-      const allReady = activePlayers.every((p) => p.ready);
+      const activeContestants = this.room.players.filter(
+        (p) => (p.connected || p.ready) && p.role !== 'viewer'
+      );
+      const allReady = activeContestants.length > 0 && activeContestants.every((p) => p.ready);
       if (allReady) {
         this.startReadyCountdown();
       }
@@ -435,9 +511,11 @@ export class RoomStateMachine {
       return { ok: false, error: 'Chỉ chủ phòng mới có quyền bắt đầu.' };
     }
 
-    const connectedPlayers = this.room.players.filter((p) => p.connected);
-    if (connectedPlayers.length < GAME_CONFIG.MIN_PLAYERS_FOR_TEST) {
-      return { ok: false, error: `Cần tối thiểu ${GAME_CONFIG.MIN_PLAYERS_FOR_TEST} người chơi để bắt đầu.` };
+    const connectedContestants = this.room.players.filter(
+      (p) => p.connected && p.role !== 'viewer'
+    );
+    if (connectedContestants.length < GAME_CONFIG.MIN_PLAYERS_FOR_TEST) {
+      return { ok: false, error: `Cần tối thiểu ${GAME_CONFIG.MIN_PLAYERS_FOR_TEST} thí sinh để bắt đầu.` };
     }
 
     this.transitionToReady('KD_RIENG');
@@ -531,7 +609,7 @@ export class RoomStateMachine {
 
     this.clearTimer();
     this.eventQueue.enqueue(async () => {
-      const players = [...this.room.players].sort((a, b) => a.seat - b.seat);
+      const players = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => a.seat - b.seat);
       const playerIdx = players.findIndex((p) => p.id === playerId);
       if (playerIdx === -1) return;
       await this.applyKdPackageChoice(players, playerIdx, packageIndex);
@@ -593,7 +671,7 @@ export class RoomStateMachine {
   private async startKhoiDongRieng(): Promise<void> {
     this.room.status = 'KD_RIENG';
     this.chosenKdPackages.clear();
-    const playersInOrder = [...this.room.players].sort((a, b) => a.seat - b.seat);
+    const playersInOrder = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => a.seat - b.seat);
     await this.runKhoiDongRiengTurn(playersInOrder, 0, 0);
   }
 
@@ -664,6 +742,11 @@ export class RoomStateMachine {
   }
 
   public submitAnswer(playerId: string, questionId: string, answer: string): boolean {
+    const player = this.room.players.find((p) => p.id === playerId);
+    if (!player || player.role === 'viewer') {
+      return false;
+    }
+
     const now = Date.now();
     const deadline = this.room.state.deadline;
     if (deadline && now > deadline + GAME_CONFIG.NETWORK_GRACE_MS) {
@@ -687,7 +770,7 @@ export class RoomStateMachine {
         // Immediately trigger reveal early since choice is locked
         this.clearTimer();
         this.eventQueue.enqueue(async () => {
-          const players = [...this.room.players].sort((a, b) => a.seat - b.seat);
+          const players = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => a.seat - b.seat);
           const activeIdx = players.findIndex((p) => p.id === playerId);
           const pkgIdx = this.chosenKdPackages.get(playerId) ?? (players[activeIdx].seat - 1);
           const questionsInPkg = this.questionSet.khoiDong.rieng[pkgIdx] || [];
@@ -882,6 +965,12 @@ export class RoomStateMachine {
   }
 
   public handleBuzzer(playerId: string): boolean {
+    const player = this.room.players.find((p) => p.id === playerId);
+    if (!player || player.role === 'viewer') {
+      this.callbacks.broadcastBuzzRejected(null, { reason: 'Khán giả không thể bấm chuông.' });
+      return false;
+    }
+
     const now = Date.now();
     const round = this.room.state.round;
     const subPhase = this.room.state.subPhase;
@@ -1126,8 +1215,8 @@ export class RoomStateMachine {
       p.eliminatedVcnv = false;
     }
 
-    // Sort players by seat for turn order
-    const sorted = [...this.room.players].sort((a, b) => a.seat - b.seat);
+    // Sort players by seat for turn order (contestants only)
+    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => a.seat - b.seat);
     this.vcnvPlayerQueue = sorted.map((p) => p.id);
 
     // Calculate letter counts for all 4 rows
@@ -1281,7 +1370,7 @@ export class RoomStateMachine {
     const results: RevealResult[] = [];
     let atLeastOneCorrect = false;
 
-    for (const p of this.room.players) {
+    for (const p of this.room.players.filter((pl) => pl.role !== 'viewer')) {
       if (p.eliminatedVcnv) continue;
       const sub = this.answersMap.get(p.id);
       const ans = sub ? sub.answer : '';
@@ -1520,7 +1609,7 @@ export class RoomStateMachine {
     const results: RevealResult[] = [];
     let atLeastOneCorrect = false;
 
-    for (const p of this.room.players) {
+    for (const p of this.room.players.filter((pl) => pl.role !== 'viewer')) {
       if (p.eliminatedVcnv) continue;
       const sub = this.answersMap.get(p.id);
       const ans = sub ? sub.answer : '';
@@ -1682,7 +1771,7 @@ export class RoomStateMachine {
     }
 
     const subs: TangTocSub[] = [];
-    for (const p of this.room.players) {
+    for (const p of this.room.players.filter((pl) => pl.role !== 'viewer')) {
       const sub = this.answersMap.get(p.id);
       if (sub) {
         const isCorrect = matchAnswer(sub.answer, question.answer, question.alternatives, {
@@ -1779,8 +1868,8 @@ export class RoomStateMachine {
     this.room.status = 'VE_DICH';
     this.buzzedPlayerId = null;
     this.room.state.buzzerLockedBy = null;
-    // G9: Sort players by current score descending, tiebreaker smaller seat
-    const sorted = [...this.room.players].sort((a, b) => {
+    // G9: Sort players by current score descending, tiebreaker smaller seat (contestants only)
+    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return a.seat - b.seat;
     });
@@ -2119,8 +2208,12 @@ export class RoomStateMachine {
   // --- TIEBREAK & FINISHED ---
 
   private async checkFinishOrTiebreak(): Promise<void> {
-    // Sort players by score
-    const sorted = [...this.room.players].sort((a, b) => b.score - a.score);
+    // Sort players by score (contestants only)
+    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => b.score - a.score);
+    if (sorted.length === 0) {
+      await this.finishGame();
+      return;
+    }
     const topScore = sorted[0].score;
     const topPlayers = sorted.filter((p) => p.score === topScore);
 
@@ -2229,8 +2322,8 @@ export class RoomStateMachine {
 
   private async finishGame(winnerId?: string): Promise<void> {
     this.room.status = 'FINISHED';
-    const sorted = [...this.room.players].sort((a, b) => b.score - a.score);
-    const finalWinnerId = winnerId || sorted[0].id;
+    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => b.score - a.score);
+    const finalWinnerId = winnerId || (sorted[0] ? sorted[0].id : this.room.players[0]?.id);
 
     this.room.state = {
       round: 'FINISHED',

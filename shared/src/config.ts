@@ -1,5 +1,6 @@
 export const GAME_CONFIG = {
-  MAX_PLAYERS: 5,
+  MAX_PLAYERS: 5,                  // Tối đa 5 thí sinh
+  MAX_VIEWERS: 5,                  // Tối đa 5 người theo dõi / khán giả
   MIN_PLAYERS_FOR_TEST: 2,
   NETWORK_GRACE_MS: 300,           // Bù trễ mạng khi nhận đáp án sau deadline
   DISCONNECT_HOLD_SECONDS: 60,     // Giữ ghế 60s khi mất kết nối (G15)

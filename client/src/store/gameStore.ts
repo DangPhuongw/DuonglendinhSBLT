@@ -27,6 +27,7 @@ interface GameStore {
   createRoom: (name: string) => Promise<{ ok: boolean; error?: string }>;
   joinRoom: (name: string, roomCode: string) => Promise<{ ok: boolean; error?: string }>;
   rejoinRoom: (roomCode: string, token: string) => Promise<{ ok: boolean; error?: string }>;
+  switchSeat: (targetRole: 'player' | 'viewer', targetSeat: 1 | 2 | 3 | 4 | 5) => Promise<{ ok: boolean; error?: string }>;
   startGame: () => void;
   setReady: (mediaLoaded?: boolean) => void;
   submitAnswer: (questionId: string, content: string) => void;
@@ -276,6 +277,58 @@ export const useGameStore = create<GameStore>((set, get) => ({
           localStorage.removeItem('olympia_room_code');
           localStorage.removeItem('olympia_seat');
           resolve({ ok: false, error: res.error || 'Không thể vào lại phòng.' });
+        }
+      });
+    });
+  },
+
+  switchSeat: (targetRole, targetSeat) => {
+    // Optimistic instant update in 0ms
+    const currentRoom = get().room;
+    const currentPlayer = get().player;
+    if (currentRoom && currentPlayer) {
+      const updatedPlayers = currentRoom.players.map((p) => {
+        if (p.id === currentPlayer.id) {
+          return { ...p, role: targetRole, seat: targetSeat };
+        }
+        return p;
+      });
+
+      const updatedPlayer: Player = {
+        ...currentPlayer,
+        role: targetRole,
+        seat: targetSeat,
+      };
+
+      localStorage.setItem('olympia_seat', String(targetSeat));
+      set({
+        room: { ...currentRoom, players: updatedPlayers },
+        player: updatedPlayer,
+        mySeat: targetSeat,
+      });
+    }
+
+    return new Promise((resolve) => {
+      const s = get().socket;
+      if (!s) return resolve({ ok: false, error: 'Chưa kết nối tới máy chủ.' });
+
+      let answered = false;
+      const timer = setTimeout(() => {
+        if (!answered) {
+          answered = true;
+          resolve({ ok: true });
+        }
+      }, 1500);
+
+      s.emit('room:switchSeat', { targetRole, targetSeat }, (res) => {
+        if (!answered) {
+          answered = true;
+          clearTimeout(timer);
+          if (res && res.ok) {
+            resolve({ ok: true });
+          } else {
+            resolve({ ok: false, error: res?.error || 'Đổi vị trí thất bại.' });
+          }
         }
       });
     });

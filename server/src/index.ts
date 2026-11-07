@@ -271,6 +271,24 @@ io.on('connection', (socket) => {
     });
   });
 
+  // 4b. Switch seat / role
+  socket.on('room:switchSeat', ({ targetRole, targetSeat }, callback) => {
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) {
+      if (callback) callback({ ok: false, error: 'Không tìm thấy thông tin người chơi.' });
+      return;
+    }
+    const machine = roomManager.getRoom(info.roomCode);
+    if (machine) {
+      machine.eventQueue.enqueue(async () => {
+        const res = machine.switchSeat(info.playerId, targetRole, targetSeat);
+        if (callback) callback(res);
+      });
+    } else {
+      if (callback) callback({ ok: false, error: 'Phòng không tồn tại.' });
+    }
+  });
+
   // 5. Start game
   socket.on('room:start', () => {
     const info = roomManager.getPlayerBySocket(socket.id);

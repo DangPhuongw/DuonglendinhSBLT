@@ -15,6 +15,7 @@ import {
   Trophy,
   Star,
   Zap,
+  Eye,
 } from 'lucide-react';
 
 export const ReadyScreen: React.FC = () => {
@@ -27,8 +28,11 @@ export const ReadyScreen: React.FC = () => {
   if (!room || !myPlayer) return null;
 
   const isHost = room.hostId === myPlayer.id;
+  const isViewer = myPlayer.role === 'viewer';
   const targetRound = room.state.targetRound || 'KD_RIENG';
   const isCountdown = room.state.subPhase === 'COUNTDOWN';
+  const contestants = room.players.filter((p) => (p.role || 'player') === 'player');
+  const viewers = room.players.filter((p) => p.role === 'viewer');
 
   const roundNames: Record<string, string> = {
     KD_RIENG: 'VÒNG 1: KHỞI ĐỘNG',
@@ -454,18 +458,26 @@ export const ReadyScreen: React.FC = () => {
           </div>
         ) : (
           <div className="w-full mb-5 flex flex-col items-center">
-            <button
-              onClick={() => setReady(true)}
-              disabled={myPlayer.ready}
-              className={`w-full max-w-xs py-3.5 px-6 rounded-xl font-heading font-extrabold uppercase tracking-wider text-sm flex items-center justify-center gap-2 border transition-all ${
-                myPlayer.ready
-                  ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success cursor-default'
-                  : 'bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] border-[#FFD43B] shadow-glow-yellow-lg hover:scale-105 active:scale-95 cursor-pointer'
-              }`}
-            >
-              <CheckCircle2 size={18} />
-              <span>{myPlayer.ready ? 'Bạn đã sẵn sàng' : 'Tôi đã sẵn sàng'}</span>
-            </button>
+            {isViewer ? (
+              <div className="w-full max-w-md p-3.5 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-xl flex items-center justify-center gap-2.5 text-xs text-[#00D9FF] font-bold shadow-glow-cyan">
+                <Eye size={18} className="shrink-0" />
+                <span>Bạn đang theo dõi với vai trò Khán giả. Trận đấu sẽ tự động bắt đầu khi các thí sinh đã sẵn sàng.</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setReady(true)}
+                disabled={myPlayer.ready}
+                className={`w-full max-w-xs py-3.5 px-6 rounded-xl font-heading font-extrabold uppercase tracking-wider text-sm flex items-center justify-center gap-2 border transition-all ${
+                  myPlayer.ready
+                    ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success cursor-default'
+                    : 'bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] border-[#FFD43B] shadow-glow-yellow-lg hover:scale-105 active:scale-95 cursor-pointer'
+                }`}
+              >
+                <CheckCircle2 size={18} />
+                <span>{myPlayer.ready ? 'Bạn đã sẵn sàng' : 'Tôi đã sẵn sàng'}</span>
+              </button>
+            )}
+
             {isHost && (
               <button
                 onClick={forceStartRound}
@@ -478,13 +490,13 @@ export const ReadyScreen: React.FC = () => {
           </div>
         )}
 
-        {/* Players Readiness List */}
+        {/* Contestants Readiness List */}
         <div className="w-full border-t border-[#303D52] pt-4 mt-1">
           <h4 className="text-[11px] uppercase tracking-wider font-heading font-bold text-[#94A3B8] mb-2.5 text-left">
             Trạng thái sẵn sàng của các thí sinh:
           </h4>
           <div className="space-y-1.5">
-            {room.players.map((p) => {
+            {contestants.map((p) => {
               const isAbsent = !p.connected && p.disconnectedAt && Date.now() - p.disconnectedAt > 60000;
 
               return (
@@ -493,7 +505,7 @@ export const ReadyScreen: React.FC = () => {
                   className="flex items-center justify-between p-2.5 bg-[#1C2638] rounded-xl border border-[#303D52] text-xs font-medium"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-heading font-bold text-[#94A3B8]">G{p.seat}</span>
+                    <span className="font-heading font-bold text-[#FFD43B]">G{p.seat}</span>
                     <span className="font-bold text-[#F8FAFC]">{p.name}</span>
                     {!p.connected && (
                       <span className="flex items-center gap-1 text-[10px] text-[#FF496C] font-bold bg-[#FF496C]/10 border border-[#FF496C]/30 px-1.5 py-0.5 rounded">
@@ -529,6 +541,18 @@ export const ReadyScreen: React.FC = () => {
               );
             })}
           </div>
+
+          {viewers.length > 0 && (
+            <div className="mt-3 pt-2.5 border-t border-[#303D52]/40 flex items-center justify-between text-xs text-[#94A3B8]">
+              <div className="flex items-center gap-1.5">
+                <Eye size={13} className="text-[#00D9FF]" />
+                <span className="font-heading font-bold text-[#00D9FF]">Khán giả đang theo dõi ({viewers.length}):</span>
+              </div>
+              <span className="text-[#F8FAFC] font-medium truncate max-w-sm">
+                {viewers.map((v) => v.name).join(', ')}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

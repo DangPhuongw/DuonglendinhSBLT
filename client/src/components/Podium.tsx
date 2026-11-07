@@ -39,8 +39,10 @@ export const Podium: React.FC = () => {
 
   if (!room) return null;
 
-  // Sort players by total score
-  const sorted = [...room.players].sort((a, b) => b.score - a.score);
+  // Sort contestants by total score (viewers excluded)
+  const sorted = [...room.players]
+    .filter((p) => (p.role || 'player') === 'player')
+    .sort((a, b) => b.score - a.score);
   const champ = sorted[0];
 
   return (

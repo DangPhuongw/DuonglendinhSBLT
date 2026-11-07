@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
-import { Bell, Send, CheckCircle2, Sparkles, AlertCircle, Key } from 'lucide-react';
+import { Bell, Send, CheckCircle2, Sparkles, AlertCircle, Key, Eye } from 'lucide-react';
 
 export const VcnvRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -33,6 +33,7 @@ export const VcnvRound: React.FC = () => {
   const obstacleAnswerRevealed = room?.state?.obstacleAnswerRevealed;
   const obstacleSolved = room?.state?.obstacleSolved;
 
+  const isViewer = myPlayer?.role === 'viewer';
   const isEliminated = Boolean(myPlayer?.eliminatedVcnv);
   const isBuzzerLocked = Boolean(room?.state?.buzzerLockedBy);
   const vcnvQuestionsAppearedCount = room?.state?.vcnvQuestionsAppearedCount || 0;
@@ -49,13 +50,14 @@ export const VcnvRound: React.FC = () => {
       ? 30
       : 20;
 
-  // Bấm chuông Chướng ngại vật: Chỉ mở sau khi câu hỏi hàng ngang 1 xuất hiện
-  const canBuzz = !isEliminated && !isBuzzerLocked && vcnvQuestionsAppearedCount >= 1;
+  // Bấm chuông Chướng ngại vật: Chỉ mở sau khi câu hỏi hàng ngang 1 xuất hiện (chỉ thí sinh)
+  const canBuzz = !isViewer && !isEliminated && !isBuzzerLocked && vcnvQuestionsAppearedCount >= 1;
 
   const activeChooser = room?.players.find((p) => p.id === room?.state?.activePlayerId);
-  const isMyTurnToPick = Boolean(subPhase === 'PICK_ROW' && myPlayer && room?.state?.activePlayerId === myPlayer.id);
+  const isMyTurnToPick = Boolean(!isViewer && subPhase === 'PICK_ROW' && myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
   const isMyTurnToAnswerCnv = Boolean(
+    !isViewer &&
     (subPhase === 'CNV_ANSWERING' || subPhase === 'FINAL_GUESS_ANSWERING') &&
     myPlayer &&
     room?.state?.activePlayerId === myPlayer.id
@@ -452,7 +454,7 @@ export const VcnvRound: React.FC = () => {
           </p>
 
           {/* Form nhập đáp án */}
-          {(subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && !isEliminated && (
+          {(subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && !isEliminated && !isViewer && (
             <form onSubmit={handleSubmit} className="flex gap-2.5">
               <input
                 ref={inputRef}
@@ -470,6 +472,13 @@ export const VcnvRound: React.FC = () => {
                 <span>{submitted ? 'Đổi đáp án' : 'Gửi'}</span>
               </button>
             </form>
+          )}
+
+          {isViewer && (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && (
+            <div className="p-3 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-xl text-center text-xs font-bold text-[#00D9FF] flex items-center justify-center gap-2 shadow-glow-cyan">
+              <Eye size={15} />
+              <span>Bạn đang theo dõi với vai trò Khán giả. Đang chờ các thí sinh nhập đáp án...</span>
+            </div>
           )}
 
           {submitted && (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && (

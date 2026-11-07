@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
-import { Zap, Send, Clock, CheckCircle2, XCircle, Award } from 'lucide-react';
+import { Zap, Send, Clock, CheckCircle2, XCircle, Award, Eye } from 'lucide-react';
 
 export const TangTocRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -48,6 +48,8 @@ export const TangTocRound: React.FC = () => {
       voiceReader.stop();
     };
   }, []);
+
+  const isViewer = myPlayer?.role === 'viewer';
 
   if (!room || !myPlayer) return null;
 
@@ -113,7 +115,7 @@ export const TangTocRound: React.FC = () => {
           )}
 
           {/* Answer input form (during 30s) */}
-          {subPhase === 'QUESTION' && (
+          {subPhase === 'QUESTION' && !isViewer && (
             <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
               <input
                 ref={inputRef}
@@ -131,6 +133,13 @@ export const TangTocRound: React.FC = () => {
                 <span>{submitted ? 'Đổi đáp án' : 'Gửi'}</span>
               </button>
             </form>
+          )}
+
+          {subPhase === 'QUESTION' && isViewer && (
+            <div className="mt-4 p-3.5 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-xl text-center text-xs font-bold text-[#00D9FF] flex items-center justify-center gap-2 shadow-glow-cyan">
+              <Eye size={16} />
+              <span>Bạn đang theo dõi với vai trò Khán giả. Đang chờ các thí sinh nộp đáp án...</span>
+            </div>
           )}
 
           {submitted && subPhase === 'QUESTION' && (

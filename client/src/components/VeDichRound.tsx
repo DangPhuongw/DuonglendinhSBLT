@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
-import { Star, Bell, Send, Trophy, CheckCircle2 } from 'lucide-react';
+import { Star, Bell, Send, Trophy, CheckCircle2, Eye } from 'lucide-react';
 
 export const VeDichRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -21,7 +21,8 @@ export const VeDichRound: React.FC = () => {
   const subPhase = room?.state?.subPhase;
   const currentQ = room?.state?.currentQuestion;
   const activePlayer = room?.players.find((p) => p.id === room.state.activePlayerId);
-  const isMyTurn = Boolean(myPlayer && room?.state?.activePlayerId === myPlayer.id);
+  const isViewer = myPlayer?.role === 'viewer';
+  const isMyTurn = Boolean(!isViewer && myPlayer && room?.state?.activePlayerId === myPlayer.id);
   const questionPoints = room?.state?.questionPoints || 10;
   const questionIndex = room?.state?.questionIndex || 0;
 
@@ -48,7 +49,7 @@ export const VeDichRound: React.FC = () => {
   // Space key for steal buzzer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && subPhase === 'STEAL_BUZZ' && !isMyTurn) {
+      if (e.code === 'Space' && !isViewer && subPhase === 'STEAL_BUZZ' && !isMyTurn) {
         e.preventDefault();
         buzz();
       }
@@ -198,7 +199,17 @@ export const VeDichRound: React.FC = () => {
       {/* STEAL BUZZER SCREEN (5s) */}
       {subPhase === 'STEAL_BUZZ' && (
         <div className="w-full flex flex-col items-center my-4">
-          {!isMyTurn ? (
+          {isViewer ? (
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#1C2638] border-2 border-[#00D9FF]/50 shadow-glow-cyan flex flex-col items-center justify-center gap-1.5 p-4 text-center">
+              <Eye size={32} className="text-[#00D9FF] animate-pulse" />
+              <span className="font-heading font-black text-xs uppercase tracking-wider text-[#00D9FF]">
+                KHÁN GIẢ
+              </span>
+              <span className="text-[10px] text-[#94A3B8] leading-tight">
+                Chờ thí sinh bấm chuông giành quyền
+              </span>
+            </div>
+          ) : !isMyTurn ? (
             <button
               onClick={buzz}
               className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FF496C] hover:bg-[#ff6584] border-4 border-[#FF496C] shadow-glow-danger-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"

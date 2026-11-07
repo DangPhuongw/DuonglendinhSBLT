@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
-import { Star, WifiOff, Crown } from 'lucide-react';
+import { Star, WifiOff, Crown, Eye } from 'lucide-react';
 
 export const Scoreboard: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -8,17 +8,21 @@ export const Scoreboard: React.FC = () => {
 
   if (!room) return null;
 
+  // Filter contestants (only contestants have seats on the main board)
+  const contestants = room.players.filter((p) => (p.role || 'player') === 'player');
+  const viewers = room.players.filter((p) => p.role === 'viewer' && p.connected);
+
   // Ensure 5 seats are represented
   const seats = [1, 2, 3, 4, 5] as const;
 
-  // Determine top score among connected players
-  const maxScore = room.players.length > 0 ? Math.max(...room.players.map((p) => p.score)) : 0;
+  // Determine top score among connected contestants
+  const maxScore = contestants.length > 0 ? Math.max(...contestants.map((p) => p.score)) : 0;
 
   return (
     <div className="w-full bg-[#0D1322] border-b border-[#303D52] px-3 sm:px-6 py-2 shadow-lg">
       <div className="max-w-6xl mx-auto grid grid-cols-5 gap-2 sm:gap-3">
         {seats.map((seatNum) => {
-          const player = room.players.find((p) => p.seat === seatNum);
+          const player = contestants.find((p) => p.seat === seatNum);
           const isMe = myPlayer && player && player.id === myPlayer.id;
           const isActive = player && room.state.activePlayerId === player.id;
           const isHost = player && room.hostId === player.id;
@@ -116,6 +120,14 @@ export const Scoreboard: React.FC = () => {
           );
         })}
       </div>
+
+      {viewers.length > 0 && (
+        <div className="max-w-6xl mx-auto mt-1 flex items-center justify-end gap-1.5 text-[10px] text-[#94A3B8] font-medium px-1">
+          <Eye size={12} className="text-[#00D9FF]" />
+          <span>Khán giả ({viewers.length}):</span>
+          <span className="text-[#F8FAFC] font-bold truncate max-w-xs">{viewers.map((v) => v.name).join(', ')}</span>
+        </div>
+      )}
     </div>
   );
 };
