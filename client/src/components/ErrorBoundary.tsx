@@ -27,25 +27,25 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#FFFDF7] text-[#171717] flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md w-full bg-white border-3 border-[#171717] rounded-3xl p-6 sm:p-8 shadow-neo-lg flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#FF9292] border-2 border-[#171717] flex items-center justify-center text-[#171717] shadow-neo-sm">
+        <div className="min-h-screen bg-[#090D18] text-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
+          <div className="max-w-md w-full bg-[#111827] border border-[#303D52] rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-[#FF496C]/20 border border-[#FF496C] flex items-center justify-center text-[#FF496C] shadow-glow-danger">
               <AlertTriangle size={32} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#171717] mb-1">Đã có lỗi xảy ra</h2>
-              <p className="text-xs text-gray-700 font-bold leading-relaxed">
+              <h2 className="text-xl font-heading font-black text-[#F8FAFC] mb-1">Đã có lỗi xảy ra</h2>
+              <p className="text-xs text-[#94A3B8] font-medium leading-relaxed">
                 Hệ thống gặp sự cố hiển thị. Vui lòng bấm làm mới để tải lại giao diện trận đấu.
               </p>
               {this.state.error && (
-                <div className="mt-3 p-3 bg-gray-100 rounded-xl text-left text-xs font-mono text-gray-800 break-all max-h-28 overflow-y-auto border-2 border-[#171717]">
+                <div className="mt-3 p-3 bg-[#090D18] rounded-xl text-left text-xs font-mono text-[#FF496C] break-all max-h-28 overflow-y-auto border border-[#303D52]">
                   {this.state.error.message}
                 </div>
               )}
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FFE45C] hover:bg-[#ffe040] text-[#171717] font-black text-sm transition-all border-2 border-[#171717] shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-bold text-sm transition-all border border-[#FFD43B] shadow-glow-yellow active:scale-95 cursor-pointer"
             >
               <RefreshCw size={16} />
               <span>Làm mới trang (F5)</span>

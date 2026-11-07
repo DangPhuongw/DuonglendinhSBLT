@@ -89,19 +89,19 @@ export const KhoiDongRound: React.FC = () => {
 
   // Fixed colors for A, B, C, D badges
   const optionBadgeColors: Record<string, string> = {
-    A: 'bg-[#FF9292] text-[#171717]',
-    B: 'bg-[#66C7F2] text-[#171717]',
-    C: 'bg-[#FFE45C] text-[#171717]',
-    D: 'bg-[#55D6C2] text-[#171717]',
+    A: 'bg-[#FF496C]/20 border border-[#FF496C] text-[#FF496C]',
+    B: 'bg-[#00D9FF]/20 border border-[#00D9FF] text-[#00D9FF]',
+    C: 'bg-[#FFD43B]/20 border border-[#FFD43B] text-[#FFD43B]',
+    D: 'bg-[#20D6A0]/20 border border-[#20D6A0] text-[#20D6A0]',
   };
 
   // 5 Palette Colors for 5 Mystery Boxes
   const packageThemes = [
-    { bg: 'bg-[#FFE45C]', hover: 'hover:bg-[#ffe040]' }, // Ô 1: Vàng
-    { bg: 'bg-[#66C7F2]', hover: 'hover:bg-[#52bbe8]' }, // Ô 2: Xanh dương
-    { bg: 'bg-[#FF9292]', hover: 'hover:bg-[#ff7b7b]' }, // Ô 3: Hồng Coral
-    { bg: 'bg-[#55D6C2]', hover: 'hover:bg-[#43c4b0]' }, // Ô 4: Xanh Mint
-    { bg: 'bg-[#A98BFF]', hover: 'hover:bg-[#9775ff]' }, // Ô 5: Tím Lavender
+    { border: 'border-[#FFD43B]', text: 'text-[#FFD43B]', glow: 'hover:shadow-glow-yellow', bgGlow: 'bg-[#FFD43B]/10' }, // Ô 1: Vàng
+    { border: 'border-[#00D9FF]', text: 'text-[#00D9FF]', glow: 'hover:shadow-glow-cyan', bgGlow: 'bg-[#00D9FF]/10' }, // Ô 2: Cyan
+    { border: 'border-[#FF496C]', text: 'text-[#FF496C]', glow: 'hover:shadow-glow-danger', bgGlow: 'bg-[#FF496C]/10' }, // Ô 3: Đỏ/Hồng
+    { border: 'border-[#20D6A0]', text: 'text-[#20D6A0]', glow: 'hover:shadow-glow-success', bgGlow: 'bg-[#20D6A0]/10' }, // Ô 4: Xanh Mint
+    { border: 'border-[#A855F7]', text: 'text-[#A855F7]', glow: 'hover:shadow-glow-purple', bgGlow: 'bg-[#A855F7]/10' }, // Ô 5: Tím Lavender
   ];
 
   // --- 1. CHOOSE PACKAGE (CHỌN Ô CÂU HỎI KHỞI ĐỘNG - 5 Ô TỔNG) ---
@@ -118,41 +118,41 @@ export const KhoiDongRound: React.FC = () => {
 
     return (
       <div className="max-w-4xl mx-auto p-4 sm:p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-full bg-white border-3 border-[#171717] rounded-3xl p-6 sm:p-8 shadow-neo-lg flex flex-col items-center">
-          <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3.5 py-1 rounded-full border-2 border-[#171717] shadow-neo-sm mb-2">
+        <div className="w-full bg-[#111827] border border-[#303D52] rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center">
+          <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1 rounded-full border border-[#FFD43B]/40 shadow-glow-yellow mb-2">
             Vòng 1: Khởi Động Riêng
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#171717] mb-1">
+          <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#F8FAFC] mb-1">
             LƯỢT THI CỦA: {activePlayer?.name}
           </h2>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-bold text-[#171717] bg-[#FFFDF7] px-3 py-0.5 rounded-full border-2 border-[#171717] shadow-neo-sm">
+            <span className="text-xs font-heading font-bold text-[#FFD43B] bg-[#1C2638] px-3 py-0.5 rounded-full border border-[#303D52]">
               Ghế số {activePlayer?.seat}
             </span>
-            <span className="text-xs font-bold text-gray-600 bg-gray-100 px-3 py-0.5 rounded-full border border-gray-300">
+            <span className="text-xs font-bold text-[#94A3B8] bg-[#090D18] px-3 py-0.5 rounded-full border border-[#303D52]">
               5 câu hỏi • 15s/câu
             </span>
           </div>
 
           {subPhase === 'PACKAGE_CONFIRMED' ? (
-            <div className="my-6 p-6 rounded-2xl bg-[#FFE45C] border-3 border-[#171717] shadow-neo-lg flex flex-col items-center gap-2 animate-bounce">
-              <Sparkles className="text-[#171717]" size={36} />
-              <span className="text-xl font-black text-[#171717]">
+            <div className="my-6 p-6 rounded-2xl bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center gap-2 animate-bounce">
+              <Sparkles className="text-[#FFD43B]" size={36} />
+              <span className="text-xl font-heading font-black text-[#FFD43B]">
                 {activePlayer?.name} đã chọn {confirmedPkg?.name || 'Ô câu hỏi'}!
               </span>
-              <span className="text-xs font-bold text-[#171717]/80">
+              <span className="text-xs font-bold text-[#94A3B8]">
                 Gói gồm 5 câu hỏi trắc nghiệm (15s/câu). Bắt đầu sau 2 giây...
               </span>
             </div>
           ) : (
             <>
-              <p className="text-xs sm:text-sm text-[#171717] mb-4 max-w-lg font-medium">
+              <p className="text-xs sm:text-sm text-[#F8FAFC] mb-4 max-w-lg font-medium">
                 {isMyTurn ? (
-                  <span className="text-[#171717] font-black bg-[#FFE45C] px-3 py-1 rounded-lg border-2 border-[#171717] inline-block shadow-neo-sm">
+                  <span className="text-[#FFD43B] font-heading font-bold bg-[#FFD43B]/10 px-3 py-1 rounded-lg border border-[#FFD43B]/40 inline-block shadow-glow-yellow">
                     Đến lượt bạn! Bấm chọn 1 ô hoặc nhấn phím 1 - 5 (10 giây):
                   </span>
                 ) : (
-                  <span className="text-gray-600 font-bold">Đang chờ thí sinh chọn ô câu hỏi...</span>
+                  <span className="text-[#94A3B8] font-bold">Đang chờ thí sinh chọn ô câu hỏi...</span>
                 )}
               </p>
 
@@ -171,17 +171,21 @@ export const KhoiDongRound: React.FC = () => {
                       key={pkg.index}
                       disabled={!canClick}
                       onClick={() => chooseKdPackage(pkg.index)}
-                      className={`group relative p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-between min-h-[145px] sm:min-h-[160px] border-2 border-[#171717] transition-all ${
+                      className={`group relative p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-between min-h-[145px] sm:min-h-[160px] border transition-all ${
                         isChosen
-                          ? 'bg-gray-100 opacity-40 cursor-not-allowed select-none shadow-none text-gray-400 border-gray-300'
+                          ? 'bg-[#090D18]/60 opacity-40 cursor-not-allowed select-none shadow-none text-[#64748B] border-[#303D52]/40'
                           : canClick
-                          ? `${theme.bg} ${theme.hover} shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer`
-                          : `${theme.bg} opacity-75 cursor-not-allowed shadow-neo-sm`
+                          ? `bg-[#1C2638] ${theme.border} ${theme.glow} hover:scale-105 active:scale-95 cursor-pointer`
+                          : `bg-[#1C2638] opacity-60 ${theme.border} cursor-not-allowed`
                       }`}
                     >
                       {/* Top: Box Number Chip */}
                       <div className="w-full flex items-center justify-center">
-                        <span className="text-[11px] font-black uppercase tracking-wider text-[#171717] bg-white/90 px-3 py-0.5 rounded-full border border-[#171717] shadow-[1px_1px_0px_#171717] flex items-center gap-1">
+                        <span className={`text-[11px] font-heading font-bold uppercase tracking-wider px-3 py-0.5 rounded-full border flex items-center gap-1 ${
+                          isChosen
+                            ? 'bg-[#090D18] text-[#64748B] border-[#303D52]'
+                            : 'bg-[#111827] text-[#F8FAFC] border-[#303D52]'
+                        }`}>
                           {isChosen ? (
                             <>
                               <Lock size={11} className="stroke-[2.5]" />
@@ -196,12 +200,12 @@ export const KhoiDongRound: React.FC = () => {
                       {/* Center: Iconic Mystery Box Question Mark */}
                       <div className="my-2 flex flex-col items-center justify-center">
                         <span
-                          className={`text-4xl sm:text-5xl font-black font-mono tracking-tight transition-transform duration-200 select-none ${
+                          className={`text-4xl sm:text-5xl font-heading font-black tracking-tight transition-transform duration-200 select-none ${
                             isChosen
-                              ? 'text-gray-400 line-through'
+                              ? 'text-[#475569] line-through'
                               : canClick
-                              ? 'text-[#171717] group-hover:scale-125'
-                              : 'text-[#171717]'
+                              ? `${theme.text} group-hover:scale-125 drop-shadow-[0_0_12px_currentColor]`
+                              : theme.text
                           }`}
                         >
                           ?
@@ -211,15 +215,15 @@ export const KhoiDongRound: React.FC = () => {
                       {/* Bottom: Action / Status Badge */}
                       <div className="w-full">
                         {isChosen ? (
-                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-white/90 text-[#171717] border border-[#171717] font-bold truncate block w-full text-center">
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-[#090D18] text-[#94A3B8] border border-[#303D52] font-bold truncate block w-full text-center">
                             🔒 {pkg.chosenByName ? pkg.chosenByName : 'Đã chọn'}
                           </span>
                         ) : canClick ? (
-                          <span className="text-[10px] px-2.5 py-1 rounded-lg bg-white text-[#171717] border-2 border-[#171717] font-black uppercase tracking-wider block text-center shadow-neo-sm group-hover:bg-[#171717] group-hover:text-white transition-colors">
+                          <span className="text-[10px] px-2.5 py-1 rounded-lg bg-[#FFD43B] text-[#090D18] font-heading font-extrabold uppercase tracking-wider block text-center shadow-glow-yellow group-hover:bg-[#ffe066] transition-colors">
                             Chọn
                           </span>
                         ) : (
-                          <span className="text-[10px] text-[#171717]/70 font-bold italic block text-center">
+                          <span className="text-[10px] text-[#64748B] font-bold italic block text-center">
                             Chờ chọn
                           </span>
                         )}
@@ -239,12 +243,12 @@ export const KhoiDongRound: React.FC = () => {
     <div className="max-w-3xl mx-auto p-4 sm:p-6 flex flex-col items-center">
       {/* Round Header */}
       <div className="w-full flex items-center justify-between mb-4 px-1 gap-2 flex-wrap">
-        <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3 py-1 rounded-lg border-2 border-[#171717] shadow-neo-sm">
+        <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
           {currentRound === 'KD_RIENG'
             ? `Khởi Động Riêng - ${activePlayer?.name} (Ghế ${activePlayer?.seat} • Ô ${(room.state.kdChosenPackageIndex ?? 0) + 1} • Câu ${(room.state.questionIndex ?? 0) + 1}/5)`
             : 'Khởi Động Chung - Giành Chuông (10 Câu)'}
         </span>
-        <span className="text-xs text-gray-700 font-bold bg-white border-2 border-[#171717] px-2.5 py-1 rounded-lg shadow-neo-sm tabular-nums">
+        <span className="text-xs text-[#94A3B8] font-bold bg-[#1C2638] border border-[#303D52] px-2.5 py-1 rounded-lg tabular-nums">
           {currentRound === 'KD_RIENG' ? 'Đúng +10đ | Sai 0đ' : 'Đúng +10đ | Sai -5đ'}
         </span>
       </div>
@@ -267,19 +271,19 @@ export const KhoiDongRound: React.FC = () => {
         <div className="w-full flex flex-col items-center my-4">
           <button
             onClick={buzz}
-            className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FFE45C] hover:bg-[#ffe040] border-4 border-[#171717] shadow-neo-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:translate-x-1 active:translate-y-1 active:shadow-neo transition-transform"
+            className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
           >
-            <Bell size={36} className="text-[#171717] animate-bounce" />
-            <span className="font-black text-[#171717] text-base tracking-wider uppercase">
+            <Bell size={36} className="text-[#090D18] animate-bounce" />
+            <span className="font-heading font-black text-[#090D18] text-base tracking-wider uppercase">
               BẤM CHUÔNG
             </span>
-            <span className="text-[11px] text-gray-800 font-black uppercase tracking-widest bg-white border border-[#171717] px-2 py-0.5 rounded-full mt-1">
+            <span className="text-[11px] text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2 py-0.5 rounded-full mt-1">
               Phím Space
             </span>
           </button>
 
           {buzzRejectedReason && (
-            <span className="text-xs text-[#FF9292] font-black mt-3 animate-pulse bg-white border-2 border-[#171717] px-3 py-1 rounded-lg shadow-neo-sm">
+            <span className="text-xs text-[#FF496C] font-bold mt-3 animate-pulse bg-[#FF496C]/10 border border-[#FF496C]/40 px-3 py-1 rounded-lg">
               {buzzRejectedReason}
             </span>
           )}
@@ -288,16 +292,16 @@ export const KhoiDongRound: React.FC = () => {
 
       {/* Buzzer Winner Announcement */}
       {subPhase === 'ANSWERING' && Boolean(room.state.buzzerLockedBy) && (
-        <div className="w-full p-3 mb-4 bg-[#FFE45C] border-2 border-[#171717] rounded-xl text-center text-xs sm:text-sm font-black text-[#171717] shadow-neo animate-bounce">
+        <div className="w-full p-3 mb-4 bg-[#FFD43B]/20 border border-[#FFD43B] rounded-xl text-center text-xs sm:text-sm font-heading font-bold text-[#FFD43B] shadow-glow-yellow animate-bounce">
           🔔 {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành được quyền trả lời (3 giây)!
         </div>
       )}
 
       {/* Question Card */}
       {currentQ && (
-        <div className="w-full bg-white border-3 border-[#171717] rounded-2xl p-6 sm:p-8 shadow-neo-lg">
+        <div className="w-full bg-[#1C2638] border border-[#303D52] rounded-2xl p-6 sm:p-8 shadow-2xl relative">
           <div className="flex items-center justify-between gap-3 mb-4">
-            <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3 py-1 rounded-md border-2 border-[#171717] shadow-neo-sm">
+            <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-md border border-[#FFD43B]/40 shadow-glow-yellow">
               Câu hỏi
             </span>
             <QuestionSpeakerButton
@@ -306,7 +310,7 @@ export const KhoiDongRound: React.FC = () => {
             />
           </div>
 
-          <div className="text-base sm:text-xl font-black text-[#171717] mb-6 leading-relaxed">
+          <div className="text-base sm:text-xl font-bold text-[#F8FAFC] mb-6 leading-relaxed">
             {currentQ.prompt}
           </div>
 
@@ -326,32 +330,32 @@ export const KhoiDongRound: React.FC = () => {
                     key={letter}
                     onClick={() => handleSelectOption(letter)}
                     disabled={!isMyTurn || selectedOption !== null || subPhase === 'REVEAL'}
-                    className={`p-3.5 sm:p-4 rounded-xl border-2 border-[#171717] text-left flex items-start gap-3 transition-all ${
+                    className={`p-3.5 sm:p-4 rounded-xl border text-left flex items-start gap-3 transition-all ${
                       isAnswer
-                        ? 'bg-[#55D6C2] text-[#171717] font-black shadow-neo-lg scale-[1.02]'
+                        ? 'bg-[#20D6A0]/20 border-[#20D6A0] text-[#20D6A0] font-bold shadow-glow-success scale-[1.02]'
                         : isWrongSelection
-                        ? 'bg-[#FF9292] text-[#171717] font-bold shadow-neo-lg'
+                        ? 'bg-[#FF496C]/20 border-[#FF496C] text-[#FF496C] font-bold shadow-glow-danger'
                         : isSelected
-                        ? 'bg-[#FFE45C] text-[#171717] font-bold shadow-neo-lg'
+                        ? 'bg-[#FFD43B]/20 border-[#FFD43B] text-[#FFD43B] font-bold shadow-glow-yellow'
                         : isMyTurn && subPhase !== 'REVEAL'
-                        ? 'bg-white hover:bg-[#FFFDF7] text-[#171717] shadow-neo hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-neo-lg active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer'
-                        : 'bg-gray-100 text-gray-500 cursor-default opacity-80 shadow-none'
+                        ? 'bg-[#111827] hover:bg-[#162132] border-[#303D52] hover:border-[#00D9FF] hover:shadow-glow-cyan text-[#F8FAFC] cursor-pointer active:scale-95'
+                        : 'bg-[#111827]/60 text-[#64748B] border-[#303D52]/40 cursor-default opacity-80'
                     }`}
                   >
                     <span
-                      className={`w-7 h-7 rounded-lg border-2 border-[#171717] flex items-center justify-center font-black text-xs shrink-0 shadow-neo-sm ${
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-heading font-bold text-xs shrink-0 ${
                         isAnswer
-                          ? 'bg-white text-[#171717]'
+                          ? 'bg-[#20D6A0] text-[#090D18]'
                           : isWrongSelection
-                          ? 'bg-white text-[#171717]'
+                          ? 'bg-[#FF496C] text-[#090D18]'
                           : isSelected
-                          ? 'bg-[#171717] text-white'
-                          : optionBadgeColors[letter] || 'bg-white text-[#171717]'
+                          ? 'bg-[#FFD43B] text-[#090D18]'
+                          : optionBadgeColors[letter] || 'bg-[#1C2638] text-[#F8FAFC] border border-[#303D52]'
                       }`}
                     >
                       {letter}
                     </span>
-                    <span className="text-sm font-bold leading-snug pt-0.5">{opt}</span>
+                    <span className="text-sm font-medium leading-snug pt-0.5">{opt}</span>
                   </button>
                 );
               })}
@@ -360,10 +364,10 @@ export const KhoiDongRound: React.FC = () => {
 
           {/* Reveal Result Info */}
           {subPhase === 'REVEAL' && lastReveal && (
-            <div className="mt-6 pt-4 border-t-2 border-[#171717] flex flex-col items-center">
+            <div className="mt-6 pt-4 border-t border-[#303D52] flex flex-col items-center">
               <div className="flex items-center gap-2 text-sm font-bold">
-                <span className="text-gray-700 font-bold uppercase tracking-wider">Đáp án chính xác:</span>
-                <span className="bg-[#55D6C2] text-[#171717] px-4 py-1 rounded-xl border-2 border-[#171717] font-black text-lg shadow-neo-sm">
+                <span className="text-[#94A3B8] font-heading uppercase tracking-wider">Đáp án chính xác:</span>
+                <span className="bg-[#20D6A0] text-[#090D18] px-4 py-1 rounded-xl font-heading font-black text-lg shadow-glow-success">
                   {lastReveal.correctAnswer}
                 </span>
               </div>

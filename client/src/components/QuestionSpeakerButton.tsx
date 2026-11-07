@@ -47,20 +47,20 @@ export const QuestionSpeakerButton: React.FC<QuestionSpeakerButtonProps> = ({
       type="button"
       onClick={handleClick}
       title={isSpeaking ? 'Dừng đọc (Tiếng Việt)' : 'Đọc câu hỏi (Tiếng Việt)'}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer ${
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-heading transition-all border active:scale-95 cursor-pointer ${
         isSpeaking
-          ? 'bg-[#FFE45C] text-[#171717] animate-pulse'
-          : 'bg-white hover:bg-[#FFE45C] text-[#171717]'
+          ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow'
+          : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#00D9FF] hover:border-[#00D9FF] border-[#303D52]'
       } ${className}`}
     >
       {isSpeaking ? (
         <>
-          <Square size={13} className="fill-[#171717] text-[#171717]" />
+          <Square size={13} className="fill-[#090D18] text-[#090D18]" />
           <span>Đang đọc...</span>
         </>
       ) : (
         <>
-          <Volume2 size={14} className="text-[#171717]" />
+          <Volume2 size={14} className="text-[#00D9FF]" />
           <span>Đọc câu hỏi</span>
         </>
       )}

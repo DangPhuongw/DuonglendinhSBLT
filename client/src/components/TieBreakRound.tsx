@@ -61,15 +61,15 @@ export const TieBreakRound: React.FC = () => {
     const winner = room.players.find((p) => p.id === room.state.winnerId);
     return (
       <div className="max-w-xl mx-auto p-8 flex flex-col items-center justify-center min-h-[50vh] text-center">
-        <div className="w-full bg-white border-3 border-[#171717] rounded-3xl p-6 sm:p-8 shadow-neo-lg flex flex-col items-center">
-          <span className="text-xs uppercase font-black bg-[#FFE45C] text-[#171717] px-3.5 py-1 rounded-full border-2 border-[#171717] shadow-neo-sm mb-2">
+        <div className="w-full bg-[#111827] border border-[#303D52] rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center">
+          <span className="text-xs uppercase font-heading font-black bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1 rounded-full border border-[#FFD43B]/40 shadow-glow-yellow mb-2">
             BỐC THĂM MAY MẮN
           </span>
-          <h2 className="text-2xl font-black text-[#171717] mb-2">PHÂN ĐỊNH THẮNG THUA</h2>
-          <p className="text-xs text-gray-700 font-bold mb-6">
+          <h2 className="text-2xl font-heading font-black text-[#F8FAFC] mb-2">PHÂN ĐỊNH THẮNG THUA</h2>
+          <p className="text-xs text-[#94A3B8] font-medium mb-6">
             Sau 3 câu hỏi phụ vẫn bất phân thắng bại, hệ thống tiến hành bốc thăm ngẫu nhiên:
           </p>
-          <div className="text-2xl sm:text-3xl font-black text-[#171717] p-6 bg-[#FFE45C] border-3 border-[#171717] rounded-2xl shadow-neo-lg animate-pulse w-full">
+          <div className="text-2xl sm:text-3xl font-heading font-black text-[#FFD43B] p-6 bg-[#1C2638] border-2 border-[#FFD43B] rounded-2xl shadow-glow-yellow-lg animate-pulse w-full">
             {winner ? `🏆 ${winner.name}` : 'Đang quay số...'}
           </div>
         </div>
@@ -80,10 +80,10 @@ export const TieBreakRound: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 flex flex-col items-center">
       <div className="w-full flex items-center justify-between mb-4 px-1 gap-2 flex-wrap">
-        <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3 py-1 rounded-lg border-2 border-[#171717] shadow-neo-sm">
+        <span className="text-xs font-heading font-black uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
           CÂU HỎI PHỤ PHÂN ĐỊNH THẮNG THUA
         </span>
-        <span className="text-xs text-gray-700 font-bold bg-white border-2 border-[#171717] px-2.5 py-1 rounded-lg shadow-neo-sm">
+        <span className="text-xs text-[#94A3B8] font-medium bg-[#1C2638] border border-[#303D52] px-2.5 py-1 rounded-lg">
           Đúng thắng chung cuộc
         </span>
       </div>
@@ -98,13 +98,13 @@ export const TieBreakRound: React.FC = () => {
 
       {/* WAIT SIGNAL BANNER */}
       {subPhase === 'WAIT_SIGNAL' && (
-        <div className="w-full p-4 mb-4 bg-[#FFE45C] border-3 border-[#171717] rounded-2xl flex items-center justify-center gap-3 shadow-neo animate-pulse">
-          <AlertTriangle size={24} className="text-[#171717] shrink-0" />
+        <div className="w-full p-4 mb-4 bg-[#FF496C]/15 border-2 border-[#FF496C] rounded-2xl flex items-center justify-center gap-3 shadow-glow-danger animate-pulse">
+          <AlertTriangle size={24} className="text-[#FF496C] shrink-0" />
           <div className="text-center">
-            <span className="text-base font-black text-[#171717] uppercase tracking-widest block">
+            <span className="text-base font-heading font-black text-[#FF496C] uppercase tracking-widest block">
               CHỜ HIỆU LỆNH BẤM CHUÔNG...
             </span>
-            <span className="text-xs text-gray-800 font-bold">
+            <span className="text-xs text-[#FF496C]/80 font-bold">
               Cảnh báo: Bấm chuông trong 3 giây này sẽ bị tước quyền câu này!
             </span>
           </div>
@@ -116,13 +116,13 @@ export const TieBreakRound: React.FC = () => {
         <div className="w-full flex flex-col items-center my-4">
           <button
             onClick={buzz}
-            className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FFE45C] hover:bg-[#ffe040] border-4 border-[#171717] shadow-neo-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:translate-x-1 active:translate-y-1 active:shadow-neo transition-transform"
+            className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
           >
-            <Bell size={36} className="text-[#171717] animate-bounce" />
-            <span className="font-black text-[#171717] text-base tracking-wider uppercase">
+            <Bell size={36} className="text-[#090D18] animate-bounce" />
+            <span className="font-heading font-black text-[#090D18] text-base tracking-wider uppercase">
               BẤM CHUÔNG
             </span>
-            <span className="text-[11px] text-gray-800 font-black uppercase tracking-widest bg-white border border-[#171717] px-2 py-0.5 rounded-full mt-1">
+            <span className="text-[11px] text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2 py-0.5 rounded-full mt-1">
               Phím Space
             </span>
           </button>
@@ -130,23 +130,23 @@ export const TieBreakRound: React.FC = () => {
       )}
 
       {buzzRejectedReason && (
-        <div className="w-full p-3 mb-3 bg-[#FF9292]/30 border-2 border-[#171717] rounded-xl text-center text-xs font-black text-[#171717] shadow-neo-sm">
+        <div className="w-full p-3 mb-3 bg-[#FF496C]/15 border border-[#FF496C]/40 rounded-xl text-center text-xs font-bold text-[#FF496C] shadow-glow-danger">
           {buzzRejectedReason}
         </div>
       )}
 
       {/* Buzzer Winner Announcement */}
       {subPhase === 'ANSWERING' && Boolean(room.state.buzzerLockedBy) && (
-        <div className="w-full p-3 mb-4 bg-[#FFE45C] border-2 border-[#171717] rounded-xl text-center text-xs sm:text-sm font-black text-[#171717] shadow-neo animate-bounce">
+        <div className="w-full p-3 mb-4 bg-[#FFD43B]/20 border border-[#FFD43B] rounded-xl text-center text-xs sm:text-sm font-heading font-bold text-[#FFD43B] shadow-glow-yellow animate-bounce">
           🔔 {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành quyền trả lời câu hỏi!
         </div>
       )}
 
       {/* Question Card */}
       {currentQ && (
-        <div className="w-full bg-white border-3 border-[#171717] rounded-2xl p-6 sm:p-8 shadow-neo-lg">
+        <div className="w-full bg-[#1C2638] border border-[#303D52] rounded-2xl p-6 sm:p-8 shadow-2xl">
           <div className="flex items-center justify-between gap-3 mb-4">
-            <span className="text-xs font-black uppercase tracking-wider bg-[#FFE45C] text-[#171717] px-3 py-1 rounded-md border-2 border-[#171717] shadow-neo-sm">
+            <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-md border border-[#FFD43B]/40 shadow-glow-yellow">
               Câu hỏi phụ
             </span>
             <QuestionSpeakerButton
@@ -155,7 +155,7 @@ export const TieBreakRound: React.FC = () => {
             />
           </div>
 
-          <p className="text-base sm:text-xl font-black text-[#171717] mb-6 leading-relaxed">
+          <p className="text-base sm:text-xl font-bold text-[#F8FAFC] mb-6 leading-relaxed">
             {currentQ.prompt}
           </p>
 
@@ -167,11 +167,11 @@ export const TieBreakRound: React.FC = () => {
                 placeholder="Nhập câu trả lời của bạn..."
                 value={inputAnswer}
                 onChange={(e) => setInputAnswer(e.target.value)}
-                className="flex-1 px-4 py-3 bg-white border-2 border-[#171717] rounded-xl text-[#171717] uppercase placeholder-gray-400 focus:outline-none focus:bg-[#FFFDF7] text-sm font-black tracking-wider shadow-neo-sm transition-all"
+                className="flex-1 px-4 py-3 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] uppercase placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan text-sm font-heading font-bold tracking-wider transition-all"
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-[#FFE45C] hover:bg-[#ffe040] text-[#171717] font-black rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all border-2 border-[#171717] shadow-neo active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer"
+                className="px-6 py-3 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-black rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#FFD43B] shadow-glow-yellow hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Send size={14} />
                 <span>Gửi</span>
@@ -180,9 +180,9 @@ export const TieBreakRound: React.FC = () => {
           )}
 
           {subPhase === 'REVEAL' && lastReveal && (
-            <div className="mt-6 pt-4 border-t-2 border-[#171717] flex items-center justify-between">
-              <span className="text-xs text-gray-700 font-black uppercase tracking-wider">Đáp án chính xác:</span>
-              <span className="text-base font-black text-[#171717] bg-[#55D6C2] px-3.5 py-1 rounded-xl border-2 border-[#171717] shadow-neo-sm tracking-wider">
+            <div className="mt-6 pt-4 border-t border-[#303D52] flex items-center justify-between">
+              <span className="text-xs text-[#94A3B8] font-heading font-bold uppercase tracking-wider">Đáp án chính xác:</span>
+              <span className="text-base font-heading font-black text-[#090D18] bg-[#20D6A0] px-3.5 py-1 rounded-xl shadow-glow-success tracking-wider">
                 {lastReveal.correctAnswer}
               </span>
             </div>

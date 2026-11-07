@@ -11,6 +11,7 @@ import { VeDichRound } from './components/VeDichRound';
 import { TieBreakRound } from './components/TieBreakRound';
 import { Podium } from './components/Podium';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { GalaxyBackground } from './components/GalaxyBackground';
 
 export const App: React.FC = () => {
   const initSocket = useGameStore((s) => s.initSocket);
@@ -85,21 +86,22 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#FFFDF7] text-[#171717] flex flex-col selection:bg-[#FFE45C] selection:text-[#171717] relative">
+      <div className="min-h-screen text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative overflow-x-hidden">
+        <GalaxyBackground />
         <Navbar />
         {room && currentRound !== 'LOBBY' && <Scoreboard />}
         <main className="flex-1 w-full max-w-6xl mx-auto px-3 py-3 sm:px-6 sm:py-4 flex flex-col justify-start">
           {renderCurrentView()}
         </main>
         {room && currentRound !== 'LOBBY' && (
-          <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 bg-white border-2 border-[#171717] shadow-neo rounded-xl p-2">
-            <span className="text-[11px] font-extrabold text-[#171717] px-1 uppercase tracking-wider">⏩ Tua:</span>
+          <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-2xl rounded-xl p-1.5">
+            <span className="text-[11px] font-bold text-[#94A3B8] px-1 font-heading uppercase tracking-wider">⏩ Tua:</span>
             <button
               onClick={() => jumpToRound('KD_RIENG')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
                 isKdActive
-                  ? 'bg-[#FF9292] text-[#171717] shadow-neo-sm font-black'
-                  : 'bg-white hover:bg-[#FF9292] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
+                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
               title="Tua tới chuẩn bị Vòng 1: Khởi Động"
             >
@@ -107,10 +109,10 @@ export const App: React.FC = () => {
             </button>
             <button
               onClick={() => jumpToRound('VCNV')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
                 isVcnvActive
-                  ? 'bg-[#FFE45C] text-[#171717] shadow-neo-sm font-black'
-                  : 'bg-white hover:bg-[#FFE45C] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
+                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
               title="Tua tới chuẩn bị Vòng 2: Vượt Chướng Ngại Vật"
             >
@@ -118,10 +120,10 @@ export const App: React.FC = () => {
             </button>
             <button
               onClick={() => jumpToRound('TANG_TOC')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
                 isTtActive
-                  ? 'bg-[#66C7F2] text-[#171717] shadow-neo-sm font-black'
-                  : 'bg-white hover:bg-[#66C7F2] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
+                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
               title="Tua tới chuẩn bị Vòng 3: Tăng Tốc"
             >
@@ -129,10 +131,10 @@ export const App: React.FC = () => {
             </button>
             <button
               onClick={() => jumpToRound('VE_DICH')}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border-2 border-[#171717] transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
                 isVdActive
-                  ? 'bg-[#55D6C2] text-[#171717] shadow-neo-sm font-black'
-                  : 'bg-white hover:bg-[#55D6C2] text-[#171717] active:translate-x-0.5 active:translate-y-0.5'
+                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow font-black'
+                  : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
               }`}
               title="Tua tới chuẩn bị Vòng 4: Về Đích"
             >

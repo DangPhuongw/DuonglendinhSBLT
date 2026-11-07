@@ -49,29 +49,29 @@ export const Lobby: React.FC = () => {
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-65px)] p-4">
-        <div className="w-full max-w-md bg-white border-3 border-[#171717] rounded-2xl p-6 sm:p-8 shadow-neo-lg text-[#171717] relative">
+        <div className="w-full max-w-md bg-[#111827]/90 backdrop-blur-xl border border-[#303D52]/80 rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] text-[#F8FAFC] relative">
           {/* Header */}
           <div className="text-center mb-6">
             <div className="inline-block relative mb-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717] tracking-tight relative z-10">
+              <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#F8FAFC] tracking-tight relative z-10">
                 ĐẤU TRƯỜNG TRÍ TUỆ
               </h1>
-              <div className="absolute bottom-0.5 left-0 right-0 h-3 bg-[#FFE45C] z-0 -rotate-1 rounded" />
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#FFD43B]/30 blur-sm rounded" />
             </div>
-            <p className="text-xs sm:text-sm font-bold text-[#666666] mt-1 leading-relaxed">
+            <p className="text-xs sm:text-sm font-medium text-[#94A3B8] mt-1 leading-relaxed">
               Mô phỏng theo format chương trình Đường lên đỉnh Olympia
             </p>
           </div>
 
           {errorMsg && (
-            <div className="mb-4 p-3 bg-[#FF9292]/20 border-2 border-[#171717] rounded-lg text-[#171717] text-xs font-bold shadow-neo-sm">
+            <div className="mb-4 p-3 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-[#FF496C] text-xs font-bold shadow-glow-danger">
               {errorMsg}
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-extrabold text-[#171717] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-heading font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">
                 Tên hiển thị của bạn
               </label>
               <input
@@ -80,7 +80,7 @@ export const Lobby: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={24}
-                className="w-full h-12 px-4 bg-white border-2 border-[#171717] rounded-lg text-[#171717] font-bold placeholder-[#999999] focus:outline-none focus:bg-[#FFFDF7] shadow-neo-sm focus:shadow-neo transition-all text-sm"
+                className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] font-bold placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-sm"
               />
             </div>
 
@@ -88,7 +88,7 @@ export const Lobby: React.FC = () => {
               <button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="w-full h-12 bg-[#FFE45C] hover:bg-[#fad836] text-[#171717] font-extrabold rounded-lg border-2 border-[#171717] shadow-neo hover:shadow-neo-lg hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full h-12 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-extrabold rounded-xl border border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Users size={18} className="stroke-[2.5]" />
                 <span>{isCreating ? 'Đang tạo phòng...' : 'Tạo phòng mới'}</span>
@@ -96,15 +96,15 @@ export const Lobby: React.FC = () => {
             </div>
 
             <div className="relative my-4 flex items-center justify-center">
-              <div className="border-t-2 border-[#171717] w-full" />
-              <span className="bg-white px-3 text-xs text-[#171717] uppercase font-black absolute border border-[#171717] rounded shadow-[1px_1px_0px_#171717]">
+              <div className="border-t border-[#303D52] w-full" />
+              <span className="bg-[#111827] px-3 text-xs text-[#64748B] uppercase font-heading font-bold absolute border border-[#303D52] rounded">
                 HOẶC
               </span>
             </div>
 
             <div className="space-y-2">
               <div>
-                <label className="block text-xs font-extrabold text-[#171717] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-heading font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5">
                   Mã phòng thi
                 </label>
                 <input
@@ -113,14 +113,14 @@ export const Lobby: React.FC = () => {
                   value={roomCodeInput}
                   onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
                   maxLength={6}
-                  className="w-full h-12 px-4 bg-white border-2 border-[#171717] rounded-lg text-[#171717] uppercase font-mono font-extrabold tracking-widest placeholder-[#999999] focus:outline-none focus:bg-[#FFFDF7] shadow-neo-sm focus:shadow-neo transition-all text-sm text-center tabular-nums"
+                  className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] uppercase font-digital font-bold tracking-widest placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-sm text-center tabular-nums"
                 />
               </div>
 
               <button
                 onClick={handleJoin}
                 disabled={isJoining}
-                className="w-full h-12 bg-white hover:bg-slate-50 text-[#171717] font-extrabold rounded-lg border-2 border-[#171717] shadow-neo hover:shadow-neo-lg hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full h-12 bg-[#1C2638] hover:bg-[#24324a] text-[#F8FAFC] font-heading font-extrabold rounded-xl border border-[#303D52] hover:border-[#00D9FF] hover:shadow-glow-cyan active:scale-95 transition-all text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>{isJoining ? 'Đang vào phòng...' : 'Vào phòng thi'}</span>
               </button>
@@ -170,24 +170,24 @@ export const Lobby: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 flex flex-col items-center">
       {/* Lobby Header */}
-      <div className="w-full bg-white border-2 border-[#171717] rounded-2xl p-6 mb-6 text-center shadow-neo">
+      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-6 mb-6 text-center shadow-xl">
         <div className="inline-block relative">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#171717] tracking-tight relative z-10">
+          <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-[#F8FAFC] tracking-tight relative z-10">
             SẢNH CHỜ TRẬN ĐẤU
           </h2>
-          <div className="absolute bottom-0 left-0 right-0 h-3 bg-[#FFE45C] z-0 -rotate-1 rounded" />
+          <div className="absolute bottom-0 left-0 right-0 h-2 bg-[#FFD43B]/30 blur-sm rounded" />
         </div>
         <div className="mt-4 flex items-center justify-center gap-2">
-          <span className="text-xs font-black uppercase text-[#666666]">Mã phòng:</span>
-          <span className="font-mono text-xl font-extrabold tracking-widest text-[#171717] bg-[#FFE45C] px-3.5 py-1 rounded-lg border-2 border-[#171717] shadow-neo-sm tabular-nums">
+          <span className="text-xs font-heading font-bold uppercase text-[#94A3B8]">Mã phòng:</span>
+          <span className="font-digital text-2xl font-bold tracking-widest text-[#090D18] bg-[#FFD43B] px-4 py-0.5 rounded-lg border border-[#FFD43B] shadow-glow-yellow tabular-nums">
             {room.code}
           </span>
           <button
             onClick={handleCopyCode}
-            className="flex items-center gap-1.5 text-xs font-black bg-white hover:bg-slate-50 px-3.5 py-2 rounded-lg border-2 border-[#171717] text-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-heading font-bold bg-[#1C2638] hover:bg-[#24324a] px-3.5 py-1.5 rounded-lg border border-[#303D52] hover:border-[#00D9FF] text-[#F8FAFC] transition-all cursor-pointer active:scale-95"
             title="Sao chép mã phòng"
           >
-            {copied ? <Check size={14} className="text-[#171717] stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
+            {copied ? <Check size={14} className="text-[#20D6A0] stroke-[3]" /> : <Copy size={14} className="stroke-[2.5]" />}
             <span>{copied ? 'Đã sao chép' : 'Sao chép'}</span>
           </button>
         </div>
@@ -196,9 +196,9 @@ export const Lobby: React.FC = () => {
       {/* 5 Seats Grid */}
       <div className="w-full mb-8">
         <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="text-xs uppercase font-extrabold text-[#171717] tracking-wider flex items-center gap-2">
+          <h3 className="text-xs uppercase font-heading font-bold text-[#94A3B8] tracking-wider flex items-center gap-2">
             <span>Danh sách người chơi</span>
-            <span className="bg-[#FFE45C] px-2 py-0.5 rounded-full border border-[#171717] shadow-[1px_1px_0px_#171717] text-[11px] font-black">
+            <span className="bg-[#FFD43B] text-[#090D18] px-2 py-0.5 rounded-full font-heading font-black text-[11px] shadow-glow-yellow">
               {connectedPlayers.length}/5
             </span>
           </h3>
@@ -211,12 +211,12 @@ export const Lobby: React.FC = () => {
             return (
               <div
                 key={seatNum}
-                className={`relative p-4 rounded-xl border-2 border-[#171717] flex flex-col items-center justify-center min-h-[130px] transition-all ${
+                className={`relative p-4 rounded-xl border flex flex-col items-center justify-center min-h-[130px] transition-all ${
                   player
                     ? isMe
-                      ? 'bg-[#FFE45C] shadow-neo scale-[1.02]'
-                      : 'bg-white shadow-neo hover:-translate-y-1 hover:shadow-neo-lg'
-                    : 'bg-[#FFFDF7] border-dashed border-[#171717]/40 opacity-70'
+                      ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow scale-[1.02]'
+                      : 'bg-[#111827] border-[#303D52] hover:border-[#00D9FF] hover:shadow-glow-cyan'
+                    : 'bg-[#090D18]/40 border-dashed border-[#303D52]/40 opacity-50'
                 }`}
               >
                 {/* Host kick button */}
@@ -227,36 +227,36 @@ export const Lobby: React.FC = () => {
                       kickPlayer(player.id);
                     }}
                     title={`Mời ${player.name} ra khỏi phòng`}
-                    className="absolute top-2 right-2 p-1 rounded-md bg-[#FF9292] hover:bg-rose-300 text-[#171717] border border-[#171717] shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none z-10"
+                    className="absolute top-2 right-2 p-1 rounded-md bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 transition-all active:scale-95 z-10"
                   >
                     <X size={12} className="stroke-[2.5]" />
                   </button>
                 )}
 
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-extrabold text-sm mb-2 border-2 border-[#171717] shadow-neo-sm ${
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-heading font-extrabold text-sm mb-2 border ${
                     player
                       ? isMe
-                        ? 'bg-[#171717] text-[#FFE45C]'
-                        : 'bg-[#66C7F2] text-[#171717]'
-                      : 'bg-white text-[#999999]'
+                        ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow'
+                        : 'bg-[#1C2638] text-[#00D9FF] border-[#00D9FF]/50'
+                      : 'bg-[#0E1524] text-[#64748B] border-[#303D52]'
                   }`}
                 >
                   {seatNum}
                 </div>
 
-                <span className="font-extrabold text-sm text-center truncate max-w-full px-1 text-[#171717]">
+                <span className="font-bold text-sm text-center truncate max-w-full px-1 text-[#F8FAFC]">
                   {player ? player.name : 'Ghế trống'}
                 </span>
 
                 {player && (
-                  <span className="text-[10px] font-bold mt-1 flex flex-col items-center gap-0.5">
+                  <span className="text-[10px] font-medium mt-1 flex flex-col items-center gap-0.5">
                     {room.hostId === player.id && (
-                      <span className="text-[#171717] bg-white px-1.5 py-0.5 rounded border border-[#171717] shadow-[1px_1px_0px_#171717]">Chủ phòng</span>
+                      <span className="text-[#FFD43B] bg-[#FFD43B]/10 px-1.5 py-0.2 rounded border border-[#FFD43B]/30 font-heading font-bold">Chủ phòng</span>
                     )}
-                    {isMe && <span className="text-[#FFE45C] bg-[#171717] px-1.5 py-0.5 rounded border border-[#171717] shadow-[1px_1px_0px_#171717]">Bạn</span>}
+                    {isMe && <span className="text-[#00D9FF] bg-[#00D9FF]/10 px-1.5 py-0.2 rounded border border-[#00D9FF]/30 font-heading font-bold">Bạn</span>}
                     {!player.connected && (
-                      <span className="text-[#171717] bg-[#FF9292] px-1 py-0.5 rounded border border-[#171717]">Mất kết nối</span>
+                      <span className="text-[#FF496C] bg-[#FF496C]/10 px-1 py-0.2 rounded border border-[#FF496C]/30 font-bold">Mất kết nối</span>
                     )}
                   </span>
                 )}
@@ -268,11 +268,11 @@ export const Lobby: React.FC = () => {
 
       {/* Host Control Section */}
       {isHost ? (
-        <div className="w-full bg-white border-2 border-[#171717] rounded-2xl p-6 shadow-neo flex flex-col items-center gap-4">
-          <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 border-b-2 border-[#171717] pb-4">
+        <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-6 shadow-xl flex flex-col items-center gap-4">
+          <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-[#303D52] pb-4">
             <div>
-              <h4 className="font-extrabold text-base text-[#171717]">Nạp bộ đề thi tùy chỉnh</h4>
-              <p className="text-xs font-semibold text-[#666666]">
+              <h4 className="font-heading font-extrabold text-base text-[#F8FAFC]">Nạp bộ đề thi tùy chỉnh</h4>
+              <p className="text-xs text-[#94A3B8]">
                 Mặc định dùng Bộ đề mẫu Đấu Trường Trí Tuệ. Có thể nạp file Excel (6 sheet) hoặc JSON.
               </p>
             </div>
@@ -280,14 +280,14 @@ export const Lobby: React.FC = () => {
               <a
                 href="/api/question-template"
                 download="olympia_bo_de_mau.xlsx"
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-[#171717] text-xs font-black rounded-lg border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1C2638] hover:bg-[#24324a] text-[#F8FAFC] text-xs font-heading font-bold rounded-lg border border-[#303D52] hover:border-[#00D9FF] transition-all cursor-pointer"
                 title="Tải file mẫu Excel chuẩn với đầy đủ 6 sheet"
               >
                 <Download size={15} className="stroke-[2.5]" />
                 <span>Tải file Excel mẫu</span>
               </a>
 
-              <label className="cursor-pointer shrink-0 flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#FFE45C] text-[#171717] text-xs font-extrabold rounded-lg border-2 border-[#171717] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
+              <label className="cursor-pointer shrink-0 flex items-center gap-2 px-4 py-2 bg-[#1C2638] hover:bg-[#24324a] text-[#00D9FF] text-xs font-heading font-bold rounded-lg border border-[#00D9FF]/50 hover:border-[#00D9FF] hover:shadow-glow-cyan transition-all">
                 <Upload size={15} className="stroke-[2.5]" />
                 <span>Nạp file đề (.xlsx / .json)</span>
                 <input
@@ -301,23 +301,23 @@ export const Lobby: React.FC = () => {
           </div>
 
           {uploadStatus && (
-            <div className="w-full p-2.5 bg-[#FFE45C] border-2 border-[#171717] rounded-lg text-xs font-black text-[#171717] shadow-neo-sm flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-[#171717] shrink-0 stroke-[2.5]" />
+            <div className="w-full p-2.5 bg-[#FFD43B]/10 border border-[#FFD43B]/40 rounded-lg text-xs font-bold text-[#FFD43B] flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-[#FFD43B] shrink-0 stroke-[2.5]" />
               <span>{uploadStatus}</span>
             </div>
           )}
 
           <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-            <span className="text-xs font-bold text-[#666666]">
+            <span className="text-xs text-[#94A3B8]">
               Yêu cầu tối thiểu {GAME_CONFIG.MIN_PLAYERS_FOR_TEST} người chơi để bắt đầu trận đấu.
             </span>
             <button
               onClick={startGame}
               disabled={!canStart}
-              className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-extrabold uppercase tracking-wider text-sm flex items-center justify-center gap-2 border-2 border-[#171717] transition-all ${
+              className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-heading font-extrabold uppercase tracking-wider text-sm flex items-center justify-center gap-2 border transition-all ${
                 canStart
-                  ? 'bg-[#FFE45C] hover:bg-[#fad836] text-[#171717] shadow-neo hover:shadow-neo-lg hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer'
-                  : 'bg-slate-200 text-slate-400 border-slate-400 cursor-not-allowed'
+                  ? 'bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] border-[#FFD43B] shadow-glow-yellow-lg hover:scale-105 active:scale-95 cursor-pointer'
+                  : 'bg-[#1C2638] text-[#64748B] border-[#303D52] cursor-not-allowed'
               }`}
             >
               <Play size={18} fill="currentColor" />
@@ -326,7 +326,7 @@ export const Lobby: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-white border-2 border-[#171717] rounded-xl text-center text-xs font-extrabold text-[#171717] shadow-neo-sm">
+        <div className="p-4 bg-[#111827] border border-[#303D52] rounded-xl text-center text-xs font-heading font-bold text-[#94A3B8] shadow-lg">
           ⏳ Đang chờ chủ phòng bắt đầu trận đấu...
         </div>
       )}
