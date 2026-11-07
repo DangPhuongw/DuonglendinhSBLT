@@ -81,7 +81,7 @@ export const ReadyScreen: React.FC = () => {
               <div className="space-y-1 text-left text-xs font-medium text-[#94A3B8] mt-1">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]" />
-                  <span>Chọn 1 ô • 5 câu (15s/câu)</span>
+                  <span>Chọn 1 ô • 6 câu (15s/câu)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#20D6A0]" />
@@ -121,7 +121,7 @@ export const ReadyScreen: React.FC = () => {
               <div className="space-y-1 text-left text-xs font-medium text-[#94A3B8] mt-1">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]" />
-                  <span>10 câu hỏi chung cho tất cả</span>
+                  <span>12 câu hỏi chung cho tất cả</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#20D6A0]" />
@@ -168,7 +168,7 @@ export const ReadyScreen: React.FC = () => {
                           <div key={c} className="w-2.5 h-2.5 rounded-[2px] bg-[#303D52]/60 border border-[#00D9FF]/20" />
                         ))}
                       </div>
-                      <span className="text-[9px] font-digital text-[#64748B] tabular-nums">15s</span>
+                      <span className="text-[9px] font-digital text-[#64748B] tabular-nums">30s</span>
                     </div>
                   ))}
                 </div>
@@ -177,12 +177,12 @@ export const ReadyScreen: React.FC = () => {
               <div className="space-y-1 text-left text-xs font-medium text-[#94A3B8] mt-1">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]" />
-                  <span>Chọn hàng • Cùng trả lời 15s</span>
+                  <span>Chọn hàng • Cùng trả lời 30s</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#20D6A0]" />
                   <span className="text-[#F8FAFC]">
-                    Đúng: <strong className="text-[#20D6A0]">+10đ</strong> & mở 1 góc ảnh
+                    Đúng: <strong className="text-[#20D6A0]">+10đ</strong> & mở ô chữ hàng ngang
                   </span>
                 </div>
               </div>

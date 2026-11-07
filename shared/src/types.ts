@@ -51,8 +51,8 @@ export interface QuestionSet {
   id: string;
   title: string;
   khoiDong: {
-    rieng: Question[][]; // [5 người][5 câu]
-    chung: Question[];   // [10 câu]
+    rieng: Question[][]; // [5 người][6 câu]
+    chung: Question[];   // [12 câu]
   };
   vcnv: {
     rows: Question[];    // 4 hàng ngang

@@ -141,7 +141,7 @@ export const KhoiDongRound: React.FC = () => {
               Ghế số {activePlayer?.seat}
             </span>
             <span className="text-xs font-bold text-[#94A3B8] bg-[#090D18] px-3 py-0.5 rounded-full border border-[#303D52]">
-              5 câu hỏi • 15s/câu
+              6 câu hỏi • 15s/câu
             </span>
           </div>
 
@@ -152,7 +152,7 @@ export const KhoiDongRound: React.FC = () => {
                 {activePlayer?.name} đã chọn {confirmedPkg?.name || 'Ô câu hỏi'}!
               </span>
               <span className="text-xs font-bold text-[#94A3B8]">
-                Gói gồm 5 câu hỏi trắc nghiệm (15s/câu). Bắt đầu sau 2 giây...
+                Gói gồm 6 câu hỏi trắc nghiệm (15s/câu). Bắt đầu sau 2 giây...
               </span>
             </div>
           ) : (
@@ -256,8 +256,8 @@ export const KhoiDongRound: React.FC = () => {
       <div className="w-full flex items-center justify-between mb-4 px-1 gap-2 flex-wrap">
         <span className="text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1.5 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
           {currentRound === 'KD_RIENG'
-            ? `KHỞI ĐỘNG RIÊNG - LƯỢT CỦA ${activePlayer?.name?.toUpperCase() || 'THÍ SINH'} - ${(room.state.questionIndex ?? 0) + 1}/5 CÂU`
-            : 'KHỞI ĐỘNG CHUNG - GIÀNH CHUÔNG (10 CÂU)'}
+            ? `KHỞI ĐỘNG RIÊNG - LƯỢT CỦA ${activePlayer?.name?.toUpperCase() || 'THÍ SINH'} - ${(room.state.questionIndex ?? 0) + 1}/6 CÂU`
+            : 'KHỞI ĐỘNG CHUNG - GIÀNH CHUÔNG (12 CÂU)'}
         </span>
         <span className="text-xs text-[#94A3B8] font-bold bg-[#1C2638] border border-[#303D52] px-2.5 py-1 rounded-lg tabular-nums">
           {currentRound === 'KD_RIENG' ? 'Đúng +10đ | Sai 0đ' : 'Đúng +10đ | Sai -5đ'}

@@ -5,7 +5,7 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
   title: 'Bộ đề Olympia Mẫu số 01',
   khoiDong: {
     rieng: [
-      // Ghế 1 (5 câu)
+      // Ghế 1 (6 câu)
       [
         {
           id: 'kd-r-1-1',
@@ -47,8 +47,16 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
           answer: 'B',
           alternatives: ['AMPE'],
         },
+        {
+          id: 'kd-r-1-6',
+          type: 'mcq',
+          prompt: 'Tác phẩm "Bình Ngô đại cáo" được sáng tác sau thắng lợi của cuộc khởi nghĩa nào?',
+          options: ['Khởi nghĩa Lam Sơn', 'Khởi nghĩa Tây Sơn', 'Khởi nghĩa Hương Khê', 'Khởi nghĩa Yên Thế'],
+          answer: 'A',
+          alternatives: ['LAM SƠN', 'KHỞI NGHĨA LAM SƠN'],
+        },
       ],
-      // Ghế 2 (5 câu)
+      // Ghế 2 (6 câu)
       [
         {
           id: 'kd-r-2-1',
@@ -90,8 +98,16 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
           answer: 'B',
           alternatives: ['H2O'],
         },
+        {
+          id: 'kd-r-2-6',
+          type: 'mcq',
+          prompt: 'Cơ quan nào trong cơ thể người chịu trách nhiệm bơm máu đi khắp cơ thể?',
+          options: ['Phổi', 'Gan', 'Tim', 'Thận'],
+          answer: 'C',
+          alternatives: ['TIM'],
+        },
       ],
-      // Ghế 3 (5 câu)
+      // Ghế 3 (6 câu)
       [
         {
           id: 'kd-r-3-1',
@@ -133,8 +149,16 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
           answer: 'A',
           alternatives: ['MENDELEEV'],
         },
+        {
+          id: 'kd-r-3-6',
+          type: 'mcq',
+          prompt: 'Trong toán học, tổng số đo ba góc trong một tam giác phẳng bằng bao nhiêu độ?',
+          options: ['90°', '180°', '270°', '360°'],
+          answer: 'B',
+          alternatives: ['180', '180°', '180 ĐỘ'],
+        },
       ],
-      // Ghế 4 (5 câu)
+      // Ghế 4 (6 câu)
       [
         {
           id: 'kd-r-4-1',
@@ -176,8 +200,16 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
           answer: 'D',
           alternatives: ['CHÂN KHÔNG', 'CHAN KHONG'],
         },
+        {
+          id: 'kd-r-4-6',
+          type: 'mcq',
+          prompt: 'Quốc gia nào có diện tích lãnh thổ lớn nhất thế giới hiện nay?',
+          options: ['Canada', 'Trung Quốc', 'Hoa Kỳ', 'Nga'],
+          answer: 'D',
+          alternatives: ['NGA', 'LIÊN BANG NGA'],
+        },
       ],
-      // Ghế 5 (5 câu)
+      // Ghế 5 (6 câu)
       [
         {
           id: 'kd-r-5-1',
@@ -218,6 +250,14 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
           options: ['11', '12', '13', '14'],
           answer: 'B',
           alternatives: ['12'],
+        },
+        {
+          id: 'kd-r-5-6',
+          type: 'mcq',
+          prompt: 'Hiện tượng khúc xạ ánh sáng xảy ra khi tia sáng truyền qua mặt phân cách giữa hai môi trường như thế nào?',
+          options: ['Cùng tính chất', 'Trong suốt khác nhau', 'Hoàn toàn mờ đục', 'Chân không và kim loại'],
+          answer: 'B',
+          alternatives: ['TRONG SUỐT KHÁC NHAU'],
         },
       ],
     ],
@@ -301,6 +341,22 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         options: ['Hai Bà Trưng', 'Bà Triệu', 'Ỷ Lan', 'Dương Vân Nga'],
         answer: 'A',
         alternatives: ['HAI BÀ TRƯNG', 'TRƯNG TRẮC', 'TRUNG TRAC'],
+      },
+      {
+        id: 'kd-c-11',
+        type: 'mcq',
+        prompt: 'Tập thơ "Nhật ký trong tù" (Ngục trung nhật ký) là tác phẩm của tác giả nào?',
+        options: ['Phan Bội Châu', 'Hồ Chí Minh', 'Tố Hữu', 'Xuân Diệu'],
+        answer: 'B',
+        alternatives: ['HỒ CHÍ MINH', 'BÁC HỒ', 'HO CHI MINH'],
+      },
+      {
+        id: 'kd-c-12',
+        type: 'mcq',
+        prompt: 'Trong bảng tuần hoàn hóa học, nguyên tố kim loại có ký hiệu hóa học là "Fe" mang tên là gì?',
+        options: ['Đồng', 'Kẽm', 'Sắt', 'Chì'],
+        answer: 'C',
+        alternatives: ['SẮT', 'SAT', 'IRON'],
       },
     ],
   },
