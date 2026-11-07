@@ -62,24 +62,9 @@ export const Scoreboard: React.FC = () => {
                   : 'bg-[#111827] border border-[#303D52] hover:border-[#64748B]'
               }`}
             >
-              {/* Header: Seat & Badges */}
+              {/* Header: Name & Badges */}
               <div className="flex items-center justify-between gap-1 w-full">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span
-                    className={`text-[10px] font-heading font-black px-1.5 py-0.5 rounded transition-colors ${
-                      isTurn
-                        ? 'bg-[#FFD43B] text-[#090D18] shadow-glow-yellow'
-                        : isDimmed
-                        ? 'bg-[#111827] text-[#64748B] border border-[#303D52]/40'
-                        : isLeader
-                        ? 'bg-[#FFD43B]/20 text-[#FFD43B] border border-[#FFD43B]/50'
-                        : isMe
-                        ? 'bg-[#00D9FF] text-[#090D18]'
-                        : 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
-                    }`}
-                  >
-                    G{seatNum}
-                  </span>
+                <div className="flex items-center min-w-0">
                   <span
                     className={`text-xs sm:text-sm font-bold truncate transition-colors ${
                       isTurn ? 'text-[#FFD43B] font-heading font-black' : isDimmed ? 'text-[#64748B]' : 'text-[#F8FAFC]'
