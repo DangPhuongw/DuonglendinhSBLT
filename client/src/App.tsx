@@ -89,12 +89,16 @@ export const App: React.FC = () => {
       <div className="min-h-screen text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative overflow-x-hidden">
         <GalaxyBackground />
         <Navbar />
-        {room && currentRound !== 'LOBBY' && <Scoreboard />}
-        <main className="flex-1 w-full max-w-6xl mx-auto px-3 py-3 sm:px-6 sm:py-4 flex flex-col justify-start">
+        <main className="flex-1 w-full max-w-6xl mx-auto px-3 py-3 sm:px-6 sm:py-4 flex flex-col justify-start pb-16 sm:pb-20">
           {renderCurrentView()}
         </main>
+        {room && currentRound !== 'LOBBY' && currentRound !== 'FINISHED' && (
+          <footer className="sticky bottom-0 z-30 w-full mt-auto">
+            <Scoreboard />
+          </footer>
+        )}
         {room && currentRound !== 'LOBBY' && (
-          <div className="fixed bottom-3 right-3 z-50 flex items-center gap-1.5 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-2xl rounded-xl p-1.5">
+          <div className="fixed top-14 right-3 z-50 flex items-center gap-1.5 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-2xl rounded-xl p-1.5">
             <span className="text-[11px] font-bold text-[#94A3B8] px-1 font-heading uppercase tracking-wider">⏩ Tua:</span>
             <button
               onClick={() => jumpToRound('KD_RIENG')}

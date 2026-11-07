@@ -148,7 +148,7 @@ export const VcnvRound: React.FC = () => {
     'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80';
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col items-center pb-28">
+    <div className="w-full max-w-5xl mx-auto flex flex-col items-center pb-32 sm:pb-36">
       {/* ======================================================== */}
       {/* 1. TOP UTILITY BAR: Round, Keyword, Timer, Buzzer        */}
       {/* ======================================================== */}
@@ -629,7 +629,7 @@ export const VcnvRound: React.FC = () => {
       {/* 5. PROMINENT CENTER FOOTER BUZZER DOCK (DUY NHẤT)       */}
       {/* ======================================================== */}
       {subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
-        <div className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-[92vw] flex justify-center pointer-events-none">
+        <div className="fixed bottom-[74px] sm:bottom-[80px] left-1/2 -translate-x-1/2 z-40 max-w-[92vw] flex justify-center pointer-events-none">
           <div className="pointer-events-auto bg-[#0B101B]/95 backdrop-blur-xl border-2 border-[#303D52] hover:border-[#FF496C]/60 transition-all rounded-full px-4 py-2 sm:px-6 sm:py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_30px_rgba(255,73,108,0.25)] flex items-center justify-between gap-3 sm:gap-6">
             {/* Left: Status / Incentive info */}
             <div className="flex flex-col min-w-0 pr-1">

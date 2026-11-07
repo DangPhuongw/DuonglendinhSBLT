@@ -19,7 +19,7 @@ export const Scoreboard: React.FC = () => {
   const maxScore = contestants.length > 0 ? Math.max(...contestants.map((p) => p.score)) : 0;
 
   return (
-    <div className="w-full bg-[#0D1322] border-b border-[#303D52] px-3 sm:px-6 py-2 shadow-lg">
+    <div className="w-full bg-[#0D1322]/95 backdrop-blur-md border-t border-[#303D52] px-3 sm:px-6 py-2 shadow-[0_-4px_25px_rgba(0,0,0,0.6)]">
       <div className="max-w-6xl mx-auto grid grid-cols-5 gap-2 sm:gap-3">
         {seats.map((seatNum) => {
           const player = contestants.find((p) => p.seat === seatNum);
