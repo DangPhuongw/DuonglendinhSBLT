@@ -12,6 +12,7 @@
     "@olympia/shared": "*",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.7.3",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^5.0.7",
     "socket.io": "^4.7.5",

@@ -5,6 +5,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
 import {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -15,8 +16,27 @@ import { SnapshotManager } from './game/SnapshotManager.js';
 import { parseExcelQuestionSet, generateExcelTemplate } from './game/questionParser.js';
 
 const app = express();
+app.set('trust proxy', 1); // Trust Render / Cloudflare reverse proxy headers
 const server = http.createServer(app);
 
+// 1. Anti-Spam HTTP Rate Limiters
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 phút
+  max: 120, // tối đa 120 requests/phút từ 1 IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Bạn đang gửi quá nhiều yêu cầu. Vui lòng thử lại sau 1 phút.' },
+});
+
+const uploadLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 phút
+  max: 20, // tối đa 20 file upload trong 10 phút
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Tải lên quá thường xuyên. Vui lòng thử lại sau 10 phút.' },
+});
+
+app.use('/api/', apiLimiter);
 app.use(cors());
 app.use(express.json());
 
@@ -88,7 +108,7 @@ app.get('/health', (req, res) => {
 
 // --- REST Endpoints ---
 
-app.post('/api/upload-media', upload.single('media'), (req, res) => {
+app.post('/api/upload-media', uploadLimiter, upload.single('media'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Không có file nào được tải lên.' });
   }
@@ -115,7 +135,7 @@ app.get('/api/question-template', (req, res) => {
   }
 });
 
-app.post('/api/upload-questions', upload.single('file'), (req, res) => {
+app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Vui lòng chọn file đề thi.' });
   }
@@ -188,19 +208,80 @@ if (clientDist) {
   });
 }
 
+// --- Socket.IO Anti-Spam & Connection Limiter ---
+const ipSocketsMap = new Map<string, number>();
+const MAX_SOCKETS_PER_IP = 15; // Cho phép tối đa 15 tab cùng lúc từ 1 địa chỉ IP/WiFi
+
+io.use((socket, next) => {
+  const forwarded = socket.handshake.headers['x-forwarded-for'];
+  const ip = typeof forwarded === 'string'
+    ? forwarded.split(',')[0].trim()
+    : socket.handshake.address;
+
+  const current = ipSocketsMap.get(ip) || 0;
+  if (current >= MAX_SOCKETS_PER_IP) {
+    console.warn(`[AntiSpam] Từ chối IP ${ip}: Vượt quá ${MAX_SOCKETS_PER_IP} kết nối đồng thời.`);
+    return next(new Error('Quá nhiều kết nối từ cùng 1 mạng. Vui lòng đóng bớt tab game!'));
+  }
+
+  ipSocketsMap.set(ip, current + 1);
+
+  socket.on('disconnect', () => {
+    const val = ipSocketsMap.get(ip) || 1;
+    if (val <= 1) {
+      ipSocketsMap.delete(ip);
+    } else {
+      ipSocketsMap.set(ip, val - 1);
+    }
+  });
+
+  next();
+});
+
 // --- Socket.IO Handlers ---
 
 io.on('connection', (socket) => {
+  // Event rate limiter per socket: tối đa 30 sự kiện/giây
+  let eventCount = 0;
+  let lastEventReset = Date.now();
+  const checkEventSpam = (): boolean => {
+    const now = Date.now();
+    if (now - lastEventReset > 1000) {
+      lastEventReset = now;
+      eventCount = 0;
+    }
+    eventCount++;
+    return eventCount > 30;
+  };
+
   // 1. Clock synchronization ping/pong
   socket.on('time:ping', (data) => {
+    if (checkEventSpam()) return;
     socket.emit('time:pong', {
       clientSentAt: data.clientSentAt,
       serverReceivedAt: Date.now(),
     });
   });
 
-  // 2. Room create
+  // 2. Room create (giới hạn tối đa 5 phòng / phút từ 1 socket)
+  let roomCreateCount = 0;
+  let lastRoomCreateReset = Date.now();
+
   socket.on('room:create', ({ name }, callback) => {
+    if (checkEventSpam()) return;
+    const now = Date.now();
+    if (now - lastRoomCreateReset > 60000) {
+      lastRoomCreateReset = now;
+      roomCreateCount = 0;
+    }
+    roomCreateCount++;
+    if (roomCreateCount > 5) {
+      return callback({
+        ok: false,
+        error: 'Bạn đang tạo phòng quá nhanh. Vui lòng đợi 1 phút trước khi tạo tiếp!',
+      });
+    }
+
     const token = `tok-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const { roomCode, machine, playerId } = roomManager.createRoom(name, token);
 
@@ -325,8 +406,14 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 8. Buzz
+  // 8. Buzz (chống spam auto-click chuông)
+  let lastBuzzTime = 0;
   socket.on('buzz', () => {
+    if (checkEventSpam()) return;
+    const now = Date.now();
+    if (now - lastBuzzTime < 150) return; // Tối đa ~6 lần bấm/giây
+    lastBuzzTime = now;
+
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
