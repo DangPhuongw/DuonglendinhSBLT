@@ -7,9 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['"Space Grotesk"', 'sans-serif'],
-        display: ['"Space Grotesk"', 'sans-serif'],
+        sans: ['"Be Vietnam Pro"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['"Montserrat"', '"Be Vietnam Pro"', '"Inter"', 'sans-serif'],
+        display: ['"Montserrat"', '"Be Vietnam Pro"', '"Inter"', 'sans-serif'],
         mono: ['"Rajdhani"', 'monospace'],
         digital: ['"Rajdhani"', 'sans-serif'],
       },

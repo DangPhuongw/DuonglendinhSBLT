@@ -25,14 +25,17 @@ export const KhoiDongRound: React.FC = () => {
   const isMyTurn = Boolean(!isViewer && myPlayer && room?.state?.activePlayerId === myPlayer.id);
 
   // Active player result from lastReveal or room.state or local selectedOption
-  const activeResult =
-    lastReveal?.results?.find((r) => r.playerId === activePlayer?.id) ||
-    lastReveal?.results?.[0];
-  const activeAnswer =
-    (room?.state?.activeAnswer || activeResult?.answer || (isMyTurn ? selectedOption : null))
-      ?.toString()
-      ?.toUpperCase()
-      ?.trim() || null;
+  const activeResult = subPhase === 'REVEAL'
+    ? (lastReveal?.results?.find((r) => r.playerId === activePlayer?.id) || lastReveal?.results?.[0])
+    : null;
+  const activeAnswer = (
+    subPhase === 'REVEAL'
+      ? (activeResult?.answer || room?.state?.activeAnswer)
+      : (isMyTurn ? selectedOption : room?.state?.activeAnswer)
+  )
+    ?.toString()
+    ?.toUpperCase()
+    ?.trim() || null;
 
   // Clear local selected option when question changes
   useEffect(() => {

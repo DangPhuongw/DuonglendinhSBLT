@@ -1957,6 +1957,14 @@ export class RoomStateMachine {
     const question = pool[Math.floor(Math.random() * pool.length)] || pool[0];
     this.veDichCurrentQuestion = question;
 
+    // Nếu thí sinh đã sử dụng Ngôi sao hy vọng ở câu hỏi trước rồi thì bỏ qua 7s suy nghĩ, vào luôn câu hỏi
+    const player = this.room.players.find((p) => p.id === playerId);
+    if (player && player.starUsed) {
+      this.buzzedPlayerId = null;
+      await this.presentVeDichQuestion(playerId, question, pValue, pointsList, turnIndex);
+      return;
+    }
+
     // Star decision phase: 7s (không đếm số giây, bắt đầu luôn khi chọn)
     this.buzzedPlayerId = null;
     this.room.state = {

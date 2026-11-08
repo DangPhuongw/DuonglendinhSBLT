@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { soundManager } from '../utils/soundEffects';
 import { voiceReader } from '../utils/voiceReader';
-import { Volume2, VolumeX, LogOut, Headphones, Maximize, Minimize } from 'lucide-react';
+import { bgmManager } from '../utils/bgmManager';
+import { Volume2, VolumeX, LogOut, Headphones, Maximize, Minimize, Music } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -10,6 +11,7 @@ export const Navbar: React.FC = () => {
 
   const [muted, setMuted] = useState(soundManager.isMuted);
   const [ttsEnabled, setTtsEnabled] = useState(voiceReader.isEnabled);
+  const [bgmEnabled, setBgmEnabled] = useState(bgmManager.isEnabled);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
 
   useEffect(() => {
@@ -23,6 +25,14 @@ export const Navbar: React.FC = () => {
   const toggleSound = () => {
     soundManager.isMuted = !soundManager.isMuted;
     setMuted(soundManager.isMuted);
+    if (soundManager.isMuted) {
+      bgmManager.stop();
+    }
+  };
+
+  const toggleBgm = () => {
+    const next = bgmManager.toggle();
+    setBgmEnabled(next);
   };
 
   const toggleTts = () => {
@@ -73,11 +83,24 @@ export const Navbar: React.FC = () => {
           </span>
         </button>
 
-        {/* Sound toggle */}
+        {/* BGM Music toggle */}
+        <button
+          onClick={toggleBgm}
+          className={`p-2 sm:p-2.5 rounded-xl border transition-all active:scale-95 flex items-center justify-center ${
+            bgmEnabled
+              ? 'bg-[#1C2638] text-[#FFD43B] border-[#FFD43B]/60 shadow-glow-yellow'
+              : 'bg-[#1C2638] text-[#64748B] border-[#303D52] hover:text-[#94A3B8]'
+          }`}
+          title={bgmEnabled ? 'Nhạc nền: Đang BẬT (bấm để tắt)' : 'Nhạc nền: Đang TẮT (bấm để bật)'}
+        >
+          <Music size={18} className="stroke-[2.5]" />
+        </button>
+
+        {/* Sound FX toggle */}
         <button
           onClick={toggleSound}
           className="p-2 sm:p-2.5 rounded-xl bg-[#1C2638] text-[#94A3B8] hover:text-[#00D9FF] hover:border-[#00D9FF] border border-[#303D52] transition-all active:scale-95 hover:shadow-glow-cyan"
-          title={muted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+          title={muted ? 'Bật hiệu ứng âm thanh' : 'Tắt hiệu ứng âm thanh'}
         >
           {muted ? <VolumeX size={18} className="stroke-[2.5]" /> : <Volume2 size={18} className="stroke-[2.5]" />}
         </button>

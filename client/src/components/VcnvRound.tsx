@@ -143,74 +143,115 @@ export const VcnvRound: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-between h-full max-h-full py-1 px-3 overflow-hidden pb-12 sm:pb-14">
+    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-between h-full max-h-full py-1 px-3 overflow-hidden">
       {/* ======================================================== */}
-      {/* 1. TOP UTILITY BAR: Round, Keyword, Timer, Buzzer        */}
+      {/* 1. TOP HEADER & TIMER                                    */}
       {/* ======================================================== */}
-      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-2.5 sm:px-4 sm:py-2.5 mb-2.5 shadow-xl flex flex-wrap items-center justify-between gap-3 shrink-0">
-        {/* Left: Round Pill & Keyword Letter Boxes */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1.5 rounded-xl border border-[#FFD43B]/40 shadow-glow-yellow">
-            VÒNG 2: VCNV
+      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-2 sm:px-4 sm:py-2 mb-2 shadow-xl flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-[#FFD43B]/40 shadow-glow-yellow">
+            VÒNG 2: VƯỢT CHƯỚNG NGẠI VẬT
           </span>
-
-          <div className="flex items-center gap-2 text-xs sm:text-sm lg:text-base font-heading font-bold text-[#94A3B8]">
-            <Key size={18} className="text-[#FFD43B] shrink-0" />
-            <span>TỪ KHÓA ({obstacleLetterCount}):</span>
-          </div>
-
-          {/* Letter boxes */}
-          <div className="flex items-center gap-1.5">
-            {Array.from({ length: obstacleLetterCount }).map((_, i) => {
-              const char = obstacleAnswerRevealed ? obstacleAnswerRevealed[i] : null;
-              return (
-                <div
-                  key={i}
-                  className={`w-8 h-10 sm:w-9 sm:h-11 rounded-xl flex items-center justify-center font-digital font-bold text-base sm:text-lg border transition-all ${
-                    char
-                      ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow scale-105'
-                      : 'bg-[#1C2638] text-[#00D9FF] border-[#303D52]'
-                  }`}
-                >
-                  {char || '?'}
-                </div>
-              );
-            })}
-          </div>
-
-          <div
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#20D6A0]/15 border border-[#20D6A0]/40 text-[#20D6A0] shadow-glow-success select-none text-xs sm:text-sm lg:text-base"
-            title="Đoán từ khóa chính dựa trên 4 hàng gợi ý - Sau mỗi câu hỏi gợi ý được lật mở, số điểm nhận được khi đoán từ khóa chính sẽ giảm"
-          >
-            <Sparkles size={16} className="text-[#20D6A0] shrink-0" />
-            <span className="font-heading font-extrabold tracking-wide">
-              +{currentCnvPoints}đ
-            </span>
-          </div>
+          <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2.5 py-1 rounded-lg border border-[#303D52] hidden sm:inline-block">
+            {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
+          </span>
         </div>
 
         {/* Right: Countdown Timer */}
-        <div className="flex items-center">
-          <div className="w-32 sm:w-40">
-            <CountdownTimer
-              deadline={room.state.deadline}
-              totalDurationSeconds={
-                subPhase === 'PICK_ROW'
-                  ? 10
-                  : subPhase === 'ROW_QUESTION'
-                  ? 30
-                  : subPhase === 'ROW_REVEAL' || subPhase === 'CENTER_REVEAL'
-                  ? 6
-                  : subPhase === 'CNV_ANSWERING' || subPhase === 'FINAL_GUESS_ANSWERING'
-                  ? 15
-                  : subPhase === 'CENTER_QUESTION'
-                  ? 30
-                  : 30
-              }
-              className="mb-0"
-            />
-          </div>
+        <div className="w-28 sm:w-36">
+          <CountdownTimer
+            deadline={room.state.deadline}
+            totalDurationSeconds={
+              subPhase === 'PICK_ROW'
+                ? 10
+                : subPhase === 'ROW_QUESTION'
+                ? 30
+                : subPhase === 'ROW_REVEAL' || subPhase === 'CENTER_REVEAL'
+                ? 6
+                : subPhase === 'CNV_ANSWERING' || subPhase === 'FINAL_GUESS_ANSWERING'
+                ? 15
+                : subPhase === 'CENTER_QUESTION'
+                ? 30
+                : 30
+            }
+            className="mb-0"
+          />
         </div>
+      </div>
+
+      {/* ======================================================== */}
+      {/* 2. HERO SECTION: TỪ KHÓA CHÍNH (CĂN CENTER & NỔI BẬT)    */}
+      {/* ======================================================== */}
+      <div className="w-full bg-gradient-to-b from-[#1C2638] via-[#151D2C] to-[#111827] border-2 border-[#FFD43B]/60 rounded-2xl p-3 sm:p-4 mb-2.5 shadow-[0_4px_25px_rgba(255,212,59,0.18)] flex flex-col items-center justify-center text-center shrink-0">
+        {/* Title */}
+        <div className="flex items-center justify-center gap-2 text-xs sm:text-sm lg:text-base font-heading font-extrabold text-[#FFD43B] uppercase tracking-wider mb-2">
+          <Key size={18} className="text-[#FFD43B]" />
+          <span>TỪ KHÓA CHƯỚNG NGẠI VẬT ({obstacleLetterCount} CHỮ CÁI)</span>
+        </div>
+
+        {/* Big Prominent Letter Boxes */}
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2 flex-wrap">
+          {Array.from({ length: obstacleLetterCount }).map((_, i) => {
+            const char = obstacleAnswerRevealed ? obstacleAnswerRevealed[i] : null;
+            return (
+              <div
+                key={i}
+                className={`w-9 h-11 sm:w-11 sm:h-13 rounded-xl flex items-center justify-center font-digital font-black text-lg sm:text-2xl border-2 transition-all ${
+                  char
+                    ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow scale-105'
+                    : 'bg-[#0B101B] text-[#00D9FF] border-[#303D52] shadow-inner'
+                }`}
+              >
+                {char || '?'}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Text: +xx đ nếu trả lời đúng từ khóa vào lúc này */}
+        <div
+          className="flex items-center justify-center gap-1.5 px-3.5 py-1 rounded-xl bg-[#20D6A0]/15 border border-[#20D6A0]/40 text-[#20D6A0] shadow-glow-success select-none text-xs sm:text-sm font-heading font-bold"
+          title="Đoán từ khóa chính dựa trên 4 hàng gợi ý - Sau mỗi câu hỏi gợi ý được lật mở, số điểm nhận được khi đoán từ khóa chính sẽ giảm"
+        >
+          <Sparkles size={15} className="text-[#20D6A0] shrink-0" />
+          <span>+{currentCnvPoints}đ nếu trả lời đúng từ khóa vào lúc này</span>
+        </div>
+
+        {/* Integrated Buzzer Button directly under keyword */}
+        {subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
+          <div className="mt-2.5 w-full flex items-center justify-center">
+            <button
+              onClick={buzz}
+              disabled={!canBuzz}
+              className={`px-5 sm:px-7 py-2 sm:py-2.5 rounded-full font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer ${
+                canBuzz
+                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_4px_0_#881337,0_0_25px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-0.5 active:shadow-[0_1px_0_#881337] animate-pulse'
+                  : isBuzzerLocked
+                  ? 'bg-[#1C2638] text-[#FF496C] border border-[#FF496C]/40 opacity-70 cursor-not-allowed'
+                  : 'bg-[#0E1524] text-[#64748B] border border-[#303D52] opacity-60 cursor-not-allowed'
+              }`}
+              title={canBuzz ? 'Bấm chuông giành quyền trả lời Chướng ngại vật (Phím Space)' : 'Chuông hiện chưa mở'}
+            >
+              <Bell
+                size={17}
+                className={canBuzz ? 'animate-bounce text-[#FFD43B]' : 'text-[#64748B]'}
+              />
+              <span>
+                {canBuzz
+                  ? 'RUNG CHUÔNG GIẢI TỪ KHÓA (PHÍM SPACE)'
+                  : isBuzzerLocked
+                  ? `🔒 ${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} ĐÃ RUNG CHUÔNG`
+                  : isEliminated
+                  ? 'BẠN ĐÃ DỪNG CUỘC CHƠI Ở VÒNG VCNV'
+                  : isViewer
+                  ? 'BẠN LÀ KHÁN GIẢ'
+                  : vcnvQuestionsAppearedCount < 1
+                  ? 'CHUÔNG SẼ MỞ SAU HÀNG NGANG 1'
+                  : 'CHUÔNG HIỆN CHƯA MỞ'}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {buzzRejectedReason && (
@@ -553,62 +594,6 @@ export const VcnvRound: React.FC = () => {
                 </p>
               </div>
             )}
-          </div>
-        </div>
-      )}
-      {/* ======================================================== */}
-      {/* 5. PROMINENT CENTER FOOTER BUZZER DOCK (DUY NHẤT)       */}
-      {/* ======================================================== */}
-      {subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
-        <div className="fixed bottom-[56px] sm:bottom-[60px] left-1/2 -translate-x-1/2 z-40 max-w-[92vw] flex justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-[#0B101B]/95 backdrop-blur-xl border-2 border-[#303D52] hover:border-[#FF496C]/60 transition-all rounded-full px-3.5 py-1 sm:px-5 sm:py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.85),0_0_20px_rgba(255,73,108,0.25)] flex items-center justify-between gap-2.5 sm:gap-4">
-            {/* Left: Status / Incentive info */}
-            <div className="flex flex-col min-w-0 pr-1">
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-extrabold text-[#F8FAFC]">
-                <Key size={14} className="text-[#FFD43B] shrink-0" />
-                <span className="truncate">Giải Chướng Ngại Vật:</span>
-                <span className="text-[#20D6A0] font-digital font-bold shrink-0">
-                  +{currentCnvPoints}đ
-                </span>
-              </div>
-              <p className="text-[10px] text-[#94A3B8] truncate hidden sm:block">
-                {isBuzzerLocked
-                  ? `🔒 ${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} đã bấm chuông!`
-                  : isEliminated
-                  ? 'Bạn đã dừng cuộc chơi ở vòng VCNV'
-                  : isViewer
-                  ? 'Khán giả theo dõi trận đấu'
-                  : vcnvQuestionsAppearedCount < 1
-                  ? 'Chuông sẽ mở sau câu hỏi hàng ngang 1'
-                  : 'Bấm chuông hoặc nhấn phím Space bất kỳ lúc nào'}
-              </p>
-            </div>
-
-            {/* Right: Big Hero Buzzer Button */}
-            <button
-              onClick={buzz}
-              disabled={!canBuzz}
-              className={`px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full font-heading font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
-                canBuzz
-                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_4px_0_#881337,0_0_20px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-0.5 active:shadow-[0_1px_0_#881337] animate-pulse hover:animate-none'
-                  : isBuzzerLocked
-                  ? 'bg-[#1C2638] text-[#FF496C] border border-[#FF496C]/40 opacity-70 cursor-not-allowed'
-                  : 'bg-[#1C2638] text-[#64748B] border border-[#303D52] opacity-60 cursor-not-allowed'
-              }`}
-              title={canBuzz ? 'Bấm chuông giành quyền trả lời Chướng ngại vật (Phím Space)' : 'Chuông hiện chưa mở'}
-            >
-              <Bell
-                size={16}
-                className={canBuzz ? 'animate-bounce text-[#FFD43B]' : 'text-[#64748B]'}
-              />
-              <span className="font-extrabold text-[11px] sm:text-xs">
-                {canBuzz
-                  ? 'RUNG CHUÔNG (SPACE)'
-                  : isBuzzerLocked
-                  ? 'ĐÃ BẤM'
-                  : 'CHUÔNG CHƯA MỞ'}
-              </span>
-            </button>
           </div>
         </div>
       )}

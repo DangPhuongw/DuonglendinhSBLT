@@ -12,11 +12,11 @@ import { TieBreakRound } from './components/TieBreakRound';
 import { Podium } from './components/Podium';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GalaxyBackground } from './components/GalaxyBackground';
+import { bgmManager } from './utils/bgmManager';
 
 export const App: React.FC = () => {
   const initSocket = useGameStore((s) => s.initSocket);
   const room = useGameStore((s) => s.room);
-  const jumpToRound = useGameStore((s) => s.jumpToRound);
 
   useEffect(() => {
     initSocket();
@@ -32,21 +32,28 @@ export const App: React.FC = () => {
   }, [initSocket]);
 
   const currentRound = room?.state?.round || 'LOBBY';
-  const targetRound = room?.state?.targetRound;
 
-  const isKdActive =
-    currentRound === 'KD_RIENG' ||
-    currentRound === 'KD_CHUNG' ||
-    (currentRound === 'READY' && targetRound === 'KD_RIENG');
+  // Manage background music based on active round
+  useEffect(() => {
+    const isGameplayRound = [
+      'KD_RIENG',
+      'KD_CHUNG',
+      'VCNV',
+      'TANG_TOC',
+      'VE_DICH',
+      'TIEBREAK',
+    ].includes(currentRound);
 
-  const isVcnvActive =
-    currentRound === 'VCNV' || (currentRound === 'READY' && targetRound === 'VCNV');
+    if (isGameplayRound) {
+      bgmManager.start();
+    } else {
+      bgmManager.stop();
+    }
 
-  const isTtActive =
-    currentRound === 'TANG_TOC' || (currentRound === 'READY' && targetRound === 'TANG_TOC');
-
-  const isVdActive =
-    currentRound === 'VE_DICH' || (currentRound === 'READY' && targetRound === 'VE_DICH');
+    return () => {
+      bgmManager.stop();
+    };
+  }, [currentRound]);
 
   const renderCurrentView = () => {
     if (!room || currentRound === 'LOBBY') {
@@ -96,55 +103,6 @@ export const App: React.FC = () => {
           <footer className="shrink-0 w-full z-30">
             <Scoreboard />
           </footer>
-        )}
-        {room && currentRound !== 'LOBBY' && (
-          <div className="fixed top-3 right-44 sm:right-48 z-50 flex items-center gap-1.5 bg-[#111827]/90 backdrop-blur-md border border-[#303D52] shadow-xl rounded-xl px-2.5 py-1">
-            <span className="text-xs font-bold text-[#94A3B8] font-heading uppercase tracking-wider">Tua:</span>
-            <button
-              onClick={() => jumpToRound('KD_RIENG')}
-              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
-                isKdActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
-                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
-              }`}
-              title="Tua tới Vòng 1: Khởi Động"
-            >
-              V1
-            </button>
-            <button
-              onClick={() => jumpToRound('VCNV')}
-              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
-                isVcnvActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
-                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
-              }`}
-              title="Tua tới Vòng 2: Vượt Chướng Ngại Vật"
-            >
-              V2
-            </button>
-            <button
-              onClick={() => jumpToRound('TANG_TOC')}
-              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
-                isTtActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
-                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
-              }`}
-              title="Tua tới Vòng 3: Tăng Tốc"
-            >
-              V3
-            </button>
-            <button
-              onClick={() => jumpToRound('VE_DICH')}
-              className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition-all ${
-                isVdActive
-                  ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] font-black'
-                  : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#F8FAFC] border-[#303D52]'
-              }`}
-              title="Tua tới Vòng 4: Về Đích"
-            >
-              V4
-            </button>
-          </div>
         )}
       </div>
     </ErrorBoundary>

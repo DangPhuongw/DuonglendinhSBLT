@@ -41,8 +41,7 @@ export const Scoreboard: React.FC = () => {
                   hasActiveTurn ? 'opacity-20' : 'opacity-40'
                 }`}
               >
-                <span className="text-xs sm:text-sm text-[#64748B] font-heading font-bold uppercase tracking-wider">GHẾ {seatNum}</span>
-                <span className="text-xs sm:text-sm text-[#475569] italic">Trống</span>
+                <span className="text-xs sm:text-sm text-[#64748B] font-heading font-bold uppercase tracking-wider">Trống</span>
               </div>
             );
           }
@@ -62,12 +61,9 @@ export const Scoreboard: React.FC = () => {
                   : 'bg-[#111827] border border-[#303D52] hover:border-[#64748B]'
               }`}
             >
-              {/* Header: Seat Number + Name & Badges */}
+              {/* Header: Name & Badges */}
               <div className="flex items-center justify-between gap-1 w-full">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-xs sm:text-sm font-heading font-black text-[#FFD43B] bg-[#090D18] px-2 py-0.5 rounded-lg border border-[#303D52] shrink-0">
-                    G{seatNum}
-                  </span>
                   <span
                     className={`text-xs sm:text-sm lg:text-base font-bold truncate transition-colors ${
                       isTurn ? 'text-[#FFD43B] font-heading font-black' : isDimmed ? 'text-[#64748B]' : 'text-[#F8FAFC]'

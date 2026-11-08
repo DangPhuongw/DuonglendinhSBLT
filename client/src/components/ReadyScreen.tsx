@@ -16,6 +16,7 @@ import {
   Star,
   Zap,
   Eye,
+  Crown,
 } from 'lucide-react';
 
 export const ReadyScreen: React.FC = () => {
@@ -439,6 +440,57 @@ export const ReadyScreen: React.FC = () => {
           {currentRoundTitle}
         </h2>
 
+        {/* Summary Scoreboard at the end of each round */}
+        {targetRound !== 'KD_RIENG' && (
+          <div className="w-full mb-3 p-3 sm:p-4 rounded-2xl bg-gradient-to-b from-[#1C2638] to-[#111827] border-2 border-[#FFD43B]/50 shadow-[0_4px_25px_rgba(255,212,59,0.15)] text-left">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2 text-[#FFD43B] font-heading font-black text-xs sm:text-sm lg:text-base uppercase tracking-wider">
+                <Trophy size={18} className="text-[#FFD43B]" />
+                <span>BẢNG TỔNG KẾT ĐIỂM SỐ SAU VÒNG ĐẤU</span>
+              </div>
+              <span className="text-[11px] sm:text-xs text-[#94A3B8] font-heading font-semibold">
+                Xếp hạng hiện tại
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-2.5">
+              {[...contestants].sort((a, b) => b.score - a.score).map((p, index) => {
+                const isLeader = index === 0 && p.score > 0;
+                const isMe = p.id === myPlayer.id;
+                const medals = ['🥇', '🥈', '🥉', '4', '5'];
+                return (
+                  <div
+                    key={p.id}
+                    className={`p-2.5 sm:p-3 rounded-xl border flex flex-col justify-between transition-all ${
+                      isLeader
+                        ? 'bg-[#1C2638] border-[#FFD43B] shadow-[0_0_15px_rgba(255,212,59,0.25)]'
+                        : isMe
+                        ? 'bg-[#162132] border-[#00D9FF]/70'
+                        : 'bg-[#0E1524] border-[#303D52]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="text-sm sm:text-base font-black">
+                        {medals[index] || index + 1}
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-[#F8FAFC] truncate max-w-[100px]" title={p.name}>
+                        {p.name}
+                      </span>
+                      {isLeader && <Crown size={15} className="text-[#FFD43B] fill-[#FFD43B] shrink-0" />}
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xl sm:text-2xl font-digital font-black text-[#FFD43B] tabular-nums">
+                        {p.score}
+                      </span>
+                      <span className="text-[10px] text-[#94A3B8] ml-1 font-heading font-bold">điểm</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Rule Box with Visual Infographics */}
         <div className="w-full mb-3 sm:mb-4 p-3 sm:p-4 rounded-2xl bg-[#1C2638] border border-[#303D52] text-left shadow-lg">
           <div className="flex items-center gap-2 mb-2.5 text-[#F8FAFC] font-heading font-bold text-sm sm:text-base lg:text-lg uppercase tracking-wider">
@@ -507,10 +559,7 @@ export const ReadyScreen: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-heading font-black text-[#FFD43B] text-xs sm:text-sm bg-[#090D18] px-2 py-0.5 rounded-lg border border-[#303D52]">
-                      G{p.seat}
-                    </span>
-                    <span className="font-bold text-[#F8FAFC] truncate text-xs sm:text-sm lg:text-base max-w-[85px] sm:max-w-[120px]">{p.name}</span>
+                    <span className="font-bold text-[#F8FAFC] truncate text-xs sm:text-sm lg:text-base max-w-[120px] sm:max-w-[160px]">{p.name}</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
