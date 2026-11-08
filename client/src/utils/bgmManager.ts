@@ -1,4 +1,6 @@
-// Dynamic Hybrid BGM Manager: Supports real HTML5 MP3 Audio + Web Audio Synth Fallback
+import { voiceReader } from './voiceReader';
+
+// Olympia Gameplay BGM Manager: Plays the official Olympia question countdown audio
 class BgmManager {
   private audioEl: HTMLAudioElement | null = null;
   private ctx: AudioContext | null = null;
@@ -8,27 +10,40 @@ class BgmManager {
   private isUrgent: boolean = false;
   private step: number = 0;
   private audioUnlocked: boolean = false;
+  private isDucked: boolean = false;
 
   private masterGain: GainNode | null = null;
-  private currentTrackUrl: string = '/audio/bgm.mp3';
+  private trackUrl: string = '/audio/question_bgm.mp3';
 
   constructor() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('olympia_bgm');
       this.enabled = saved !== null ? saved === 'true' : true;
 
-      // Create audio element for real MP3 playback
+      // Initialize HTML5 Audio Element for real MP3
       this.initAudioElement();
 
-      // Setup one-time user interaction unlocker for browser autoplay policies
+      // Listen to voice reader to duck audio volume when host speaks
+      voiceReader.subscribe((speaking) => {
+        this.setDucking(speaking);
+      });
+
+      // Browser autoplay policy: Unlock on first user interaction
       const unlock = () => {
         if (!this.audioUnlocked) {
           this.audioUnlocked = true;
           if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            this.ctx.resume().catch(() => {});
           }
-          if (this.enabled && !this.isPlaying) {
-            this.start();
+          const el = this.audioEl;
+          if (el) {
+            // Prime audio buffer
+            el.play().then(() => {
+              if (!this.isPlaying) {
+                el.pause();
+                el.currentTime = 0;
+              }
+            }).catch(() => {});
           }
         }
       };
@@ -42,31 +57,33 @@ class BgmManager {
   private initAudioElement() {
     if (typeof window === 'undefined') return;
     try {
-      this.audioEl = new Audio(this.currentTrackUrl);
+      this.audioEl = new Audio(this.trackUrl);
       this.audioEl.loop = true;
-      this.audioEl.volume = 0.35;
+      this.audioEl.volume = 0.45;
 
       this.audioEl.addEventListener('error', () => {
-        // If file doesn't exist (404), fall back to synthesized Web Audio soundtrack
+        // Fallback to synthesized audio if MP3 fails
         if (this.isPlaying && this.enabled) {
           this.startSynthesizedTheme();
         }
       });
     } catch (e) {
-      console.warn('Audio element error:', e);
+      console.warn('Audio element initialization error:', e);
     }
   }
 
-  public setCustomAudioUrl(url: string) {
-    this.currentTrackUrl = url;
+  private setDucking(ducking: boolean) {
+    this.isDucked = ducking;
     if (this.audioEl) {
-      const wasPlaying = this.isPlaying;
-      this.audioEl.pause();
-      this.audioEl.src = url;
-      this.audioEl.load();
-      if (wasPlaying && this.enabled) {
-        this.audioEl.play().catch(() => this.startSynthesizedTheme());
-      }
+      this.audioEl.volume = ducking ? 0.18 : 0.45;
+    }
+    if (this.masterGain && this.ctx) {
+      try {
+        this.masterGain.gain.setValueAtTime(
+          ducking ? 0.04 : 0.12,
+          this.ctx.currentTime
+        );
+      } catch (e) {}
     }
   }
 
@@ -111,26 +128,26 @@ class BgmManager {
 
     // Try playing real MP3 track first
     if (this.audioEl) {
+      this.audioEl.volume = this.isDucked ? 0.18 : 0.45;
       this.audioEl.currentTime = 0;
       const playPromise = this.audioEl.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            // MP3 is playing successfully!
+            // MP3 playing successfully
           })
           .catch(() => {
-            // Autoplay blocked or MP3 missing -> use audible synthesized theme
+            // Fallback if audio element blocked
             this.startSynthesizedTheme();
           });
         return;
       }
     }
 
-    // Fallback if audioEl not ready
     this.startSynthesizedTheme();
   }
 
-  // Melodic, dramatic, audible Game Show theme synthesized in real-time
+  // Melodic fallback synthesizer
   private startSynthesizedTheme() {
     const ctx = this.getContext();
     if (!ctx) return;
@@ -142,14 +159,14 @@ class BgmManager {
 
     try {
       this.masterGain = ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.12, ctx.currentTime);
+      this.masterGain.gain.setValueAtTime(this.isDucked ? 0.04 : 0.12, ctx.currentTime);
       this.masterGain.connect(ctx.destination);
 
       this.step = 0;
       this.scheduleNextNote();
       this.timerId = setInterval(() => {
         this.scheduleNextNote();
-      }, this.isUrgent ? 160 : 250); // 120-180 BPM dramatic tempo
+      }, this.isUrgent ? 160 : 250);
     } catch (e) {
       console.warn('Synthesizer error:', e);
     }
@@ -162,18 +179,15 @@ class BgmManager {
 
     const now = ctx.currentTime;
 
-    // Dramatic minor chord arpeggio pattern: Am -> F -> C -> G
-    // Frequencies (Hz): A3=220, C4=261.63, E4=329.63, A4=440, F3=174.61, G3=196, D4=293.66, B3=246.94
     const melody = [
-      220.0, 329.63, 440.0, 329.63, 261.63, 329.63, 440.0, 523.25, // Am arpeggio
-      174.61, 261.63, 349.23, 261.63, 220.0, 261.63, 349.23, 440.0, // F arpeggio
-      261.63, 329.63, 392.0, 329.63, 261.63, 329.63, 392.0, 523.25, // C arpeggio
-      196.0, 293.66, 392.0, 293.66, 246.94, 293.66, 392.0, 493.88, // G arpeggio
+      220.0, 329.63, 440.0, 329.63, 261.63, 329.63, 440.0, 523.25,
+      174.61, 261.63, 349.23, 261.63, 220.0, 261.63, 349.23, 440.0,
+      261.63, 329.63, 392.0, 329.63, 261.63, 329.63, 392.0, 523.25,
+      196.0, 293.66, 392.0, 293.66, 246.94, 293.66, 392.0, 493.88,
     ];
 
     const currentFreq = melody[this.step % melody.length];
 
-    // 1. Synth Pluck note (clearly audible in 200 - 800 Hz range)
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -196,7 +210,6 @@ class BgmManager {
       osc.start(now);
       osc.stop(now + 0.24);
 
-      // 2. Rhythmic Game Show Beat on beat 0, 4, 8, 12 (Kick pulse)
       if (this.step % 4 === 0) {
         const kickOsc = ctx.createOscillator();
         const kickGain = ctx.createGain();
@@ -213,7 +226,6 @@ class BgmManager {
         kickOsc.stop(now + 0.14);
       }
 
-      // 3. Crisp Hi-hat ticker on every step
       const hatOsc = ctx.createOscillator();
       const hatGain = ctx.createGain();
       hatOsc.type = 'triangle';
@@ -225,9 +237,7 @@ class BgmManager {
       hatGain.connect(this.masterGain);
       hatOsc.start(now);
       hatOsc.stop(now + 0.05);
-    } catch (e) {
-      // Ignore audio glitch
-    }
+    } catch (e) {}
 
     this.step++;
   }
