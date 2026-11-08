@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { soundManager } from '../utils/soundEffects';
 import { voiceReader } from '../utils/voiceReader';
 import { bgmManager } from '../utils/bgmManager';
-import { Volume2, VolumeX, LogOut, Headphones, Maximize, Minimize, Music } from 'lucide-react';
+import { LogOut, Headphones, Maximize, Minimize, Music } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const room = useGameStore((s) => s.room);
   const leaveRoom = useGameStore((s) => s.leaveRoom);
 
-  const [muted, setMuted] = useState(soundManager.isMuted);
   const [ttsEnabled, setTtsEnabled] = useState(voiceReader.isEnabled);
   const [bgmEnabled, setBgmEnabled] = useState(bgmManager.isEnabled);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
@@ -21,14 +19,6 @@ export const Navbar: React.FC = () => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
-
-  const toggleSound = () => {
-    soundManager.isMuted = !soundManager.isMuted;
-    setMuted(soundManager.isMuted);
-    if (soundManager.isMuted) {
-      bgmManager.stop();
-    }
-  };
 
   const toggleBgm = () => {
     const next = bgmManager.toggle();
@@ -97,15 +87,6 @@ export const Navbar: React.FC = () => {
           <span className="hidden md:inline">
             {bgmEnabled ? 'Nhạc nền: BẬT' : 'Nhạc nền: TẮT'}
           </span>
-        </button>
-
-        {/* Sound FX toggle */}
-        <button
-          onClick={toggleSound}
-          className="p-2 sm:p-2.5 rounded-xl bg-[#1C2638] text-[#94A3B8] hover:text-[#00D9FF] hover:border-[#00D9FF] border border-[#303D52] transition-all active:scale-95 hover:shadow-glow-cyan"
-          title={muted ? 'Bật hiệu ứng âm thanh' : 'Tắt hiệu ứng âm thanh'}
-        >
-          {muted ? <VolumeX size={18} className="stroke-[2.5]" /> : <Volume2 size={18} className="stroke-[2.5]" />}
         </button>
 
         {/* Fullscreen toggle */}
