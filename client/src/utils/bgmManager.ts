@@ -2,7 +2,7 @@ import { voiceReader } from './voiceReader';
 
 // Dual-Track Olympia BGM Manager
 // Track 1 (Theme): /audio/theme_bgm.mp3 (Homepage, Lobby, Ready: soft volume 0.22; Podium/Finished: loud volume 0.75)
-// Track 2 (Question): /audio/question_bgm.mp3 (Gameplay rounds: volume 0.45 with speech ducking)
+// Track 2 (Question): /audio/question_bgm.mp3 (Countdown beat: normal 0.20, ducked to 0.05 when host speaks)
 class BgmManager {
   private themeAudio: HTMLAudioElement | null = null;
   private questionAudio: HTMLAudioElement | null = null;
@@ -11,6 +11,13 @@ class BgmManager {
   private currentRound: string = 'LOBBY';
   private audioUnlocked: boolean = false;
   private isDucked: boolean = false;
+  private fadeInterval: any = null;
+
+  // Question countdown volume levels:
+  // Normal: 0.20 (nhẹ nhàng, không lấn át)
+  // Ducked: 0.05 (giảm sâu khi giọng đọc bắt đầu đọc câu hỏi)
+  private readonly QUESTION_VOLUME_NORMAL = 0.20;
+  private readonly QUESTION_VOLUME_DUCKED = 0.05;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -30,7 +37,7 @@ class BgmManager {
       try {
         this.questionAudio = new Audio('/audio/question_bgm.mp3');
         this.questionAudio.loop = true;
-        this.questionAudio.volume = 0.45;
+        this.questionAudio.volume = this.QUESTION_VOLUME_NORMAL;
       } catch (e) {
         console.warn('Failed to init questionAudio:', e);
       }
@@ -71,10 +78,44 @@ class BgmManager {
     }
   }
 
+  // Smoothly fade question music volume up or down
+  private fadeQuestionVolume(targetVolume: number, durationMs: number = 200) {
+    if (!this.questionAudio) return;
+    if (this.fadeInterval) {
+      clearInterval(this.fadeInterval);
+      this.fadeInterval = null;
+    }
+
+    const startVolume = this.questionAudio.volume;
+    const diff = targetVolume - startVolume;
+    const steps = 10;
+    const stepTime = durationMs / steps;
+    let stepCount = 0;
+
+    this.fadeInterval = setInterval(() => {
+      stepCount++;
+      if (!this.questionAudio) {
+        clearInterval(this.fadeInterval);
+        this.fadeInterval = null;
+        return;
+      }
+      const progress = stepCount / steps;
+      this.questionAudio.volume = Math.max(0, Math.min(1, startVolume + diff * progress));
+      if (stepCount >= steps) {
+        this.questionAudio.volume = targetVolume;
+        clearInterval(this.fadeInterval);
+        this.fadeInterval = null;
+      }
+    }, stepTime);
+  }
+
   private setDucking(ducking: boolean) {
     this.isDucked = ducking;
     if (this.questionAudio && this.isPlaying) {
-      this.questionAudio.volume = ducking ? 0.18 : 0.45;
+      // Khi giọng đọc cất tiếng: giảm sâu xuống 0.05 nhanh chóng (120ms)
+      // Khi giọng đọc dứt lời: nâng nhẹ nhàng lên 0.20 (250ms)
+      const target = ducking ? this.QUESTION_VOLUME_DUCKED : this.QUESTION_VOLUME_NORMAL;
+      this.fadeQuestionVolume(target, ducking ? 120 : 250);
     }
   }
 
@@ -133,14 +174,16 @@ class BgmManager {
         this.themeAudio.play().catch(() => {});
       }
     } else if (isGameplayRound) {
-      // 2. Lúc diễn ra câu hỏi -> Nhạc Question Countdown hồi hộp
+      // 2. Lúc diễn ra câu hỏi -> Nhạc Question Countdown hồi hộp (bé hơn: 0.20, ducked: 0.05)
       this.isPlaying = true;
       if (this.themeAudio) {
         this.themeAudio.pause();
         this.themeAudio.currentTime = 0;
       }
       if (this.questionAudio) {
-        this.questionAudio.volume = this.isDucked ? 0.18 : 0.45;
+        this.questionAudio.volume = this.isDucked
+          ? this.QUESTION_VOLUME_DUCKED
+          : this.QUESTION_VOLUME_NORMAL;
         this.questionAudio.play().catch(() => {});
       }
     } else {
@@ -164,6 +207,10 @@ class BgmManager {
 
   public stop() {
     this.isPlaying = false;
+    if (this.fadeInterval) {
+      clearInterval(this.fadeInterval);
+      this.fadeInterval = null;
+    }
     if (this.themeAudio) {
       try {
         this.themeAudio.pause();
