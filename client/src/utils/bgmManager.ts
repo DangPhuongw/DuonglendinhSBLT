@@ -1,49 +1,66 @@
 import { voiceReader } from './voiceReader';
 
-// Olympia Gameplay BGM Manager: Plays the official Olympia question countdown audio
+// Dual-Track Olympia BGM Manager
+// Track 1 (Theme): /audio/theme_bgm.mp3 (Homepage, Lobby, Ready: soft volume 0.22; Podium/Finished: loud volume 0.75)
+// Track 2 (Question): /audio/question_bgm.mp3 (Gameplay rounds: volume 0.45 with speech ducking)
 class BgmManager {
-  private audioEl: HTMLAudioElement | null = null;
-  private ctx: AudioContext | null = null;
+  private themeAudio: HTMLAudioElement | null = null;
+  private questionAudio: HTMLAudioElement | null = null;
   private isPlaying: boolean = false;
   private enabled: boolean = true;
-  private timerId: any = null;
-  private isUrgent: boolean = false;
-  private step: number = 0;
+  private currentRound: string = 'LOBBY';
   private audioUnlocked: boolean = false;
   private isDucked: boolean = false;
-
-  private masterGain: GainNode | null = null;
-  private trackUrl: string = '/audio/question_bgm.mp3';
 
   constructor() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('olympia_bgm');
       this.enabled = saved !== null ? saved === 'true' : true;
 
-      // Initialize HTML5 Audio Element for real MP3
-      this.initAudioElement();
+      // 1. Initialize Theme Audio (Olympia Theme Song)
+      try {
+        this.themeAudio = new Audio('/audio/theme_bgm.mp3');
+        this.themeAudio.loop = true;
+        this.themeAudio.volume = 0.22;
+      } catch (e) {
+        console.warn('Failed to init themeAudio:', e);
+      }
 
-      // Listen to voice reader to duck audio volume when host speaks
+      // 2. Initialize Question Countdown Audio (Tense beat)
+      try {
+        this.questionAudio = new Audio('/audio/question_bgm.mp3');
+        this.questionAudio.loop = true;
+        this.questionAudio.volume = 0.45;
+      } catch (e) {
+        console.warn('Failed to init questionAudio:', e);
+      }
+
+      // 3. Audio Ducking for Question Music when Host speaks
       voiceReader.subscribe((speaking) => {
         this.setDucking(speaking);
       });
 
-      // Browser autoplay policy: Unlock on first user interaction
+      // 4. Browser Autoplay Policy: Unlock on first user interaction
       const unlock = () => {
         if (!this.audioUnlocked) {
           this.audioUnlocked = true;
-          if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume().catch(() => {});
-          }
-          const el = this.audioEl;
-          if (el) {
-            // Prime audio buffer
-            el.play().then(() => {
-              if (!this.isPlaying) {
-                el.pause();
-                el.currentTime = 0;
-              }
-            }).catch(() => {});
+
+          // Prime audio elements
+          [this.themeAudio, this.questionAudio].forEach((el) => {
+            if (el) {
+              el.play()
+                .then(() => {
+                  if (!this.isPlaying) {
+                    el.pause();
+                    el.currentTime = 0;
+                  }
+                })
+                .catch(() => {});
+            }
+          });
+
+          if (this.enabled) {
+            this.updatePlayback();
           }
         }
       };
@@ -54,51 +71,11 @@ class BgmManager {
     }
   }
 
-  private initAudioElement() {
-    if (typeof window === 'undefined') return;
-    try {
-      this.audioEl = new Audio(this.trackUrl);
-      this.audioEl.loop = true;
-      this.audioEl.volume = 0.45;
-
-      this.audioEl.addEventListener('error', () => {
-        // Fallback to synthesized audio if MP3 fails
-        if (this.isPlaying && this.enabled) {
-          this.startSynthesizedTheme();
-        }
-      });
-    } catch (e) {
-      console.warn('Audio element initialization error:', e);
-    }
-  }
-
   private setDucking(ducking: boolean) {
     this.isDucked = ducking;
-    if (this.audioEl) {
-      this.audioEl.volume = ducking ? 0.18 : 0.45;
+    if (this.questionAudio && this.isPlaying) {
+      this.questionAudio.volume = ducking ? 0.18 : 0.45;
     }
-    if (this.masterGain && this.ctx) {
-      try {
-        this.masterGain.gain.setValueAtTime(
-          ducking ? 0.04 : 0.12,
-          this.ctx.currentTime
-        );
-      } catch (e) {}
-    }
-  }
-
-  private getContext(): AudioContext | null {
-    if (typeof window === 'undefined') return null;
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(() => {});
-    }
-    return this.ctx;
   }
 
   public get isEnabled(): boolean {
@@ -113,7 +90,7 @@ class BgmManager {
     if (!val) {
       this.stop();
     } else {
-      this.start();
+      this.updatePlayback();
     }
   }
 
@@ -122,158 +99,79 @@ class BgmManager {
     return this.isEnabled;
   }
 
+  public setRound(round: string) {
+    this.currentRound = round;
+    this.updatePlayback();
+  }
+
+  public updatePlayback() {
+    if (!this.enabled) {
+      this.stop();
+      return;
+    }
+
+    const round = this.currentRound;
+
+    const isGameplayRound = [
+      'KD_RIENG',
+      'KD_CHUNG',
+      'VCNV',
+      'TANG_TOC',
+      'VE_DICH',
+      'TIEBREAK',
+    ].includes(round);
+
+    if (round === 'FINISHED') {
+      // 1. Lúc công bố người thắng cuộc (Podium) -> Nhạc Theme Olympia với âm lượng to (0.75)
+      this.isPlaying = true;
+      if (this.questionAudio) {
+        this.questionAudio.pause();
+        this.questionAudio.currentTime = 0;
+      }
+      if (this.themeAudio) {
+        this.themeAudio.volume = 0.75;
+        this.themeAudio.play().catch(() => {});
+      }
+    } else if (isGameplayRound) {
+      // 2. Lúc diễn ra câu hỏi -> Nhạc Question Countdown hồi hộp
+      this.isPlaying = true;
+      if (this.themeAudio) {
+        this.themeAudio.pause();
+        this.themeAudio.currentTime = 0;
+      }
+      if (this.questionAudio) {
+        this.questionAudio.volume = this.isDucked ? 0.18 : 0.45;
+        this.questionAudio.play().catch(() => {});
+      }
+    } else {
+      // 3. Homepage, Phòng chờ (LOBBY), Màn hình chuẩn bị (READY) -> Nhạc Theme với âm lượng nhỏ (0.22)
+      this.isPlaying = true;
+      if (this.questionAudio) {
+        this.questionAudio.pause();
+        this.questionAudio.currentTime = 0;
+      }
+      if (this.themeAudio) {
+        this.themeAudio.volume = 0.22;
+        this.themeAudio.play().catch(() => {});
+      }
+    }
+  }
+
   public start() {
-    if (!this.enabled) return;
     this.isPlaying = true;
-
-    // Try playing real MP3 track first
-    if (this.audioEl) {
-      this.audioEl.volume = this.isDucked ? 0.18 : 0.45;
-      this.audioEl.currentTime = 0;
-      const playPromise = this.audioEl.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // MP3 playing successfully
-          })
-          .catch(() => {
-            // Fallback if audio element blocked
-            this.startSynthesizedTheme();
-          });
-        return;
-      }
-    }
-
-    this.startSynthesizedTheme();
-  }
-
-  // Melodic fallback synthesizer
-  private startSynthesizedTheme() {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    if (this.timerId) {
-      clearInterval(this.timerId);
-      this.timerId = null;
-    }
-
-    try {
-      this.masterGain = ctx.createGain();
-      this.masterGain.gain.setValueAtTime(this.isDucked ? 0.04 : 0.12, ctx.currentTime);
-      this.masterGain.connect(ctx.destination);
-
-      this.step = 0;
-      this.scheduleNextNote();
-      this.timerId = setInterval(() => {
-        this.scheduleNextNote();
-      }, this.isUrgent ? 160 : 250);
-    } catch (e) {
-      console.warn('Synthesizer error:', e);
-    }
-  }
-
-  private scheduleNextNote() {
-    if (!this.isPlaying || !this.enabled) return;
-    const ctx = this.getContext();
-    if (!ctx || !this.masterGain) return;
-
-    const now = ctx.currentTime;
-
-    const melody = [
-      220.0, 329.63, 440.0, 329.63, 261.63, 329.63, 440.0, 523.25,
-      174.61, 261.63, 349.23, 261.63, 220.0, 261.63, 349.23, 440.0,
-      261.63, 329.63, 392.0, 329.63, 261.63, 329.63, 392.0, 523.25,
-      196.0, 293.66, 392.0, 293.66, 246.94, 293.66, 392.0, 493.88,
-    ];
-
-    const currentFreq = melody[this.step % melody.length];
-
-    try {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(currentFreq, now);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1400, now);
-      filter.frequency.exponentialRampToValueAtTime(300, now + 0.22);
-
-      gain.gain.setValueAtTime(0.09, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.masterGain);
-
-      osc.start(now);
-      osc.stop(now + 0.24);
-
-      if (this.step % 4 === 0) {
-        const kickOsc = ctx.createOscillator();
-        const kickGain = ctx.createGain();
-        kickOsc.type = 'sine';
-        kickOsc.frequency.setValueAtTime(150, now);
-        kickOsc.frequency.exponentialRampToValueAtTime(45, now + 0.12);
-
-        kickGain.gain.setValueAtTime(0.2, now);
-        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-        kickOsc.connect(kickGain);
-        kickGain.connect(this.masterGain);
-        kickOsc.start(now);
-        kickOsc.stop(now + 0.14);
-      }
-
-      const hatOsc = ctx.createOscillator();
-      const hatGain = ctx.createGain();
-      hatOsc.type = 'triangle';
-      hatOsc.frequency.setValueAtTime(this.step % 2 === 0 ? 1200 : 900, now);
-      hatGain.gain.setValueAtTime(0.015, now);
-      hatGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-
-      hatOsc.connect(hatGain);
-      hatGain.connect(this.masterGain);
-      hatOsc.start(now);
-      hatOsc.stop(now + 0.05);
-    } catch (e) {}
-
-    this.step++;
-  }
-
-  public setUrgency(urgent: boolean) {
-    if (this.isUrgent !== urgent) {
-      this.isUrgent = urgent;
-      if (this.isPlaying && this.timerId) {
-        clearInterval(this.timerId);
-        this.timerId = setInterval(() => {
-          this.scheduleNextNote();
-        }, this.isUrgent ? 160 : 250);
-      }
-    }
+    this.updatePlayback();
   }
 
   public stop() {
     this.isPlaying = false;
-    this.isUrgent = false;
-
-    if (this.audioEl) {
+    if (this.themeAudio) {
       try {
-        this.audioEl.pause();
-        this.audioEl.currentTime = 0;
+        this.themeAudio.pause();
       } catch (e) {}
     }
-
-    if (this.timerId) {
-      clearInterval(this.timerId);
-      this.timerId = null;
-    }
-
-    if (this.masterGain && this.ctx) {
+    if (this.questionAudio) {
       try {
-        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, this.ctx.currentTime);
-        this.masterGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.1);
+        this.questionAudio.pause();
       } catch (e) {}
     }
   }

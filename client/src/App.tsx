@@ -33,22 +33,12 @@ export const App: React.FC = () => {
 
   const currentRound = room?.state?.round || 'LOBBY';
 
-  // Manage background music - play during active gameplay rounds (from start to end of round)
+  // Manage background music according to game state:
+  // - LOBBY, READY: Theme song (soft volume)
+  // - KD_RIENG, KD_CHUNG, VCNV, TANG_TOC, VE_DICH, TIEBREAK: Question countdown music
+  // - FINISHED: Theme song (loud celebratory volume)
   useEffect(() => {
-    const isGameplayRound = [
-      'KD_RIENG',
-      'KD_CHUNG',
-      'VCNV',
-      'TANG_TOC',
-      'VE_DICH',
-      'TIEBREAK',
-    ].includes(currentRound);
-
-    if (isGameplayRound) {
-      bgmManager.start();
-    } else {
-      bgmManager.stop();
-    }
+    bgmManager.setRound(currentRound);
 
     return () => {
       bgmManager.stop();
