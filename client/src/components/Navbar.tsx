@@ -86,14 +86,17 @@ export const Navbar: React.FC = () => {
         {/* BGM Music toggle */}
         <button
           onClick={toggleBgm}
-          className={`p-2 sm:p-2.5 rounded-xl border transition-all active:scale-95 flex items-center justify-center ${
+          className={`flex items-center gap-1.5 text-xs sm:text-sm font-bold font-heading px-3 py-1.5 rounded-xl border transition-all active:scale-95 ${
             bgmEnabled
               ? 'bg-[#1C2638] text-[#FFD43B] border-[#FFD43B]/60 shadow-glow-yellow'
               : 'bg-[#1C2638] text-[#64748B] border-[#303D52] hover:text-[#94A3B8]'
           }`}
           title={bgmEnabled ? 'Nhạc nền: Đang BẬT (bấm để tắt)' : 'Nhạc nền: Đang TẮT (bấm để bật)'}
         >
-          <Music size={18} className="stroke-[2.5]" />
+          <Music size={17} className={`stroke-[2.5] ${bgmEnabled ? 'animate-pulse text-[#FFD43B]' : 'text-[#64748B]'}`} />
+          <span className="hidden md:inline">
+            {bgmEnabled ? 'Nhạc nền: BẬT' : 'Nhạc nền: TẮT'}
+          </span>
         </button>
 
         {/* Sound FX toggle */}
