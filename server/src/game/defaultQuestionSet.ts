@@ -313,10 +313,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
       {
         id: 'kd-c-7',
         type: 'mcq',
-        prompt: 'Bộ từ điển "Dictionarium Annamiticum Lusitanum et Latinum" (Từ điển Việt - Bồ - La) xuất bản năm 1651 tại Roma, đánh dấu mốc quan trọng trong sự hình thành chữ Quốc ngữ, là công trình của giáo sĩ nào?',
-        options: ['Alexandre de Rhodes', 'Pigneau de Béhaine', 'Francisco de Pina', 'Bá Đa Lộc'],
+        prompt: 'Năm 968, sau khi dẹp loạn 12 sứ quân và thống nhất đất nước, Đinh Bộ Lĩnh lên ngôi Hoàng đế và đặt quốc hiệu nước ta là gì?',
+        options: ['Đại Cồ Việt', 'Đại Việt', 'Vạn Xuân', 'Đại Ngu'],
         answer: 'A',
-        alternatives: ['ALEXANDRE DE RHODES', 'DẮC LỘ', 'ĐẮC LỘ', 'ALEXANDRE'],
+        alternatives: ['ĐẠI CỒ VIỆT', 'DAI CO VIET'],
       },
       {
         id: 'kd-c-8',
