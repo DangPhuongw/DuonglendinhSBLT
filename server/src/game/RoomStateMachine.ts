@@ -48,6 +48,9 @@ export class RoomStateMachine {
   private buzzerOpenTime: number = 0;
   private pendingCnvBuzzerId: string | null = null;
   private veDichPlayerQueue: string[] = [];
+  private veDichCompletedPlayerIds: Set<string> = new Set();
+  private veDichActiveContestantId: string = '';
+  private veDichCurrentPackage: 40 | 60 | 80 = 40;
   private veDichCurrentQuestionIndex: number = 0;
   private veDichCurrentQuestionPoints: number = 10;
   private veDichHopeStarActive: boolean = false;
@@ -337,7 +340,7 @@ export class RoomStateMachine {
   public skipAbsentPlayer(hostId: string, absentPlayerId: string): void {
     if (this.room.hostId !== hostId) return;
     const player = this.room.players.find((p) => p.id === absentPlayerId);
-    if (!player || player.connected) return;
+    if (!player) return;
 
     // Mark as ready or eliminate from current phase
     player.ready = true;
@@ -351,6 +354,19 @@ export class RoomStateMachine {
       if (allReady) {
         this.startReadyCountdown();
       }
+      return;
+    }
+
+    if (
+      this.room.state.round === 'VE_DICH' &&
+      (this.veDichActiveContestantId === absentPlayerId || this.room.state.activePlayerId === absentPlayerId)
+    ) {
+      this.clearTimer();
+      this.veDichCompletedPlayerIds.add(absentPlayerId);
+      this.eventQueue.enqueue(async () => {
+        await this.runVeDichTurn(this.veDichCurrentTurnIndex + 1);
+      });
+      return;
     }
   }
 
@@ -1068,12 +1084,15 @@ export class RoomStateMachine {
 
     // VE_DICH Steal Buzzer
     if (round === 'VE_DICH' && subPhase === 'STEAL_BUZZ') {
-      if (playerId === this.room.state.activePlayerId) return false; // Main player cannot steal
+      const mainPlayerId = this.veDichActiveContestantId || this.room.state.mainPlayerId || this.room.state.activePlayerId;
+      if (playerId === mainPlayerId) return false; // Main contestant cannot steal their own question
       if (this.buzzedPlayerId) return false;
 
       this.buzzedPlayerId = playerId;
       this.room.state.buzzerLockedBy = playerId;
       this.room.state.activePlayerId = playerId;
+      this.room.state.mainPlayerId = mainPlayerId;
+      this.room.state.turnIndex = this.veDichCurrentTurnIndex;
       this.room.state.subPhase = 'STEAL_ANSWER';
 
       const player = this.room.players.find((p) => p.id === playerId);
@@ -1865,13 +1884,21 @@ export class RoomStateMachine {
     this.room.status = 'VE_DICH';
     this.buzzedPlayerId = null;
     this.room.state.buzzerLockedBy = null;
-    // G9: Sort players by current score descending, tiebreaker smaller seat (contestants only)
-    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return a.seat - b.seat;
-    });
+    this.veDichCompletedPlayerIds.clear();
 
-    this.veDichPlayerQueue = sorted.map((p) => p.id);
+    // G9: Sort players by current score descending, tiebreaker smaller seat (contestants only)
+    const sorted = [...this.room.players]
+      .filter((p) => p.role !== 'viewer' && p.connected)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.seat - b.seat;
+      });
+
+    const eligible = sorted.length > 0
+      ? sorted
+      : [...this.room.players].filter((p) => p.role !== 'viewer');
+
+    this.veDichPlayerQueue = eligible.map((p) => p.id);
     await this.runVeDichTurn(0);
   }
 
@@ -1882,11 +1909,30 @@ export class RoomStateMachine {
     }
 
     const activePlayerId = this.veDichPlayerQueue[playerQueueIndex];
+
+    // Guarantee: Each player has at most 1 package/turn in Ve Dich!
+    if (this.veDichCompletedPlayerIds.has(activePlayerId)) {
+      await this.runVeDichTurn(playerQueueIndex + 1);
+      return;
+    }
+
+    const activePlayer = this.room.players.find((p) => p.id === activePlayerId);
+    // If contestant disconnected, immediately skip them to prevent game stall
+    if (!activePlayer || !activePlayer.connected) {
+      this.veDichCompletedPlayerIds.add(activePlayerId);
+      await this.runVeDichTurn(playerQueueIndex + 1);
+      return;
+    }
+
+    this.veDichActiveContestantId = activePlayerId;
+    this.veDichCurrentTurnIndex = playerQueueIndex;
     this.buzzedPlayerId = null;
+
     this.room.state = {
       round: 'VE_DICH',
       subPhase: 'CHOOSE_PACKAGE',
       activePlayerId,
+      mainPlayerId: activePlayerId,
       deadline: null,
       turnIndex: playerQueueIndex,
       buzzerLockedBy: null,
@@ -1895,7 +1941,7 @@ export class RoomStateMachine {
     const chooseSec = GAME_CONFIG.VE_DICH.CHOOSE_PACKAGE_SECONDS;
     this.setDeadline(chooseSec * 1000, async () => {
       // Default package 40 on timeout
-      await this.handleVeDichPackageChosen(activePlayerId, GAME_CONFIG.VE_DICH.DEFAULT_PACKAGE, playerQueueIndex);
+      await this.handleVeDichPackageChosen(activePlayerId, GAME_CONFIG.VE_DICH.DEFAULT_PACKAGE, playerQueueIndex, true);
     });
 
     this.persistSnapshot();
@@ -1911,9 +1957,9 @@ export class RoomStateMachine {
     }
 
     this.clearTimer();
-    const turnIndex = this.room.state.turnIndex || 0;
+    const turnIndex = this.veDichCurrentTurnIndex;
     this.eventQueue.enqueue(async () => {
-      await this.handleVeDichPackageChosen(playerId, packagePoints, turnIndex);
+      await this.handleVeDichPackageChosen(playerId, packagePoints, turnIndex, false);
     });
     return true;
   }
@@ -1921,10 +1967,40 @@ export class RoomStateMachine {
   private async handleVeDichPackageChosen(
     playerId: string,
     pkg: 40 | 60 | 80,
-    turnIndex: number
+    turnIndex: number,
+    isAutoTimeout: boolean = false
   ): Promise<void> {
     const questionPointsList = GAME_CONFIG.VE_DICH.PACKAGES[pkg] || [10, 10, 20];
-    await this.runVeDichQuestion(playerId, questionPointsList, 0, turnIndex);
+    const player = this.room.players.find((p) => p.id === playerId);
+    const playerName = player ? player.name : 'Thí sinh';
+
+    this.veDichCurrentPackage = pkg;
+    this.veDichCurrentPointsList = questionPointsList;
+    this.veDichCurrentTurnIndex = turnIndex;
+    this.veDichActiveContestantId = playerId;
+
+    // Show announcement for 2.5 seconds
+    this.clearTimer();
+    this.buzzedPlayerId = null;
+    this.room.state = {
+      round: 'VE_DICH',
+      subPhase: 'PACKAGE_CHOSEN',
+      activePlayerId: playerId,
+      mainPlayerId: playerId,
+      turnIndex,
+      chosenPackage: pkg,
+      chosenPackagePointsList: questionPointsList,
+      chosenPackagePlayerName: playerName,
+      isAutoTimeout,
+      deadline: null,
+      buzzerLockedBy: null,
+    };
+    this.persistSnapshot();
+    this.syncRoom();
+
+    this.setDeadline(2500, async () => {
+      await this.runVeDichQuestion(playerId, questionPointsList, 0, turnIndex);
+    });
   }
 
   private async runVeDichQuestion(
@@ -1934,7 +2010,8 @@ export class RoomStateMachine {
     turnIndex: number
   ): Promise<void> {
     if (questionIdx >= 3) {
-      // Next player turn
+      // Contestant has finished their 3 questions! Mark completed!
+      this.veDichCompletedPlayerIds.add(playerId);
       await this.runVeDichTurn(turnIndex + 1);
       return;
     }
@@ -1942,6 +2019,7 @@ export class RoomStateMachine {
     this.veDichCurrentQuestionIndex = questionIdx;
     this.veDichCurrentPointsList = pointsList;
     this.veDichCurrentTurnIndex = turnIndex;
+    this.veDichActiveContestantId = playerId;
     const pValue = pointsList[questionIdx];
     this.veDichCurrentQuestionPoints = pValue;
     this.veDichHopeStarActive = false;
@@ -1971,6 +2049,10 @@ export class RoomStateMachine {
       round: 'VE_DICH',
       subPhase: 'STAR_DECISION',
       activePlayerId: playerId,
+      mainPlayerId: playerId,
+      turnIndex,
+      chosenPackage: this.veDichCurrentPackage,
+      chosenPackagePointsList: pointsList,
       deadline: null,
       currentQuestion: question,
       questionPoints: pValue,
@@ -2040,10 +2122,15 @@ export class RoomStateMachine {
       round: 'VE_DICH',
       subPhase: 'QUESTION',
       activePlayerId: playerId,
+      mainPlayerId: playerId,
+      turnIndex,
+      chosenPackage: this.veDichCurrentPackage,
+      chosenPackagePointsList: pointsList,
       currentQuestion: question,
       deadline: null,
       hopeStarActive: this.veDichHopeStarActive,
       questionPoints: points,
+      questionIndex: this.veDichCurrentQuestionIndex,
       buzzerLockedBy: null,
     };
 
@@ -2087,7 +2174,13 @@ export class RoomStateMachine {
         round: 'VE_DICH',
         subPhase: 'REVEAL',
         activePlayerId: playerId,
+        mainPlayerId: playerId,
+        turnIndex,
+        chosenPackage: this.veDichCurrentPackage,
+        chosenPackagePointsList: pointsList,
         currentQuestion: question,
+        questionPoints: p,
+        questionIndex: this.veDichCurrentQuestionIndex,
         deadline: null,
         buzzerLockedBy: null,
       };
@@ -2116,7 +2209,13 @@ export class RoomStateMachine {
       round: 'VE_DICH',
       subPhase: 'STEAL_BUZZ',
       activePlayerId: playerId, // Main player ID
+      mainPlayerId: playerId,
+      turnIndex,
+      chosenPackage: this.veDichCurrentPackage,
+      chosenPackagePointsList: pointsList,
       currentQuestion: question,
+      questionPoints: p,
+      questionIndex: this.veDichCurrentQuestionIndex,
       deadline: null,
       buzzerLockedBy: null,
     };
@@ -2135,7 +2234,14 @@ export class RoomStateMachine {
       this.room.state = {
         round: 'VE_DICH',
         subPhase: 'REVEAL',
+        activePlayerId: playerId,
+        mainPlayerId: playerId,
+        turnIndex,
+        chosenPackage: this.veDichCurrentPackage,
+        chosenPackagePointsList: pointsList,
         currentQuestion: question,
+        questionPoints: p,
+        questionIndex: this.veDichCurrentQuestionIndex,
         deadline: null,
         buzzerLockedBy: null,
       };
@@ -2155,7 +2261,9 @@ export class RoomStateMachine {
 
   private async evaluateVeDichSteal(stealerId: string, stealAnswer: string): Promise<void> {
     const question = this.room.state.currentQuestion as Question;
-    const mainPlayerId = this.veDichPlayerQueue[this.room.state.turnIndex || 0];
+    const mainPlayerId = this.veDichActiveContestantId;
+    const turnIndex = this.veDichCurrentTurnIndex;
+    const pointsList = this.veDichCurrentPointsList;
     const p = this.veDichCurrentQuestionPoints;
     const hasStar = this.veDichHopeStarActive;
 
@@ -2194,7 +2302,14 @@ export class RoomStateMachine {
     this.room.state = {
       round: 'VE_DICH',
       subPhase: 'REVEAL',
+      activePlayerId: mainPlayerId,
+      mainPlayerId,
+      turnIndex,
+      chosenPackage: this.veDichCurrentPackage,
+      chosenPackagePointsList: pointsList,
       currentQuestion: question,
+      questionPoints: p,
+      questionIndex: this.veDichCurrentQuestionIndex,
       deadline: null,
       buzzerLockedBy: null,
     };
@@ -2203,8 +2318,6 @@ export class RoomStateMachine {
     this.persistSnapshot();
     this.syncRoom();
 
-    const turnIndex = this.room.state.turnIndex || 0;
-    const pointsList = [10, 20, 30]; // fallback
     this.setDeadline(3000, async () => {
       await this.runVeDichQuestion(mainPlayerId, pointsList, this.veDichCurrentQuestionIndex + 1, turnIndex);
     });

@@ -32,6 +32,15 @@ export const VeDichRound: React.FC = () => {
     setSubmitted(false);
   }, [currentQ?.id, subPhase]);
 
+  // Announce chosen package with voice reader
+  useEffect(() => {
+    if (subPhase === 'PACKAGE_CHOSEN') {
+      const playerName = room?.state?.chosenPackagePlayerName || activePlayer?.name || 'Thí sinh';
+      const pkg = room?.state?.chosenPackage || 40;
+      voiceReader.speak(`Thí sinh ${playerName} đã lựa chọn gói câu hỏi ${pkg} điểm!`);
+    }
+  }, [subPhase, room?.state?.chosenPackage, room?.state?.chosenPackagePlayerName, activePlayer?.name]);
+
   // Stop voice reading on reveal, steal buzz, or steal answer
   useEffect(() => {
     if (subPhase === 'STEAL_BUZZ' || subPhase === 'STEAL_ANSWER' || subPhase === 'REVEAL') {
@@ -78,7 +87,9 @@ export const VeDichRound: React.FC = () => {
           <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#F8FAFC] mb-1.5">
             {activePlayer?.name}
           </h2>
-          <p className="text-xs sm:text-sm text-[#94A3B8] font-medium mb-3">Chọn gói câu hỏi trong 20 giây:</p>
+          <p className="text-xs sm:text-sm text-[#94A3B8] font-medium mb-3">
+            {isMyTurn ? 'Chọn gói câu hỏi trong 20 giây:' : `Đang chờ ${activePlayer?.name} chọn gói câu hỏi:`}
+          </p>
 
           <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={20} className="mb-4" />
 
@@ -105,6 +116,56 @@ export const VeDichRound: React.FC = () => {
               </button>
             ))}
           </div>
+
+          {!isMyTurn && (
+            <div className="mt-4 px-4 py-2 bg-[#1C2638] rounded-xl border border-[#00D9FF]/30 text-xs sm:text-sm text-[#00D9FF] font-heading font-bold animate-pulse">
+              ⏳ Thí sinh đang suy nghĩ và chọn gói câu hỏi...
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- 1.5. PACKAGE CHOSEN ANNOUNCEMENT (2.5s) ---
+  if (subPhase === 'PACKAGE_CHOSEN') {
+    const pkg = room.state.chosenPackage || 40;
+    const pointsList = room.state.chosenPackagePointsList || (pkg === 40 ? [10, 10, 20] : pkg === 60 ? [10, 20, 30] : [20, 30, 30]);
+    const playerName = room.state.chosenPackagePlayerName || activePlayer?.name || 'Thí sinh';
+
+    return (
+      <div className="w-full max-w-2xl mx-auto flex flex-col items-center justify-center h-full max-h-full py-1 px-2 overflow-hidden text-center animate-in zoom-in-95 duration-300">
+        <div className="w-full bg-[#111827] border-2 border-[#FFD43B] rounded-3xl p-6 sm:p-8 shadow-glow-yellow flex flex-col items-center">
+          <span className="text-xs uppercase font-heading font-black bg-[#FFD43B]/20 text-[#FFD43B] px-4 py-1.5 rounded-full border border-[#FFD43B]/50 shadow-glow-yellow mb-3">
+            LỰA CHỌN GÓI CÂU HỎI VỀ ĐÍCH
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-heading font-black text-[#F8FAFC] mb-2">
+            {playerName}
+          </h2>
+          <div className="text-sm sm:text-base text-[#94A3B8] font-medium mb-4">
+            {room.state.isAutoTimeout ? '(Hết giờ - Hệ thống tự động chọn)' : 'đã lựa chọn gói câu hỏi'}
+          </div>
+
+          <div className="flex flex-col items-center gap-2 bg-[#1C2638] px-8 py-5 rounded-2xl border border-[#FFD43B]/60 shadow-glow-yellow">
+            <span className="text-4xl sm:text-5xl font-digital font-bold text-[#FFD43B]">
+              {pkg} ĐIỂM
+            </span>
+            <div className="flex items-center gap-2 mt-2">
+              {pointsList.map((pts: number, idx: number) => (
+                <span
+                  key={idx}
+                  className="px-3.5 py-1.5 bg-[#090D18] border border-[#303D52] rounded-lg text-xs sm:text-sm font-digital font-bold text-[#00D9FF]"
+                >
+                  Câu {idx + 1}: {pts}đ
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-[#20D6A0] font-heading font-bold mt-5 animate-pulse flex items-center gap-1.5">
+            <Trophy size={16} />
+            <span>Chuẩn bị bước vào các câu hỏi...</span>
+          </p>
         </div>
       </div>
     );
@@ -165,7 +226,13 @@ export const VeDichRound: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1.5 rounded-xl border border-[#FFD43B]/40 shadow-glow-yellow flex items-center gap-2">
             <Trophy size={16} />
-            Về Đích - {activePlayer?.name} (Câu {questionIndex + 1}/3 - {questionPoints}đ)
+            <span>Về Đích - {activePlayer?.name}</span>
+            {room.state.chosenPackage && (
+              <span className="text-[#00D9FF] font-digital font-bold">
+                (Gói {room.state.chosenPackage}đ: {(room.state.chosenPackagePointsList || [10, 10, 20]).join('-')}đ)
+              </span>
+            )}
+            <span className="text-[#F8FAFC]">| Câu {questionIndex + 1}/3 ({questionPoints}đ)</span>
           </span>
           {room.state.hopeStarActive && (
             <span className="flex items-center gap-1.5 text-xs sm:text-sm bg-[#FFD43B] text-[#090D18] font-heading font-black px-3 py-1 rounded-full shadow-glow-yellow animate-pulse">
