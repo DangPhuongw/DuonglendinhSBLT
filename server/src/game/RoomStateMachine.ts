@@ -49,6 +49,7 @@ export class RoomStateMachine {
   private pendingCnvBuzzerId: string | null = null;
   private veDichPlayerQueue: string[] = [];
   private veDichCompletedPlayerIds: Set<string> = new Set();
+  private veDichUsedQuestionIds: Set<string> = new Set();
   private veDichActiveContestantId: string = '';
   private veDichCurrentPackage: 40 | 60 | 80 = 40;
   private veDichCurrentQuestionIndex: number = 0;
@@ -1885,6 +1886,7 @@ export class RoomStateMachine {
     this.buzzedPlayerId = null;
     this.room.state.buzzerLockedBy = null;
     this.veDichCompletedPlayerIds.clear();
+    this.veDichUsedQuestionIds.clear();
 
     // G9: Sort players by current score descending, tiebreaker smaller seat (contestants only)
     const sorted = [...this.room.players]
@@ -2024,7 +2026,7 @@ export class RoomStateMachine {
     this.veDichCurrentQuestionPoints = pValue;
     this.veDichHopeStarActive = false;
 
-    // Pick question from pool
+    // Pick question from pool without repeating across contestants
     const pool =
       pValue === 10
         ? this.questionSet.veDich.pool10
@@ -2032,7 +2034,10 @@ export class RoomStateMachine {
         ? this.questionSet.veDich.pool20
         : this.questionSet.veDich.pool30;
 
-    const question = pool[Math.floor(Math.random() * pool.length)] || pool[0];
+    const unusedPool = pool.filter((q) => !this.veDichUsedQuestionIds.has(q.id));
+    const candidateList = unusedPool.length > 0 ? unusedPool : pool;
+    const question = candidateList[Math.floor(Math.random() * candidateList.length)] || pool[0];
+    this.veDichUsedQuestionIds.add(question.id);
     this.veDichCurrentQuestion = question;
 
     // Nếu thí sinh đã sử dụng Ngôi sao hy vọng ở câu hỏi trước rồi thì bỏ qua 7s suy nghĩ, vào luôn câu hỏi
