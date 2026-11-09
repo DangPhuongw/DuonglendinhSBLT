@@ -29,7 +29,8 @@ export interface StateMachineCallbacks {
     metadata?: any;
   }) => void;
   broadcastBuzzWon: (data: { winnerId: string; winnerName: string; diffMs?: number }) => void;
-  broadcastBuzzRejected: (toSocketId: string | null, data: { reason: string }) => void;
+  /** toPlayerId: chỉ gửi riêng cho người đó; null = cả phòng. */
+  broadcastBuzzRejected: (toPlayerId: string | null, data: { reason: string }) => void;
   emitAnswerAck: (toPlayerId: string, data: { questionId: string; receivedAt: number }) => void;
   broadcastReveal: (data: RevealPayload) => void;
   broadcastScoreUpdate: (data: { scores: Record<string, number>; lastEvents: ScoreEvent[] }) => void;
@@ -922,6 +923,8 @@ export class RoomStateMachine {
     const subPhase = this.room.state.subPhase;
 
     if (round === 'KD_RIENG') {
+      // Chỉ nhận đáp án khi câu hỏi đang mở. Ở pha REVEAL đáp án đúng đã hiện, nhận thêm là gian lận.
+      if (subPhase !== 'QUESTION') return false;
       if (this.room.state.activePlayerId !== playerId) return false;
       // Single choice, lock immediately
       if (!this.answersMap.has(playerId)) {
@@ -990,6 +993,7 @@ export class RoomStateMachine {
     }
 
     if (round === 'TANG_TOC') {
+      if (subPhase !== 'QUESTION') return false;
       // Overwrite until deadline
       this.answersMap.set(playerId, { answer, timestamp: now });
       this.callbacks.emitAnswerAck(playerId, { questionId, receivedAt: now });
@@ -1135,7 +1139,7 @@ export class RoomStateMachine {
   public handleBuzzer(playerId: string): boolean {
     const player = this.room.players.find((p) => p.id === playerId);
     if (!player || player.role === 'viewer') {
-      this.callbacks.broadcastBuzzRejected(null, { reason: 'Khán giả không thể bấm chuông.' });
+      this.callbacks.broadcastBuzzRejected(playerId, { reason: 'Khán giả không thể bấm chuông.' });
       return false;
     }
     if (player.disqualified) return false;
@@ -1145,7 +1149,7 @@ export class RoomStateMachine {
     const subPhase = this.room.state.subPhase;
 
     if (this.disqualifiedBuzzers.has(playerId)) {
-      this.callbacks.broadcastBuzzRejected(null, { reason: 'Bạn đã bị mất quyền bấm chuông câu này.' });
+      this.callbacks.broadcastBuzzRejected(playerId, { reason: 'Bạn đã bị mất quyền bấm chuông câu này.' });
       return false;
     }
 
@@ -1187,7 +1191,7 @@ export class RoomStateMachine {
 
       // Chuông Chướng ngại vật chỉ mở sau khi câu hỏi hàng ngang thứ 1 xuất hiện
       if (this.vcnvQuestionsAppearedCount < 1) {
-        this.callbacks.broadcastBuzzRejected(null, {
+        this.callbacks.broadcastBuzzRejected(playerId, {
           reason: 'Chuông Chướng ngại vật chỉ mở sau khi câu hỏi hàng ngang thứ 1 xuất hiện.',
         });
         return false;
@@ -1258,10 +1262,18 @@ export class RoomStateMachine {
 
     // TIEBREAK Buzzer
     if (round === 'TIEBREAK') {
+      const eligible: string[] = this.room.state.eligiblePlayerIds || [];
+      if (!eligible.includes(playerId)) {
+        this.callbacks.broadcastBuzzRejected(playerId, {
+          reason: 'Chỉ các thí sinh bằng điểm mới được bấm chuông câu hỏi phụ.',
+        });
+        return false;
+      }
+
       if (subPhase === 'WAIT_SIGNAL') {
         // G14: Buzz early loses right for this question
         this.disqualifiedBuzzers.add(playerId);
-        this.callbacks.broadcastBuzzRejected(null, {
+        this.callbacks.broadcastBuzzRejected(playerId, {
           reason: 'Bấm chuông trước hiệu lệnh: Bị tước quyền trả lời câu này!',
         });
         return false;
@@ -2510,6 +2522,7 @@ export class RoomStateMachine {
       return;
     }
 
+    this.tieBreakQuestionIndex = qIndex;
     const question = this.questionSet.tieBreak[qIndex];
     this.disqualifiedBuzzers.clear();
     this.buzzedPlayerId = null;

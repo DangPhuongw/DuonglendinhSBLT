@@ -77,15 +77,18 @@ roomManager.setCallbacksFactory((roomCode: string) => ({
   broadcastBuzzWon: (data) => {
     io.to(roomCode).emit('buzz:won', data);
   },
-  broadcastBuzzRejected: (toSocketId, data) => {
-    if (toSocketId) {
-      io.to(toSocketId).emit('buzz:rejected', data);
-    } else {
+  broadcastBuzzRejected: (toPlayerId, data) => {
+    if (!toPlayerId) {
       io.to(roomCode).emit('buzz:rejected', data);
+      return;
     }
+    // Gửi riêng cho người bấm; nếu không tìm thấy socket thì bỏ qua (không lộ cho cả phòng)
+    const socketId = roomManager.getSocketByPlayer(roomCode, toPlayerId);
+    if (socketId) io.to(socketId).emit('buzz:rejected', data);
   },
   emitAnswerAck: (toPlayerId, data) => {
-    io.to(roomCode).emit('answer:ack', data);
+    const socketId = roomManager.getSocketByPlayer(roomCode, toPlayerId);
+    if (socketId) io.to(socketId).emit('answer:ack', data);
   },
   broadcastReveal: (data) => {
     io.to(roomCode).emit('reveal', data);
