@@ -5,7 +5,6 @@ import { GAME_CONFIG } from '@olympia/shared';
 function createMockCallbacks(): StateMachineCallbacks {
   return {
     broadcastRoom: vi.fn(),
-    broadcastPhaseChange: vi.fn(),
     broadcastBuzzWon: vi.fn(),
     broadcastBuzzRejected: vi.fn(),
     emitAnswerAck: vi.fn(),

@@ -5,7 +5,6 @@ import { GAME_CONFIG } from '@olympia/shared';
 function createMockCallbacks(): StateMachineCallbacks {
   return {
     broadcastRoom: vi.fn(),
-    broadcastPhaseChange: vi.fn(),
     broadcastBuzzWon: vi.fn(),
     broadcastBuzzRejected: vi.fn(),
     emitAnswerAck: vi.fn(),
@@ -99,7 +98,7 @@ describe('Chống gian lận rời tab', () => {
     expect(a.disqualified).toBe(true);
 
     // Pha chọn gói bị kết thúc ngay -> xác nhận 2.5s -> bỏ qua người bị loại -> tới lượt người 2
-    await sleep(2600);
+    await sleep(3000); // 2.5s xác nhận + 0.3s bù trễ mạng
     expect(machine.room.state.activePlayerId).toBe(b.id);
   }, 10000);
 

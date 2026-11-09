@@ -4,7 +4,6 @@ import { RoomStateMachine, StateMachineCallbacks } from '../src/game/RoomStateMa
 function createMockCallbacks(): StateMachineCallbacks {
   return {
     broadcastRoom: vi.fn(),
-    broadcastPhaseChange: vi.fn(),
     broadcastBuzzWon: vi.fn(),
     broadcastBuzzRejected: vi.fn(),
     emitAnswerAck: vi.fn(),
@@ -112,13 +111,13 @@ describe('Câu hỏi phụ', () => {
     // Câu 1: p1 trả lời sai
     machine.room.state.activePlayerId = p1.id;
     await (machine as any).evaluateTiebreakAnswer(p1.id, 'sai');
-    await vi.advanceTimersByTimeAsync(3100);
+    await vi.advanceTimersByTimeAsync(3500); // 3s công bố + 0.3s bù trễ mạng
     expect(machine.room.state.currentQuestion.id).toBe(questions[1].id);
 
     // Câu 2: p2 trả lời sai -> phải sang câu 3 (trước đây bị lặp lại câu 2)
     machine.room.state.activePlayerId = p2.id;
     await (machine as any).evaluateTiebreakAnswer(p2.id, 'sai');
-    await vi.advanceTimersByTimeAsync(3100);
+    await vi.advanceTimersByTimeAsync(3500); // 3s công bố + 0.3s bù trễ mạng
     expect(machine.room.state.currentQuestion.id).toBe(questions[2].id);
   });
 });

@@ -134,27 +134,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     });
 
-    socket.on('phase:change', (data) => {
-      const currentRoom = get().room;
-      if (currentRoom) {
-        set({
-          room: {
-            ...currentRoom,
-            state: {
-              ...currentRoom.state,
-              round: data.round,
-              subPhase: data.subPhase,
-              deadline: data.deadline,
-              currentQuestion: data.question,
-              buzzerLockedBy: null,
-            },
-          },
-          buzzWinner: null,
-          buzzRejectedReason: null,
-        });
-      }
-    });
-
     socket.on('buzz:won', (data) => {
       soundManager.playBuzzer();
       set({ buzzWinner: data, buzzRejectedReason: null });

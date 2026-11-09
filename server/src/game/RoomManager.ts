@@ -108,12 +108,14 @@ export class RoomManager {
       const host = room.players.find((p) => p.id === room.hostId) || room.players[0];
       if (host) {
         const callbacks = this.defaultCallbacksFactory(room.code);
+        const savedQuestionSet = SnapshotManager.loadQuestionSet(room.code) ?? undefined;
         const machine = new RoomStateMachine(
           room.code,
           { id: host.id, name: host.name, token: host.token ?? '' },
-          callbacks
+          callbacks,
+          savedQuestionSet
         );
-        machine.room = room; // Restore exact room state
+        machine.restoreFromSnapshot(room);
         this.rooms.set(room.code, machine);
       }
     }
@@ -126,8 +128,12 @@ export class RoomManager {
       for (const [code, machine] of this.rooms.entries()) {
         if (now - machine.room.updatedAt > GAME_CONFIG.ROOM_IDLE_TIMEOUT_MS) {
           console.log(`Cleaning up idle room ${code}`);
+          machine.dispose();
           SnapshotManager.deleteRoom(code);
           this.rooms.delete(code);
+          for (const [sockId, info] of this.socketToPlayer.entries()) {
+            if (info.roomCode === code) this.socketToPlayer.delete(sockId);
+          }
         }
       }
     }, 15 * 60 * 1000); // Check every 15 minutes

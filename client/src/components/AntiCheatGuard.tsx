@@ -31,8 +31,16 @@ export const AntiCheatGuard: React.FC = () => {
 
     let away = false;
     let unloading = false; // Tải lại / đóng trang không tính là rời tab
+    let blurTimer: ReturnType<typeof setTimeout> | null = null;
 
+    const cancelBlurTimer = () => {
+      if (blurTimer) {
+        clearTimeout(blurTimer);
+        blurTimer = null;
+      }
+    };
     const report = (reason: TabLeaveReason) => {
+      cancelBlurTimer();
       if (away || unloading) return;
       away = true;
       socket.emit('anticheat:leave', { reason });
@@ -41,8 +49,17 @@ export const AntiCheatGuard: React.FC = () => {
       if (document.visibilityState === 'hidden') report('hidden');
       else if (document.hasFocus()) away = false;
     };
-    const onBlur = () => report('blur');
+    // Mất focus thoáng qua (bấm thanh địa chỉ, khung media, hộp thoại...) không tính;
+    // chỉ báo khi vẫn chưa quay lại sau BLUR_GRACE_MS.
+    const onBlur = () => {
+      cancelBlurTimer();
+      blurTimer = setTimeout(() => {
+        blurTimer = null;
+        if (!document.hasFocus()) report('blur');
+      }, GAME_CONFIG.ANTI_CHEAT.BLUR_GRACE_MS);
+    };
     const onFocus = () => {
+      cancelBlurTimer();
       away = false;
     };
     const onUnload = () => {
@@ -58,6 +75,7 @@ export const AntiCheatGuard: React.FC = () => {
     window.addEventListener('beforeunload', onUnload);
     window.addEventListener('pagehide', onUnload);
     return () => {
+      cancelBlurTimer();
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('blur', onBlur);
       window.removeEventListener('focus', onFocus);

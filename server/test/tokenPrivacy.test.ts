@@ -4,7 +4,6 @@ import { RoomStateMachine, StateMachineCallbacks } from '../src/game/RoomStateMa
 function createMockCallbacks(): StateMachineCallbacks {
   return {
     broadcastRoom: vi.fn(),
-    broadcastPhaseChange: vi.fn(),
     broadcastBuzzWon: vi.fn(),
     broadcastBuzzRejected: vi.fn(),
     emitAnswerAck: vi.fn(),

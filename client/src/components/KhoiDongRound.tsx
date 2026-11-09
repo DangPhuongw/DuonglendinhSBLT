@@ -71,8 +71,9 @@ export const KhoiDongRound: React.FC = () => {
         if (['1', '2', '3', '4', '5'].includes(e.key)) {
           const index = parseInt(e.key, 10) - 1;
           const pkgs = room?.state?.kdPackages || [];
-          if (!pkgs[index]?.chosenBy) {
-            chooseKdPackage(index);
+          // Phím 1-5 ứng với ô thứ 1-5 đang hiện (không phải chỉ số gói)
+          if (pkgs[index] && !pkgs[index].chosenBy) {
+            chooseKdPackage(pkgs[index].index);
           }
           return;
         }

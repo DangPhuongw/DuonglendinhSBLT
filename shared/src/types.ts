@@ -157,13 +157,6 @@ export interface Room {
 // Socket events interfaces
 export interface ServerToClientEvents {
   'state:sync': (room: Room) => void;
-  'phase:change': (data: {
-    round: RoundType;
-    subPhase: string;
-    deadline: number | null;
-    question?: ClientQuestion;
-    metadata?: any;
-  }) => void;
   'buzz:won': (data: { winnerId: string; winnerName: string; diffMs?: number }) => void;
   'buzz:rejected': (data: { reason: string }) => void;
   'answer:ack': (data: { questionId: string; receivedAt: number }) => void;

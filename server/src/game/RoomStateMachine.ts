@@ -21,13 +21,6 @@ import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
 
 export interface StateMachineCallbacks {
   broadcastRoom: (room: Room) => void;
-  broadcastPhaseChange: (data: {
-    round: RoundType;
-    subPhase: string;
-    deadline: number | null;
-    question?: ClientQuestion;
-    metadata?: any;
-  }) => void;
   broadcastBuzzWon: (data: { winnerId: string; winnerName: string; diffMs?: number }) => void;
   /** toPlayerId: chỉ gửi riêng cho người đó; null = cả phòng. */
   broadcastBuzzRejected: (toPlayerId: string | null, data: { reason: string }) => void;
@@ -62,6 +55,12 @@ export class RoomStateMachine {
   private callbacks: StateMachineCallbacks;
   private activeTimer: NodeJS.Timeout | null = null;
   private activeExpire: (() => Promise<void>) | null = null;
+  /** Tăng mỗi lần hủy/đặt lại đồng hồ: tác vụ hết giờ cũ đã nằm trong hàng đợi sẽ tự bỏ qua. */
+  private timerGeneration = 0;
+  /** Vòng của lần công bố gần nhất (để chủ phòng sửa điểm đúng luật của vòng đó). */
+  private lastRevealRound: RoundType | null = null;
+  /** VCNV: thời gian còn lại của 15s đoán cuối khi có người bấm chuông (để chạy tiếp, không đếm lại từ đầu). */
+  private vcnvFinalGuessRemainingMs: number | null = null;
   private lastTabLeaveAt: Map<string, number> = new Map();
   private hostTransferTimer: NodeJS.Timeout | null = null;
 
@@ -140,6 +139,67 @@ export class RoomStateMachine {
     SnapshotManager.saveRoom(this.room);
   }
 
+  /** Đổi bộ đề của phòng và lưu ra đĩa (để khởi động lại server không bị mất bộ đề). */
+  public setQuestionSet(questionSet: QuestionSet): void {
+    this.questionSet = questionSet;
+    this.room.questionSetId = questionSet.id;
+    SnapshotManager.saveQuestionSet(this.room.code, questionSet);
+    this.persistSnapshot();
+  }
+
+  /**
+   * Khôi phục phòng từ snapshot sau khi server khởi động lại.
+   * Trạng thái giữa vòng (hàng đợi lượt, đồng hồ...) không lưu được, nên vòng đang dở được chơi lại
+   * từ đầu: trả về màn Sẵn sàng của vòng đó và trừ lại điểm đã ghi trong vòng đó.
+   */
+  public restoreFromSnapshot(room: Room): void {
+    this.room = room;
+    const now = Date.now();
+    for (const p of room.players) {
+      p.connected = false;
+      p.disconnectedAt = now;
+      p.ready = false;
+    }
+
+    const round = room.state?.round;
+    const restartTarget: Partial<Record<RoundType, RoundType>> = {
+      KD_RIENG: 'KD_RIENG',
+      KD_CHUNG: 'KD_RIENG',
+      VCNV: 'VCNV',
+      TANG_TOC: 'TANG_TOC',
+      VE_DICH: 'VE_DICH',
+      TIEBREAK: 'TIEBREAK',
+    };
+
+    if (round === 'READY') {
+      this.transitionToReady(room.state.targetRound || 'KD_RIENG');
+    } else if (round && restartTarget[round]) {
+      const target = restartTarget[round]!;
+      this.rollbackRoundScores(target);
+      this.transitionToReady(target);
+    } else {
+      this.persistSnapshot();
+    }
+  }
+
+  private rollbackRoundScores(target: RoundType): void {
+    const key: Record<string, keyof Player['roundScores'] | undefined> = {
+      KD_RIENG: 'kd',
+      VCNV: 'vcnv',
+      TANG_TOC: 'tt',
+      VE_DICH: 'vd',
+    };
+    const scoreKey = key[target];
+    if (!scoreKey) return;
+    for (const p of this.room.players) {
+      const roundScore = p.roundScores[scoreKey];
+      if (roundScore !== 0) {
+        this.addScore(p.id, target, '', -roundScore, 'server_restart_rollback');
+      }
+      if (target === 'VE_DICH') p.starUsed = false;
+    }
+  }
+
   public getSanitizedRoom(): Room {
     // Make sure no answers or alternatives leak
     const currentQ = this.room.state.currentQuestion;
@@ -158,6 +218,8 @@ export class RoomStateMachine {
     return {
       ...this.room,
       players: toPublicPlayers(this.room.players),
+      // Lịch sử điểm chỉ dùng ở server (biên bản CSV); không gửi kèm mỗi lần đồng bộ vì càng lúc càng nặng
+      history: [],
       state: {
         ...this.room.state,
         currentQuestion: sanitizedQ,
@@ -183,6 +245,7 @@ export class RoomStateMachine {
   // --- Timer scheduling ---
 
   private clearTimer(): void {
+    this.timerGeneration++;
     if (this.activeTimer) {
       clearTimeout(this.activeTimer);
       this.activeTimer = null;
@@ -191,18 +254,30 @@ export class RoomStateMachine {
 
   private setDeadline(durationMs: number, onExpire: () => Promise<void>): void {
     this.clearTimer();
+    const generation = this.timerGeneration;
     const now = Date.now();
     this.room.state.deadline = now + durationMs;
     this.activeExpire = onExpire;
 
+    // Hẹn giờ chạy sau deadline + NETWORK_GRACE_MS: đáp án gửi sát giờ, tới trễ vì mạng vẫn được nhận
+    // (submitAnswer chấp nhận tới deadline + NETWORK_GRACE_MS).
+    const fireInMs = durationMs > 0 ? durationMs + GAME_CONFIG.NETWORK_GRACE_MS : 0;
+
     this.activeTimer = setTimeout(() => {
       this.eventQueue.enqueue(async () => {
-        // If deadline hasn't changed or expired
-        if (this.room.state.deadline && Date.now() >= this.room.state.deadline - 50) {
-          await onExpire();
-        }
+        // Đồng hồ đã bị hủy hoặc thay bằng đồng hồ khác trong lúc tác vụ này chờ trong hàng đợi
+        if (generation !== this.timerGeneration || !this.room.state.deadline) return;
+        this.activeTimer = null;
+        await onExpire();
       });
-    }, durationMs);
+    }, fireInMs);
+  }
+
+  /** Dừng mọi đồng hồ của phòng (dùng khi xóa phòng). */
+  public dispose(): void {
+    this.clearTimer();
+    this.clearHostTransferTimer();
+    this.eventQueue.clear();
   }
 
   /** Kết thúc ngay pha đang đếm giờ (chạy luôn hành động hết giờ của pha đó). */
@@ -437,7 +512,7 @@ export class RoomStateMachine {
       );
       const allReady =
         connectedContestants.length > 0 && connectedContestants.every((p) => p.ready);
-      if (allReady) {
+      if (allReady && this.room.state.subPhase === 'WAITING_READY') {
         this.startReadyCountdown();
       }
     }
@@ -457,7 +532,7 @@ export class RoomStateMachine {
         (p) => (p.connected || p.ready) && p.role !== 'viewer' && !p.disqualified
       );
       const allReady = activeContestants.length > 0 && activeContestants.every((p) => p.ready);
-      if (allReady) {
+      if (allReady && this.room.state.subPhase === 'WAITING_READY') {
         this.startReadyCountdown();
       }
       return;
@@ -639,6 +714,8 @@ export class RoomStateMachine {
     isCorrect: boolean
   ): boolean {
     if (this.room.hostId !== hostId) return false;
+    // Chủ phòng cũng là thí sinh: không được tự sửa kết quả của chính mình
+    if (hostId === playerId) return false;
     if (!this.lastRevealedPayload || this.lastRevealedPayload.questionId !== questionId) {
       return false;
     }
@@ -658,9 +735,11 @@ export class RoomStateMachine {
     const player = this.room.players.find((p) => p.id === playerId);
     if (!player) return false;
 
-    // Calculate new delta based on round
-    let newDelta = 0;
-    const round = this.room.state.round;
+    // Tính điểm mới theo luật của vòng chứa câu hỏi đó (không phải vòng hiện tại: câu cuối của vòng
+    // có thể đã chuyển sang màn READY trong lúc còn thời gian sửa).
+    // Chỉ các vòng có overrideWindowExpiresAt mới tới được đây: KD_RIENG, KD_CHUNG, TANG_TOC.
+    const round = this.lastRevealRound;
+    let newDelta: number;
 
     if (round === 'KD_RIENG') {
       newDelta = isCorrect ? GAME_CONFIG.KHOI_DONG.RIENG_CORRECT_POINTS : 0;
@@ -668,12 +747,11 @@ export class RoomStateMachine {
       newDelta = isCorrect
         ? GAME_CONFIG.KHOI_DONG.CHUNG_CORRECT_POINTS
         : GAME_CONFIG.KHOI_DONG.CHUNG_WRONG_OR_TIMEOUT_POINTS;
-    } else if (round === 'VCNV') {
-      newDelta = isCorrect ? GAME_CONFIG.VCNV.ROW_CORRECT_POINTS : 0;
     } else if (round === 'TANG_TOC') {
-      newDelta = isCorrect ? 10 : 0; // Host override fallback
-    } else if (round === 'VE_DICH') {
-      newDelta = isCorrect ? this.veDichCurrentQuestionPoints : -this.veDichCurrentQuestionPoints;
+      if (isCorrect && !result.answer) return false; // Không nộp gì thì không thể chấm đúng
+      newDelta = isCorrect ? this.tangTocPointsForOverride(result.playerId) : 0;
+    } else {
+      return false;
     }
 
     const netAdjustment = newDelta - oldDelta;
@@ -684,6 +762,19 @@ export class RoomStateMachine {
     this.persistSnapshot();
     this.syncRoom();
     return true;
+  }
+
+  /** Điểm Tăng tốc theo thứ hạng thời gian của người được sửa thành đúng (giữ nguyên điểm người khác). */
+  private tangTocPointsForOverride(playerId: string): number {
+    const results = this.lastRevealedPayload?.results || [];
+    const me = results.find((r) => r.playerId === playerId);
+    const myMs = (me?.timeSec || 0) * 1000;
+    const tieMs = GAME_CONFIG.TANG_TOC.TIE_THRESHOLD_MS;
+    const fasterCorrect = results.filter(
+      (r) => r.playerId !== playerId && r.isCorrect && (r.timeSec || 0) * 1000 < myMs - tieMs
+    ).length;
+    const ranks = GAME_CONFIG.TANG_TOC.POINTS_BY_RANK;
+    return ranks[fasterCorrect] ?? ranks[ranks.length - 1];
   }
 
   // --- Dev / Test shortcut: Tua nhanh vòng tới màn hình chuẩn bị sẵn sàng ---
@@ -719,7 +810,7 @@ export class RoomStateMachine {
 
   public forceStartReadyRound(hostId: string): boolean {
     if (this.room.hostId !== hostId) return false;
-    if (this.room.state.round === 'READY') {
+    if (this.room.state.round === 'READY' && this.room.state.subPhase === 'WAITING_READY') {
       for (const p of this.room.players) {
         if (p.connected) p.ready = true;
       }
@@ -785,6 +876,8 @@ export class RoomStateMachine {
         await this.startTangToc();
       } else if (target === 'VE_DICH') {
         await this.startVeDich();
+      } else if (target === 'TIEBREAK') {
+        await this.checkFinishOrTiebreak();
       }
     });
 
@@ -797,10 +890,12 @@ export class RoomStateMachine {
   // ==========================================
 
   private getKdPackagesList() {
-    // Luôn luôn có đúng 5 ô câu hỏi tổng
+    // Tối đa 5 ô; chỉ hiện các gói có câu hỏi (bộ đề có thể chỉ soạn cho 4 thí sinh)
     const totalBoxes = 5;
     const result = [];
     for (let i = 0; i < totalBoxes; i++) {
+      const questionCount = (this.questionSet.khoiDong.rieng[i] || []).length;
+      if (questionCount === 0) continue;
       let chosenByPlayerId: string | undefined;
       let chosenByName: string | undefined;
       for (const [pId, pIdx] of this.chosenKdPackages.entries()) {
@@ -814,7 +909,7 @@ export class RoomStateMachine {
       result.push({
         index: i,
         name: `Ô số ${i + 1}`,
-        count: (this.questionSet.khoiDong.rieng[i] || []).length || 5,
+        count: questionCount,
         chosenBy: chosenByPlayerId,
         chosenByName,
       });
@@ -850,6 +945,12 @@ export class RoomStateMachine {
     const currentPlayer = players[playerIndex];
     const packages = this.getKdPackagesList();
 
+    // Nhiều thí sinh hơn số gói có câu hỏi: không còn ô trống để chọn -> dùng lại gói đầu tiên luôn
+    if (packages.length > 0 && packages.every((p) => p.chosenBy)) {
+      await this.applyKdPackageChoice(players, playerIndex, packages[0].index);
+      return;
+    }
+
     this.room.state = {
       round: 'KD_RIENG',
       subPhase: 'CHOOSE_PACKAGE',
@@ -863,7 +964,7 @@ export class RoomStateMachine {
     this.setDeadline(10000, async () => {
       const currentPkgs = this.getKdPackagesList();
       const unchosen = currentPkgs.find((p) => !p.chosenBy);
-      const pickIdx = unchosen ? unchosen.index : 0;
+      const pickIdx = unchosen ? unchosen.index : currentPkgs[0]?.index ?? 0;
       await this.applyKdPackageChoice(players, playerIndex, pickIdx);
     });
   }
@@ -1144,6 +1245,7 @@ export class RoomStateMachine {
       overrideWindowExpiresAt: Date.now() + GAME_CONFIG.HOST_OVERRIDE_WINDOW_SECONDS * 1000,
     };
     this.lastRevealedPayload = revealPayload;
+    this.lastRevealRound = this.room.state.round;
 
     const pkgIdx = this.chosenKdPackages.get(currentPlayer.id) ?? (currentPlayer.seat - 1);
     this.room.state = {
@@ -1258,6 +1360,7 @@ export class RoomStateMachine {
       const player = this.room.players.find((p) => p.id === playerId);
       if (!player || player.eliminatedVcnv) return false;
       if (this.buzzedPlayerId) return false; // Already locked
+      if (this.room.state.obstacleSolved || subPhase === 'CNV_RESULT') return false;
 
       // Chuông Chướng ngại vật chỉ mở sau khi câu hỏi hàng ngang thứ 1 xuất hiện
       if (this.vcnvQuestionsAppearedCount < 1) {
@@ -1267,7 +1370,28 @@ export class RoomStateMachine {
         return false;
       }
 
-      // Bấm chuông trả lời từ khóa chính bất kì lúc nào!
+      // G7: đang có câu hàng ngang / ô trung tâm -> chỉ ghi nhận chuông. Câu hỏi vẫn chạy tiếp cho mọi
+      // người (không xóa đáp án đã nộp); người bấm được trả lời CNV ngay sau khi công bố câu đó.
+      if (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') {
+        this.buzzedPlayerId = playerId;
+        this.pendingCnvBuzzerId = playerId;
+        this.room.state.buzzerLockedBy = playerId;
+        this.callbacks.broadcastBuzzWon({
+          winnerId: playerId,
+          winnerName: player.name,
+          diffMs: now - this.buzzerOpenTime,
+        });
+        this.persistSnapshot();
+        this.syncRoom();
+        return true;
+      }
+
+      // Các pha khác (chọn hàng, công bố, đoán cuối): trả lời CNV ngay
+      const isFinalGuess = subPhase === 'FINAL_GUESS';
+      if (isFinalGuess) {
+        // Tạm dừng 15s đoán cuối, lưu thời gian còn lại để chạy tiếp nếu người này trả lời sai
+        this.vcnvFinalGuessRemainingMs = Math.max(0, (this.room.state.deadline || now) - now);
+      }
       this.clearTimer();
       this.buzzedPlayerId = playerId;
       this.pendingCnvBuzzerId = null;
@@ -1276,7 +1400,7 @@ export class RoomStateMachine {
       this.room.state = {
         ...this.room.state,
         round: 'VCNV',
-        subPhase: 'CNV_ANSWERING',
+        subPhase: isFinalGuess ? 'FINAL_GUESS_ANSWERING' : 'CNV_ANSWERING',
         activePlayerId: playerId,
         buzzerLockedBy: playerId,
         currentQuestion: this.questionSet.vcnv.obstacle,
@@ -1410,6 +1534,7 @@ export class RoomStateMachine {
       overrideWindowExpiresAt: Date.now() + GAME_CONFIG.HOST_OVERRIDE_WINDOW_SECONDS * 1000,
     };
     this.lastRevealedPayload = revealPayload;
+    this.lastRevealRound = this.room.state.round;
 
     const qIdx = this.questionSet.khoiDong.chung.findIndex((q) => q.id === questionId);
     this.room.state = {
@@ -1689,6 +1814,7 @@ export class RoomStateMachine {
     // 6 seconds display for ROW_REVEAL so players have time to see answers and picture
     this.setDeadline(6000, async () => {
       // If someone buzzed for CNV during the row, give them 15s to answer CNV now (G7)
+      this.dropIneligiblePendingCnvBuzzer();
       if (this.pendingCnvBuzzerId) {
         const buzzerId = this.pendingCnvBuzzerId;
         this.pendingCnvBuzzerId = null;
@@ -1807,8 +1933,8 @@ export class RoomStateMachine {
     this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
 
-    // Check if any non-eliminated players remain
-    const remainingPlayers = this.room.players.filter((p) => !p.eliminatedVcnv && p.connected);
+    // Check if any non-eliminated players remain (chỉ tính thí sinh, không tính khán giả)
+    const remainingPlayers = this.getActiveVcnvContestants();
     if (remainingPlayers.length === 0) {
       // Nobody left -> finish VCNV
       const obstacleLetters = obsQuestion.answer.toUpperCase().replace(/\s+/g, '').split('');
@@ -1825,8 +1951,10 @@ export class RoomStateMachine {
       return;
     }
 
-    if (isFinalGuess || this.vcnvQuestionsAppearedCount >= 5) {
-      // Resume final guess countdown for remaining players
+    if (isFinalGuess) {
+      // Chạy tiếp phần thời gian đoán cuối còn lại (tối thiểu 1s), không đếm lại 15s từ đầu
+      await this.presentVcnvFinalGuess(Math.max(1000, this.vcnvFinalGuessRemainingMs ?? 0));
+    } else if (this.vcnvQuestionsAppearedCount >= 5) {
       await this.presentVcnvFinalGuess();
     } else {
       // Continue next row
@@ -1895,6 +2023,7 @@ export class RoomStateMachine {
     };
 
     this.setDeadline(5000, async () => {
+      this.dropIneligiblePendingCnvBuzzer();
       if (this.pendingCnvBuzzerId) {
         const buzzerId = this.pendingCnvBuzzerId;
         this.pendingCnvBuzzerId = null;
@@ -1928,8 +2057,26 @@ export class RoomStateMachine {
     this.syncRoom();
   }
 
-  private async presentVcnvFinalGuess(): Promise<void> {
-    const nonEliminated = this.room.players.filter((p) => !p.eliminatedVcnv && p.connected);
+  /** Thí sinh còn quyền thi VCNV (chưa bị loại, đang kết nối, không phải khán giả). */
+  private getActiveVcnvContestants(): Player[] {
+    return this.room.players.filter(
+      (p) => p.role !== 'viewer' && !p.eliminatedVcnv && !p.disqualified && p.connected
+    );
+  }
+
+  /** Người bấm chuông chờ (G7) bị loại / mất kết nối trước khi tới lượt -> bỏ lượt chờ đó. */
+  private dropIneligiblePendingCnvBuzzer(): void {
+    const id = this.pendingCnvBuzzerId;
+    if (!id) return;
+    if (!this.getActiveVcnvContestants().some((p) => p.id === id)) {
+      this.pendingCnvBuzzerId = null;
+      this.buzzedPlayerId = null;
+      this.room.state.buzzerLockedBy = null;
+    }
+  }
+
+  private async presentVcnvFinalGuess(durationOverrideMs?: number): Promise<void> {
+    const nonEliminated = this.getActiveVcnvContestants();
     if (nonEliminated.length === 0) {
       // Nobody left -> finish VCNV
       this.transitionToReady('TANG_TOC');
@@ -1951,7 +2098,8 @@ export class RoomStateMachine {
       vcnvQuestionsAppearedCount: 5,
     };
 
-    const durationMs = GAME_CONFIG.VCNV.FINAL_GUESS_SECONDS * 1000;
+    const durationMs = durationOverrideMs ?? GAME_CONFIG.VCNV.FINAL_GUESS_SECONDS * 1000;
+    this.vcnvFinalGuessRemainingMs = null;
     this.setDeadline(durationMs, async () => {
       // Time expired without final guess
       this.transitionToReady('TANG_TOC');
@@ -2085,6 +2233,7 @@ export class RoomStateMachine {
       overrideWindowExpiresAt: Date.now() + GAME_CONFIG.HOST_OVERRIDE_WINDOW_SECONDS * 1000,
     };
     this.lastRevealedPayload = revealPayload;
+    this.lastRevealRound = this.room.state.round;
 
     this.buzzedPlayerId = null;
     this.room.state = {
@@ -2267,6 +2416,13 @@ export class RoomStateMachine {
     const unusedPool = pool.filter((q) => !this.veDichUsedQuestionIds.has(q.id));
     const candidateList = unusedPool.length > 0 ? unusedPool : pool;
     const question = candidateList[Math.floor(Math.random() * candidateList.length)] || pool[0];
+    if (!question) {
+      // Bộ đề không có câu cho mức điểm này -> kết thúc lượt thay vì làm treo trận
+      console.error(`[Room ${this.room.code}] Thiếu câu hỏi Về đích ${pValue} điểm, bỏ qua lượt.`);
+      this.veDichCompletedPlayerIds.add(playerId);
+      await this.runVeDichTurn(turnIndex + 1);
+      return;
+    }
     this.veDichUsedQuestionIds.add(question.id);
     this.veDichCurrentQuestion = question;
 

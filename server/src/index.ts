@@ -5,16 +5,18 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import { randomBytes } from 'crypto';
 import rateLimit from 'express-rate-limit';
 import {
   ClientToServerEvents,
   ServerToClientEvents,
-  QuestionSet,
 } from '@olympia/shared';
 import { RoomManager } from './game/RoomManager.js';
 import { toPublicPlayers, sanitizePlayerName } from './game/RoomStateMachine.js';
 import { SnapshotManager } from './game/SnapshotManager.js';
 import { parseExcelQuestionSet, generateExcelTemplate } from './game/questionParser.js';
+import { validateQuestionSet } from './game/questionValidator.js';
+import { csvCell } from './utils/csv.js';
 
 const app = express();
 app.set('trust proxy', 1); // Trust Render / Cloudflare reverse proxy headers
@@ -70,9 +72,6 @@ const roomManager = RoomManager.getInstance();
 roomManager.setCallbacksFactory((roomCode: string) => ({
   broadcastRoom: (room) => {
     io.to(roomCode).emit('state:sync', { ...room, players: toPublicPlayers(room.players) });
-  },
-  broadcastPhaseChange: (data) => {
-    io.to(roomCode).emit('phase:change', data);
   },
   broadcastBuzzWon: (data) => {
     io.to(roomCode).emit('buzz:won', data);
@@ -193,16 +192,20 @@ app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, re
     }
 
     const buffer = fs.readFileSync(filePath);
-    let questionSet: QuestionSet;
+    const raw: unknown = req.file.originalname.toLowerCase().endsWith('.json')
+      ? JSON.parse(buffer.toString('utf-8'))
+      : parseExcelQuestionSet(buffer, req.file.originalname);
 
-    if (req.file.originalname.toLowerCase().endsWith('.json')) {
-      questionSet = JSON.parse(buffer.toString('utf-8'));
-    } else {
-      questionSet = parseExcelQuestionSet(buffer, req.file.originalname);
+    const validation = validateQuestionSet(raw);
+    if (!validation.ok) {
+      return res.status(400).json({
+        error: 'Bộ đề chưa hợp lệ: ' + validation.errors.join(' '),
+        errors: validation.errors,
+      });
     }
+    const questionSet = validation.questionSet;
 
-    machine.questionSet = questionSet;
-    machine.persistSnapshot();
+    machine.setQuestionSet(questionSet);
     console.log(`[Room ${machine.room.code}] Updated custom question set: ${questionSet.title}`);
 
     res.json({ ok: true, questionSet, roomUpdated: true });
@@ -222,13 +225,23 @@ app.get('/api/room/:code/export-csv', (req, res) => {
   }
 
   const room = machine.room;
-  let csv = 'ID,ThoiDiem,VongThi,CauHoiId,NguoiChoi,SoGhe,BienDongDiem,LyDo\n';
-
+  const rows: (string | number)[][] = [
+    ['ID', 'ThoiDiem', 'VongThi', 'CauHoiId', 'NguoiChoi', 'SoGhe', 'BienDongDiem', 'LyDo'],
+  ];
   for (const ev of room.history) {
     const player = room.players.find((p) => p.id === ev.playerId);
-    const dateStr = new Date(ev.at).toISOString();
-    csv += `"${ev.id}","${dateStr}","${ev.round}","${ev.questionId}","${player ? player.name : ''}",${player ? player.seat : ''},${ev.delta},"${ev.reason}"\n`;
+    rows.push([
+      ev.id,
+      new Date(ev.at).toISOString(),
+      ev.round,
+      ev.questionId,
+      player ? player.name : '',
+      player ? player.seat : '',
+      ev.delta,
+      ev.reason,
+    ]);
   }
+  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n') + '\n';
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="bien-ban-tran-dau-${code}.csv"`);
@@ -277,6 +290,11 @@ io.use((socket, next) => {
 
   next();
 });
+
+/** Token bí mật để vào lại phòng: ngẫu nhiên an toàn, không đoán được. */
+function generateToken(): string {
+  return `tok-${randomBytes(24).toString('base64url')}`;
+}
 
 // --- Socket.IO payload helpers ---
 // Dữ liệu từ client không đáng tin: luôn kiểm tra kiểu trước khi dùng để một gói tin sai định dạng
@@ -364,7 +382,7 @@ io.on('connection', (socket) => {
       });
     }
 
-    const token = `tok-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const token = generateToken();
     const { roomCode, machine, playerId } = roomManager.createRoom(name, token);
 
     socket.join(roomCode);
@@ -399,7 +417,7 @@ io.on('connection', (socket) => {
       return callback({ ok: false, error: 'Phòng thi không tồn tại.' });
     }
 
-    const token = `tok-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const token = generateToken();
     const res = machine.addPlayer(name, token);
 
     if (!res.ok || !res.player) {
@@ -548,7 +566,9 @@ io.on('connection', (socket) => {
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
-      machine.chooseKdPackage(info.playerId, packageIndex);
+      machine.eventQueue.enqueue(async () => {
+        machine.chooseKdPackage(info.playerId, packageIndex);
+      });
     }
   });
 
@@ -561,7 +581,9 @@ io.on('connection', (socket) => {
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
-      machine.pickVcnvRow(info.playerId, rowIndex);
+      machine.eventQueue.enqueue(async () => {
+        machine.pickVcnvRow(info.playerId, rowIndex);
+      });
     }
   });
 
@@ -574,7 +596,9 @@ io.on('connection', (socket) => {
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
-      machine.chooseVeDichPackage(info.playerId, packagePoints);
+      machine.eventQueue.enqueue(async () => {
+        machine.chooseVeDichPackage(info.playerId, packagePoints);
+      });
     }
   });
 
@@ -586,7 +610,9 @@ io.on('connection', (socket) => {
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
-      machine.setHopeStar(info.playerId, useStar);
+      machine.eventQueue.enqueue(async () => {
+        machine.setHopeStar(info.playerId, useStar);
+      });
     }
   });
 

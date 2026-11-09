@@ -12,6 +12,9 @@ export const GAME_CONFIG = {
     ENABLED: true,                 // Bật/tắt cơ chế phát hiện rời tab
     MAX_WARNINGS: 1,               // Số lần được cảnh cáo; vi phạm lần kế tiếp -> bị loại
     DEDUPE_MS: 2000,               // Gộp các tín hiệu (blur + hidden) trong 2s thành 1 lần vi phạm
+    // Mất focus cửa sổ (blur) chỉ tính vi phạm nếu kéo dài quá thời gian này. Tránh báo nhầm khi bấm vào
+    // thanh địa chỉ, khung media, hộp thoại hệ thống... Chuyển tab / thu nhỏ (hidden) vẫn tính ngay.
+    BLUR_GRACE_MS: 1500,
     // Chỉ tính vi phạm trong các vòng đang thi (không tính ở Sảnh chờ / màn Sẵn sàng / Kết thúc)
     ACTIVE_ROUNDS: ['KD_RIENG', 'KD_CHUNG', 'VCNV', 'TANG_TOC', 'VE_DICH', 'TIEBREAK'] as string[],
   },
