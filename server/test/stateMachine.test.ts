@@ -60,14 +60,20 @@ describe('Room & Player lifecycle', () => {
     expect(p11.error).toContain('Phòng đã đầy');
   });
 
-  it('transfers host automatically when host disconnects', () => {
+  it('transfers host only after the disconnect hold period', async () => {
+    vi.useFakeTimers();
     const callbacks = createMockCallbacks();
     const machine = new RoomStateMachine('ROOM03', { id: 'p1', name: 'Host', token: 'tok-1' }, callbacks);
     const p2Res = machine.addPlayer('Player 2', 'tok-2');
 
     machine.handleDisconnect('p1');
     expect(machine.room.players[0].connected).toBe(false);
+    // Vẫn giữ quyền chủ phòng trong thời gian chờ (vd. bấm F5)
+    expect(machine.room.hostId).toBe('p1');
+
+    await vi.advanceTimersByTimeAsync(GAME_CONFIG.DISCONNECT_HOLD_SECONDS * 1000 + 100);
     expect(machine.room.hostId).toBe(p2Res.player?.id);
+    vi.useRealTimers();
 
     // Reconnecting p1 recovers state
     const recon = machine.handleReconnect('tok-1');

@@ -440,7 +440,11 @@ io.on('connection', (socket) => {
     }
 
     socket.join(code);
-    roomManager.associateSocket(socket.id, code, res.player.id);
+    const staleSocketIds = roomManager.associateSocket(socket.id, code, res.player.id);
+    // Kết nối cũ của cùng người chơi không còn nhận tin của phòng nữa
+    for (const staleId of staleSocketIds) {
+      io.sockets.sockets.get(staleId)?.leave(code);
+    }
 
     callback({
       ok: true,

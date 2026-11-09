@@ -59,8 +59,24 @@ export class RoomManager {
     return this.rooms.get(roomCode.toUpperCase());
   }
 
-  public associateSocket(socketId: string, roomCode: string, playerId: string): void {
-    this.socketToPlayer.set(socketId, { roomCode: roomCode.toUpperCase(), playerId });
+  /**
+   * Gắn socket với người chơi. Mỗi người chơi chỉ giữ 1 socket: các socket cũ của cùng người chơi
+   * (vd. kết nối cũ chưa kịp ngắt khi vào lại) bị gỡ để khi chúng ngắt muộn sẽ không đánh dấu
+   * người chơi offline nhầm. Trả về danh sách socket cũ đã gỡ.
+   */
+  public associateSocket(socketId: string, roomCode: string, playerId: string): string[] {
+    const code = roomCode.toUpperCase();
+    const staleSocketIds: string[] = [];
+    for (const [sockId, info] of this.socketToPlayer.entries()) {
+      if (sockId !== socketId && info.roomCode === code && info.playerId === playerId) {
+        staleSocketIds.push(sockId);
+      }
+    }
+    for (const sockId of staleSocketIds) {
+      this.socketToPlayer.delete(sockId);
+    }
+    this.socketToPlayer.set(socketId, { roomCode: code, playerId });
+    return staleSocketIds;
   }
 
   public getPlayerBySocket(socketId: string): { roomCode: string; playerId: string } | undefined {

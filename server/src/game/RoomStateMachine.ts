@@ -63,6 +63,7 @@ export class RoomStateMachine {
   private activeTimer: NodeJS.Timeout | null = null;
   private activeExpire: (() => Promise<void>) | null = null;
   private lastTabLeaveAt: Map<string, number> = new Map();
+  private hostTransferTimer: NodeJS.Timeout | null = null;
 
   // Working state during rounds
   private answersMap: Map<string, { answer: string; timestamp: number }> = new Map();
@@ -332,17 +333,61 @@ export class RoomStateMachine {
     player.connected = false;
     player.disconnectedAt = Date.now();
 
-    // If host disconnected, reassign host to first connected player
+    // Chủ phòng mất kết nối (vd. bấm F5, đổi mạng): giữ quyền trong DISCONNECT_HOLD_SECONDS,
+    // chỉ chuyển cho người khác nếu quá thời gian đó vẫn chưa vào lại.
     if (this.room.hostId === player.id) {
-      const nextHost = this.room.players.find((p) => p.connected && p.id !== player.id);
-      if (nextHost) {
-        this.room.hostId = nextHost.id;
-      }
+      this.scheduleHostTransfer(player.id);
+    }
+
+    // VCNV: người đang chọn hàng mất kết nối -> pha này không đếm giờ nên phải chuyển lượt ngay
+    if (
+      this.room.state.round === 'VCNV' &&
+      this.room.state.subPhase === 'PICK_ROW' &&
+      this.room.state.activePlayerId === player.id
+    ) {
+      this.eventQueue.enqueue(async () => {
+        await this.promptVcnvPickRow(this.room.state.stepIndex || 0);
+      });
     }
 
     this.persistSnapshot();
     this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
+  }
+
+  private clearHostTransferTimer(): void {
+    if (this.hostTransferTimer) {
+      clearTimeout(this.hostTransferTimer);
+      this.hostTransferTimer = null;
+    }
+  }
+
+  private scheduleHostTransfer(hostId: string): void {
+    this.clearHostTransferTimer();
+    const holdMs = GAME_CONFIG.DISCONNECT_HOLD_SECONDS * 1000;
+    this.hostTransferTimer = setTimeout(() => {
+      this.hostTransferTimer = null;
+      this.eventQueue.enqueue(async () => {
+        this.transferHostIfAbsent(hostId);
+      });
+    }, holdMs);
+    this.hostTransferTimer.unref?.();
+  }
+
+  /** Chuyển quyền chủ phòng nếu chủ phòng hiện tại vẫn vắng mặt. Trả true nếu đã chuyển. */
+  private transferHostIfAbsent(hostId: string): boolean {
+    if (this.room.hostId !== hostId) return false;
+    const host = this.room.players.find((p) => p.id === hostId);
+    if (host?.connected) return false;
+
+    const nextHost = this.room.players.find((p) => p.connected && p.id !== hostId);
+    if (!nextHost) return false;
+
+    this.room.hostId = nextHost.id;
+    this.persistSnapshot();
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
+    this.syncRoom();
+    return true;
   }
 
   public handleReconnect(token: string): { ok: boolean; player?: Player; error?: string } {
@@ -356,6 +401,19 @@ export class RoomStateMachine {
 
     player.connected = true;
     player.disconnectedAt = undefined;
+
+    if (this.room.hostId === player.id) {
+      // Chủ phòng đã quay lại kịp: hủy việc chuyển quyền
+      this.clearHostTransferTimer();
+    } else {
+      // Chủ phòng vắng quá lâu mà lúc đó không có ai để nhận quyền -> giao cho người vừa vào lại
+      const host = this.room.players.find((p) => p.id === this.room.hostId);
+      const holdMs = GAME_CONFIG.DISCONNECT_HOLD_SECONDS * 1000;
+      if (!host || (!host.connected && Date.now() - (host.disconnectedAt || 0) >= holdMs)) {
+        this.room.hostId = player.id;
+        this.clearHostTransferTimer();
+      }
+    }
 
     this.persistSnapshot();
     this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
@@ -413,6 +471,18 @@ export class RoomStateMachine {
       this.veDichCompletedPlayerIds.add(absentPlayerId);
       this.eventQueue.enqueue(async () => {
         await this.runVeDichTurn(this.veDichCurrentTurnIndex + 1);
+      });
+      return;
+    }
+
+    // VCNV: người tới lượt chọn hàng vắng mặt / không chọn -> chuyển quyền chọn cho người kế tiếp
+    if (
+      this.room.state.round === 'VCNV' &&
+      this.room.state.subPhase === 'PICK_ROW' &&
+      this.room.state.activePlayerId === absentPlayerId
+    ) {
+      this.eventQueue.enqueue(async () => {
+        await this.promptVcnvPickRow(this.room.state.stepIndex || 0, absentPlayerId);
       });
       return;
     }
@@ -1440,7 +1510,7 @@ export class RoomStateMachine {
     await this.promptVcnvPickRow(0);
   }
 
-  private async promptVcnvPickRow(stepIndex: number): Promise<void> {
+  private async promptVcnvPickRow(stepIndex: number, skipPlayerId?: string): Promise<void> {
     if (stepIndex >= 4) {
       // All 4 rows finished without CNV guessed -> Center question
       await this.presentVcnvCenter();
@@ -1466,7 +1536,11 @@ export class RoomStateMachine {
       return;
     }
 
-    const chooserId = activeQueue[stepIndex % activeQueue.length];
+    let chooserIdx = stepIndex % activeQueue.length;
+    if (skipPlayerId && activeQueue[chooserIdx] === skipPlayerId && activeQueue.length > 1) {
+      chooserIdx = (chooserIdx + 1) % activeQueue.length;
+    }
+    const chooserId = activeQueue[chooserIdx];
 
     this.buzzedPlayerId = null;
     this.pendingCnvBuzzerId = null;
