@@ -313,10 +313,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
       {
         id: 'kd-c-7',
         type: 'mcq',
-        prompt: 'Chữ cái nào không xuất hiện trong bảng chữ cái tiếng Việt chính thức?',
-        options: ['W', 'Ă', 'Đ', 'Ơ'],
+        prompt: 'Bộ từ điển "Dictionarium Annamiticum Lusitanum et Latinum" (Từ điển Việt - Bồ - La) xuất bản năm 1651 tại Roma, đánh dấu mốc quan trọng trong sự hình thành chữ Quốc ngữ, là công trình của giáo sĩ nào?',
+        options: ['Alexandre de Rhodes', 'Pigneau de Béhaine', 'Francisco de Pina', 'Bá Đa Lộc'],
         answer: 'A',
-        alternatives: ['W'],
+        alternatives: ['ALEXANDRE DE RHODES', 'DẮC LỘ', 'ĐẮC LỘ', 'ALEXANDRE'],
       },
       {
         id: 'kd-c-8',
