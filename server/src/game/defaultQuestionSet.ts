@@ -10,10 +10,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-1-1',
           type: 'mcq',
-          prompt: 'Thủ đô của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam là gì?',
-          options: ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng'],
+          prompt: 'Năm 1010, vua Lý Thái Tổ đã ban bố văn bản lịch sử nổi tiếng nào để quyết định dời đô từ Hoa Lư về thành Đại La (sau đổi tên thành Thăng Long)?',
+          options: ['Chiếu dời đô', 'Hịch tướng sĩ', 'Bình Ngô đại cáo', 'Chiếu Cần Vương'],
           answer: 'A',
-          alternatives: ['HÀ NỘI'],
+          alternatives: ['CHIẾU DỜI ĐÔ', 'CHIEU DOI DO'],
         },
         {
           id: 'kd-r-1-2',
@@ -77,10 +77,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-2-3',
           type: 'mcq',
-          prompt: 'Tác giả của tác phẩm "Truyện Kiều" là ai?',
-          options: ['Nguyễn Du', 'Nguyễn Trãi', 'Hồ Xuân Hương', 'Đoàn Thị Điểm'],
+          prompt: 'Kiệt tác "Truyện Kiều" (Đoạn trường tân thanh) của đại thi hào Nguyễn Du được sáng tác dựa trên cốt truyện của tác phẩm văn học nào?',
+          options: ['Kim Vân Kiều truyện', 'Hoàng Lê nhất thống chí', 'Truyền kỳ mạn lục', 'Liêu trai chí dị'],
           answer: 'A',
-          alternatives: ['NGUYỄN DU', 'NGUYEN DU'],
+          alternatives: ['KIM VÂN KIỀU TRUYỆN', 'KIM VAN KIEU TRUYEN'],
         },
         {
           id: 'kd-r-2-4',
@@ -93,10 +93,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-2-5',
           type: 'mcq',
-          prompt: 'Công thức hóa học của nước là gì?',
-          options: ['CO2', 'H2O', 'NaCl', 'O2'],
-          answer: 'B',
-          alternatives: ['H2O'],
+          prompt: 'Hợp chất vô cơ có công thức H2O2, thường được dùng trong y tế để sát trùng và trong công nghiệp để tẩy trắng, có tên gọi là gì?',
+          options: ['Hydro peroxyd (Oxy già)', 'Acid sulfuric', 'Natri hypoclorit', 'Acid clohydric'],
+          answer: 'A',
+          alternatives: ['HYDRO PEROXYD', 'HYDROGEN PEROXIDE', 'OXY GIA', 'OXI GIA'],
         },
         {
           id: 'kd-r-2-6',
@@ -136,10 +136,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-3-4',
           type: 'mcq',
-          prompt: 'Quốc hoa của Việt Nam được đông đảo bình chọn là hoa gì?',
-          options: ['Hoa Mai', 'Hoa Đào', 'Hoa Sen', 'Hoa Súng'],
-          answer: 'C',
-          alternatives: ['HOA SEN', 'SEN'],
+          prompt: 'Ngôi chùa cổ nổi tiếng ở Hà Nội được khởi dựng từ thời vua Lý Thái Tông (năm 1049) với kiến trúc độc đáo mô phỏng hình một đóa sen nở trên mặt nước là chùa nào?',
+          options: ['Chùa Một Cột', 'Chùa Trấn Quốc', 'Chùa Thầy', 'Chùa Hương'],
+          answer: 'A',
+          alternatives: ['CHÙA MỘT CỘT', 'CHUA MOT COT', 'DIÊN HỰU', 'DIEN HUU'],
         },
         {
           id: 'kd-r-3-5',
@@ -163,10 +163,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-4-1',
           type: 'mcq',
-          prompt: 'Sông nào dài nhất thế giới theo ghi nhận phổ biến?',
-          options: ['Sông Nin', 'Sông Amazon', 'Sông Mê Kông', 'Sông Dương Tử'],
+          prompt: 'Dòng sông nào ở Nam Mỹ có lưu lượng nước trung bình lớn nhất thế giới, chiếm khoảng 20% tổng lưu lượng nước ngọt đổ ra biển của các con sông trên Trái Đất?',
+          options: ['Sông Amazon', 'Sông Nin', 'Sông Mississippi', 'Sông Parana'],
           answer: 'A',
-          alternatives: ['SÔNG NIN', 'NIN', 'NILE'],
+          alternatives: ['SÔNG AMAZON', 'SONG AMAZON', 'AMAZON'],
         },
         {
           id: 'kd-r-4-2',
@@ -195,10 +195,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-4-5',
           type: 'mcq',
-          prompt: 'Âm thanh không thể truyền qua môi trường nào sau đây?',
-          options: ['Chất rắn', 'Chất lỏng', 'Chất khí', 'Chân không'],
-          answer: 'D',
-          alternatives: ['CHÂN KHÔNG', 'CHAN KHONG'],
+          prompt: 'Tốc độ truyền sóng âm phụ thuộc vào mật độ và tính đàn hồi của môi trường. Trong các môi trường sau, tốc độ truyền âm lớn nhất trong môi trường nào?',
+          options: ['Thép (Chất rắn)', 'Nước (Chất lỏng)', 'Không khí (Chất khí)', 'Chân không'],
+          answer: 'A',
+          alternatives: ['THÉP', 'THEP', 'CHẤT RẮN', 'CHAT RAN'],
         },
         {
           id: 'kd-r-4-6',
@@ -222,10 +222,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-5-2',
           type: 'mcq',
-          prompt: 'Tác giả bài hát Quốc ca Việt Nam (Tiến quân ca) là ai?',
-          options: ['Văn Cao', 'Phạm Tuyên', 'Trịnh Công Sơn', 'Lưu Hữu Phước'],
+          prompt: 'Vào cuối năm 1944, nhạc sĩ Văn Cao đã sáng tác hành khúc lịch sử "Tiến quân ca" tại địa phương nào trước khi bài hát được Quốc hội khóa I chọn làm Quốc ca Việt Nam?',
+          options: ['Hà Nội', 'Hải Phòng', 'Việt Bắc', 'Nam Định'],
           answer: 'A',
-          alternatives: ['VĂN CAO'],
+          alternatives: ['HÀ NỘI', 'HA NOI'],
         },
         {
           id: 'kd-r-5-3',
@@ -246,10 +246,10 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
         {
           id: 'kd-r-5-5',
           type: 'mcq',
-          prompt: 'Căn bậc hai số học của 144 là bao nhiêu?',
-          options: ['11', '12', '13', '14'],
-          answer: 'B',
-          alternatives: ['12'],
+          prompt: 'Số cạnh của một khối bát diện đều (khối đa diện đều có 8 mặt là các tam giác đều) là bao nhiêu?',
+          options: ['12', '8', '6', '20'],
+          answer: 'A',
+          alternatives: ['12', 'MƯỜI HAI', 'MUOI HAI'],
         },
         {
           id: 'kd-r-5-6',
