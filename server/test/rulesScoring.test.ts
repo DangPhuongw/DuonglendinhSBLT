@@ -318,32 +318,32 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     machine.addPlayer('Player 2', 'tok-2');
 
     // Jump to KD_RIENG (Round 1)
-    machine.jumpToRound('KD_RIENG');
+    machine.jumpToRound('p1', 'KD_RIENG');
     await new Promise((r) => setTimeout(r, 30));
     expect(machine.room.status).toBe('READY');
     expect(machine.room.state.round).toBe('READY');
     expect(machine.room.state.targetRound).toBe('KD_RIENG');
 
     // Jump to VCNV (Round 2)
-    machine.jumpToRound('VCNV');
+    machine.jumpToRound('p1', 'VCNV');
     await new Promise((r) => setTimeout(r, 30));
     expect(machine.room.status).toBe('READY');
     expect(machine.room.state.targetRound).toBe('VCNV');
 
     // Jump to TANG_TOC (Round 3)
-    machine.jumpToRound('TANG_TOC');
+    machine.jumpToRound('p1', 'TANG_TOC');
     await new Promise((r) => setTimeout(r, 30));
     expect(machine.room.status).toBe('READY');
     expect(machine.room.state.targetRound).toBe('TANG_TOC');
 
     // Jump to VE_DICH (Round 4)
-    machine.jumpToRound('VE_DICH');
+    machine.jumpToRound('p1', 'VE_DICH');
     await new Promise((r) => setTimeout(r, 30));
     expect(machine.room.status).toBe('READY');
     expect(machine.room.state.targetRound).toBe('VE_DICH');
 
     // Force start ready round
-    machine.forceStartReadyRound();
+    machine.forceStartReadyRound('p1');
     expect(machine.room.state.subPhase).toBe('COUNTDOWN');
     expect(machine.room.players.every((p) => p.ready)).toBe(true);
   });

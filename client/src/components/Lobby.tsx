@@ -25,6 +25,7 @@ export const Lobby: React.FC = () => {
   const switchSeat = useGameStore((s) => s.switchSeat);
   const startGame = useGameStore((s) => s.startGame);
   const kickPlayer = useGameStore((s) => s.kickPlayer);
+  const myToken = useGameStore((s) => s.myToken);
 
   const [name, setName] = useState('');
   const [roomCodeInput, setRoomCodeInput] = useState(() => {
@@ -192,6 +193,7 @@ export const Lobby: React.FC = () => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('roomCode', room.code);
+    formData.append('hostToken', myToken || '');
 
     try {
       const res = await fetch('/api/upload-questions', {

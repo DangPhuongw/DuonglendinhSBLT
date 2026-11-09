@@ -42,6 +42,18 @@ export function toPublicPlayers(players: Player[]): Player[] {
   return players.map(({ token: _token, ...rest }) => rest);
 }
 
+export const MAX_PLAYER_NAME_LENGTH = 30;
+
+/** Bỏ ký tự điều khiển, gộp khoảng trắng, cắt độ dài. Trả '' nếu không hợp lệ. */
+export function sanitizePlayerName(name: unknown): string {
+  if (typeof name !== 'string') return '';
+  return name
+    .replace(/[\u0000-\u001F\u007F]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_PLAYER_NAME_LENGTH);
+}
+
 export class RoomStateMachine {
   public room: Room;
   public eventQueue: EventQueue;
@@ -88,7 +100,7 @@ export class RoomStateMachine {
 
     const host: Player = {
       id: hostPlayer.id,
-      name: hostPlayer.name,
+      name: sanitizePlayerName(hostPlayer.name) || 'Chủ phòng',
       seat: 1,
       role: 'player',
       token: hostPlayer.token,
@@ -153,6 +165,13 @@ export class RoomStateMachine {
 
   public syncRoom(): void {
     this.callbacks.broadcastRoom(this.getSanitizedRoom());
+  }
+
+  /** Token gửi kèm có đúng là token của chủ phòng hiện tại không. */
+  public isHostToken(token: unknown): boolean {
+    if (typeof token !== 'string' || !token) return false;
+    const host = this.room.players.find((p) => p.id === this.room.hostId);
+    return Boolean(host?.token) && host!.token === token;
   }
 
   public setCallbacks(callbacks: StateMachineCallbacks): void {
@@ -235,9 +254,14 @@ export class RoomStateMachine {
       }
     }
 
+    const cleanName = sanitizePlayerName(name);
+    if (!cleanName) {
+      return { ok: false, error: 'Tên không hợp lệ.' };
+    }
+
     const newPlayer: Player = {
       id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      name: name.trim(),
+      name: cleanName,
       seat: nextSeat,
       role: assignedRole,
       token,
@@ -592,7 +616,8 @@ export class RoomStateMachine {
   }
 
   // --- Dev / Test shortcut: Tua nhanh vòng tới màn hình chuẩn bị sẵn sàng ---
-  public jumpToRound(targetRound: string = 'VCNV'): void {
+  public jumpToRound(hostId: string, targetRound: string = 'VCNV'): boolean {
+    if (this.room.hostId !== hostId) return false;
     this.clearTimer();
     this.answersMap.clear();
     this.buzzedPlayerId = null;
@@ -618,16 +643,20 @@ export class RoomStateMachine {
       }
       this.transitionToReady(nextRound);
     });
+    return true;
   }
 
-  public forceStartReadyRound(): void {
+  public forceStartReadyRound(hostId: string): boolean {
+    if (this.room.hostId !== hostId) return false;
     if (this.room.state.round === 'READY') {
       for (const p of this.room.players) {
         if (p.connected) p.ready = true;
       }
       this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
       this.startReadyCountdown();
+      return true;
     }
+    return false;
   }
 
   // --- Flow & Transitions ---

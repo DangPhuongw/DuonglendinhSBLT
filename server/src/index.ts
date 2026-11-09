@@ -12,7 +12,7 @@ import {
   QuestionSet,
 } from '@olympia/shared';
 import { RoomManager } from './game/RoomManager.js';
-import { toPublicPlayers } from './game/RoomStateMachine.js';
+import { toPublicPlayers, sanitizePlayerName } from './game/RoomStateMachine.js';
 import { SnapshotManager } from './game/SnapshotManager.js';
 import { parseExcelQuestionSet, generateExcelTemplate } from './game/questionParser.js';
 
@@ -112,11 +112,44 @@ app.get('/health', (req, res) => {
 
 // --- REST Endpoints ---
 
+/** Xóa file tạm của multer, bỏ qua lỗi nếu file đã không còn. */
+function removeTempFile(filePath?: string): void {
+  if (!filePath) return;
+  try {
+    fs.unlinkSync(filePath);
+  } catch {
+    /* đã bị xóa */
+  }
+}
+
+/** Trả về phòng nếu token gửi kèm đúng là token chủ phòng; ngược lại null. */
+function getRoomAsHost(roomCodeRaw: unknown, hostToken: unknown) {
+  if (typeof roomCodeRaw !== 'string' || !roomCodeRaw.trim()) return null;
+  const machine = roomManager.getRoom(roomCodeRaw.trim());
+  if (!machine || !machine.isHostToken(hostToken)) return null;
+  return machine;
+}
+
+// Chỉ nhận ảnh / video / âm thanh. Không bao giờ nhận .html, .svg, .js... vì thư mục uploads
+// được phục vụ cùng domain với trang game (tránh chèn mã độc - stored XSS).
+const ALLOWED_MEDIA_EXTS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.webp',
+  '.mp4', '.webm', '.mp3', '.wav', '.ogg', '.m4a',
+]);
+
 app.post('/api/upload-media', uploadLimiter, upload.single('media'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Không có file nào được tải lên.' });
   }
-  const fileExt = path.extname(req.file.originalname) || '';
+  if (!getRoomAsHost(req.body?.roomCode, req.body?.hostToken)) {
+    removeTempFile(req.file.path);
+    return res.status(403).json({ error: 'Chỉ chủ phòng mới được tải media lên.' });
+  }
+  const fileExt = path.extname(req.file.originalname).toLowerCase();
+  if (!ALLOWED_MEDIA_EXTS.has(fileExt)) {
+    removeTempFile(req.file.path);
+    return res.status(400).json({ error: 'Định dạng file không được hỗ trợ (chỉ ảnh, video, âm thanh).' });
+  }
   const newFilename = `${req.file.filename}${fileExt}`;
   const newPath = path.join(uploadsDir, newFilename);
   fs.renameSync(req.file.path, newPath);
@@ -144,37 +177,37 @@ app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, re
     return res.status(400).json({ error: 'Vui lòng chọn file đề thi.' });
   }
 
+  const filePath = req.file.path;
   try {
-    const filePath = req.file.path;
+    // Chỉ chủ phòng (có token chủ phòng) mới được thay bộ đề, và chỉ khi còn ở Sảnh chờ.
+    // Nếu không, thí sinh có thể tự nạp bộ đề mình đã biết đáp án.
+    const machine = getRoomAsHost(req.body?.roomCode, req.body?.hostToken);
+    if (!machine) {
+      return res.status(403).json({ error: 'Chỉ chủ phòng mới được nạp bộ đề.' });
+    }
+    if (machine.room.status !== 'LOBBY') {
+      return res.status(409).json({ error: 'Chỉ có thể đổi bộ đề khi trận đấu chưa bắt đầu.' });
+    }
+
     const buffer = fs.readFileSync(filePath);
     let questionSet: QuestionSet;
 
-    if (req.file.originalname.endsWith('.json')) {
+    if (req.file.originalname.toLowerCase().endsWith('.json')) {
       questionSet = JSON.parse(buffer.toString('utf-8'));
     } else {
       questionSet = parseExcelQuestionSet(buffer, req.file.originalname);
     }
 
-    // Clean temp file
-    fs.unlinkSync(filePath);
+    machine.questionSet = questionSet;
+    machine.persistSnapshot();
+    console.log(`[Room ${machine.room.code}] Updated custom question set: ${questionSet.title}`);
 
-    // Gắn trực tiếp bộ đề vào phòng nếu có roomCode
-    const roomCode = req.body?.roomCode ? String(req.body.roomCode).toUpperCase() : null;
-    let roomUpdated = false;
-    if (roomCode) {
-      const machine = roomManager.getRoom(roomCode);
-      if (machine) {
-        machine.questionSet = questionSet;
-        machine.persistSnapshot();
-        roomUpdated = true;
-        console.log(`[Room ${roomCode}] Updated custom question set: ${questionSet.title}`);
-      }
-    }
-
-    res.json({ ok: true, questionSet, roomUpdated });
+    res.json({ ok: true, questionSet, roomUpdated: true });
   } catch (err: any) {
     console.error('Error parsing question file:', err);
-    res.status(500).json({ error: 'Lỗi đọc file đề thi: ' + err.message });
+    res.status(400).json({ error: 'Lỗi đọc file đề thi: ' + err.message });
+  } finally {
+    removeTempFile(filePath);
   }
 });
 
@@ -242,6 +275,31 @@ io.use((socket, next) => {
   next();
 });
 
+// --- Socket.IO payload helpers ---
+// Dữ liệu từ client không đáng tin: luôn kiểm tra kiểu trước khi dùng để một gói tin sai định dạng
+// không làm lỗi handler (hoặc làm sập server).
+
+const MAX_ANSWER_LENGTH = 200;
+
+function parseRoomCode(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const code = value.trim().toUpperCase();
+  return /^[A-Z0-9]{4,10}$/.test(code) ? code : null;
+}
+
+function asString(value: unknown, maxLength = 200): string | null {
+  return typeof value === 'string' && value.length <= maxLength ? value : null;
+}
+
+function asInt(value: unknown): number | null {
+  return typeof value === 'number' && Number.isInteger(value) ? value : null;
+}
+
+/** Callback ack của socket.io có thể bị thiếu hoặc sai kiểu nếu client gửi bậy. */
+function toCallback<T>(cb: unknown): (res: T) => void {
+  return typeof cb === 'function' ? (cb as (res: T) => void) : () => {};
+}
+
 // --- Socket.IO Handlers ---
 
 io.on('connection', (socket) => {
@@ -258,11 +316,23 @@ io.on('connection', (socket) => {
     return eventCount > 30;
   };
 
+  // Bọc mọi handler trong try/catch: lỗi trong 1 sự kiện chỉ được ghi log, không làm sập server.
+  const on = ((event: string, handler: (...args: any[]) => void) =>
+    socket.on(event as any, (...args: any[]) => {
+      try {
+        handler(...args);
+      } catch (err) {
+        console.error(`[Socket] Lỗi xử lý sự kiện "${event}":`, err);
+      }
+    })) as typeof socket.on;
+
   // 1. Clock synchronization ping/pong
-  socket.on('time:ping', (data) => {
+  on('time:ping', (data) => {
     if (checkEventSpam()) return;
+    const clientSentAt = data?.clientSentAt;
+    if (typeof clientSentAt !== 'number' || !Number.isFinite(clientSentAt)) return;
     socket.emit('time:pong', {
-      clientSentAt: data.clientSentAt,
+      clientSentAt,
       serverReceivedAt: Date.now(),
     });
   });
@@ -271,8 +341,13 @@ io.on('connection', (socket) => {
   let roomCreateCount = 0;
   let lastRoomCreateReset = Date.now();
 
-  socket.on('room:create', ({ name }, callback) => {
+  on('room:create', (data, cb) => {
+    const callback = toCallback<any>(cb);
     if (checkEventSpam()) return;
+    const name = sanitizePlayerName(data?.name);
+    if (!name) {
+      return callback({ ok: false, error: 'Vui lòng nhập tên hợp lệ.' });
+    }
     const now = Date.now();
     if (now - lastRoomCreateReset > 60000) {
       lastRoomCreateReset = now;
@@ -305,8 +380,17 @@ io.on('connection', (socket) => {
   });
 
   // 3. Room join
-  socket.on('room:join', ({ name, roomCode }, callback) => {
-    const code = roomCode.toUpperCase();
+  on('room:join', (data, cb) => {
+    const callback = toCallback<any>(cb);
+    if (checkEventSpam()) return;
+    const code = parseRoomCode(data?.roomCode);
+    const name = sanitizePlayerName(data?.name);
+    if (!code) {
+      return callback({ ok: false, error: 'Mã phòng không hợp lệ.' });
+    }
+    if (!name) {
+      return callback({ ok: false, error: 'Vui lòng nhập tên hợp lệ.' });
+    }
     const machine = roomManager.getRoom(code);
     if (!machine) {
       return callback({ ok: false, error: 'Phòng thi không tồn tại.' });
@@ -334,8 +418,14 @@ io.on('connection', (socket) => {
   });
 
   // 4. Room rejoin
-  socket.on('room:rejoin', ({ roomCode, token }, callback) => {
-    const code = roomCode.toUpperCase();
+  on('room:rejoin', (data, cb) => {
+    const callback = toCallback<any>(cb);
+    if (checkEventSpam()) return;
+    const code = parseRoomCode(data?.roomCode);
+    const token = asString(data?.token);
+    if (!code || !token) {
+      return callback({ ok: false, error: 'Thông tin vào lại phòng không hợp lệ.' });
+    }
     const machine = roomManager.getRoom(code);
     if (!machine) {
       return callback({ ok: false, error: 'Phòng không tồn tại.' });
@@ -357,25 +447,33 @@ io.on('connection', (socket) => {
   });
 
   // 4b. Switch seat / role
-  socket.on('room:switchSeat', ({ targetRole, targetSeat }, callback) => {
+  on('room:switchSeat', (data, cb) => {
+    const callback = toCallback<{ ok: boolean; error?: string }>(cb);
+    if (checkEventSpam()) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) {
-      if (callback) callback({ ok: false, error: 'Không tìm thấy thông tin người chơi.' });
+      callback({ ok: false, error: 'Không tìm thấy thông tin người chơi.' });
+      return;
+    }
+    const targetRole = data?.targetRole;
+    const targetSeat = asInt(data?.targetSeat);
+    if ((targetRole !== 'player' && targetRole !== 'viewer') || targetSeat === null) {
+      callback({ ok: false, error: 'Vị trí hoặc vai trò không hợp lệ.' });
       return;
     }
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
       machine.eventQueue.enqueue(async () => {
-        const res = machine.switchSeat(info.playerId, targetRole, targetSeat);
-        if (callback) callback(res);
+        callback(machine.switchSeat(info.playerId, targetRole, targetSeat));
       });
     } else {
-      if (callback) callback({ ok: false, error: 'Phòng không tồn tại.' });
+      callback({ ok: false, error: 'Phòng không tồn tại.' });
     }
   });
 
   // 5. Start game
-  socket.on('room:start', () => {
+  on('room:start', () => {
+    if (checkEventSpam()) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -387,7 +485,9 @@ io.on('connection', (socket) => {
   });
 
   // 6. Player ready
-  socket.on('player:ready', ({ mediaLoaded }) => {
+  on('player:ready', (data) => {
+    if (checkEventSpam()) return;
+    const mediaLoaded = data?.mediaLoaded === true;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -399,7 +499,11 @@ io.on('connection', (socket) => {
   });
 
   // 7. Answer submit
-  socket.on('answer:submit', ({ questionId, content }) => {
+  on('answer:submit', (data) => {
+    if (checkEventSpam()) return;
+    const questionId = asString(data?.questionId);
+    const content = asString(data?.content, MAX_ANSWER_LENGTH);
+    if (questionId === null || content === null) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -412,7 +516,7 @@ io.on('connection', (socket) => {
 
   // 8. Buzz (chống spam auto-click chuông)
   let lastBuzzTime = 0;
-  socket.on('buzz', () => {
+  on('buzz', () => {
     if (checkEventSpam()) return;
     const now = Date.now();
     if (now - lastBuzzTime < 150) return; // Tối đa ~6 lần bấm/giây
@@ -429,7 +533,10 @@ io.on('connection', (socket) => {
   });
 
   // 8a. Khởi động: choose package
-  socket.on('kd:choosePackage', ({ packageIndex }) => {
+  on('kd:choosePackage', (data) => {
+    if (checkEventSpam()) return;
+    const packageIndex = asInt(data?.packageIndex);
+    if (packageIndex === null) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -439,7 +546,10 @@ io.on('connection', (socket) => {
   });
 
   // 8b. VCNV: Pick row
-  socket.on('vcnv:pickRow', ({ rowIndex }) => {
+  on('vcnv:pickRow', (data) => {
+    if (checkEventSpam()) return;
+    const rowIndex = asInt(data?.rowIndex);
+    if (rowIndex === null) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -449,7 +559,10 @@ io.on('connection', (socket) => {
   });
 
   // 9. Về đích: choose package
-  socket.on('vd:choosePackage', ({ packagePoints }) => {
+  on('vd:choosePackage', (data) => {
+    if (checkEventSpam()) return;
+    const packagePoints = data?.packagePoints;
+    if (packagePoints !== 40 && packagePoints !== 60 && packagePoints !== 80) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -459,7 +572,9 @@ io.on('connection', (socket) => {
   });
 
   // 10. Về đích: set star
-  socket.on('vd:setStar', ({ useStar }) => {
+  on('vd:setStar', (data) => {
+    if (checkEventSpam()) return;
+    const useStar = data?.useStar === true;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -469,7 +584,12 @@ io.on('connection', (socket) => {
   });
 
   // 11. Host override
-  socket.on('host:overrideScore', ({ questionId, playerId, isCorrect }) => {
+  on('host:overrideScore', (data) => {
+    if (checkEventSpam()) return;
+    const questionId = asString(data?.questionId);
+    const playerId = asString(data?.playerId);
+    const isCorrect = data?.isCorrect;
+    if (questionId === null || playerId === null || typeof isCorrect !== 'boolean') return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -481,7 +601,10 @@ io.on('connection', (socket) => {
   });
 
   // 12. Host skip absent
-  socket.on('host:skipAbsent', ({ playerId }) => {
+  on('host:skipAbsent', (data) => {
+    if (checkEventSpam()) return;
+    const playerId = asString(data?.playerId);
+    if (playerId === null) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -493,7 +616,10 @@ io.on('connection', (socket) => {
   });
 
   // 13. Host kick player
-  socket.on('host:kickPlayer', ({ playerId }) => {
+  on('host:kickPlayer', (data) => {
+    if (checkEventSpam()) return;
+    const playerId = asString(data?.playerId);
+    if (playerId === null) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
@@ -518,26 +644,32 @@ io.on('connection', (socket) => {
   });
 
   // 14. Dev: Jump / Tua nhanh sang vòng khác (tới màn hình chuẩn bị sẵn sàng)
-  socket.on('dev:jumpRound', ({ targetRound }) => {
+  // Chỉ chủ phòng mới dùng được (kiểm tra trong state machine)
+  on('dev:jumpRound', (data) => {
+    if (checkEventSpam()) return;
+    const targetRound = asString(data?.targetRound, 20) || 'VCNV';
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
-      machine.jumpToRound(targetRound || 'VCNV');
+      machine.jumpToRound(info.playerId, targetRound);
     }
   });
 
-  socket.on('dev:forceStartRound', () => {
+  on('dev:forceStartRound', () => {
+    if (checkEventSpam()) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
     const machine = roomManager.getRoom(info.roomCode);
     if (machine) {
-      machine.forceStartReadyRound();
+      machine.eventQueue.enqueue(async () => {
+        machine.forceStartReadyRound(info.playerId);
+      });
     }
   });
 
   // 13b. Chống gian lận: client báo đã rời tab / cửa sổ trò chơi
-  socket.on('anticheat:leave', (data) => {
+  on('anticheat:leave', (data) => {
     if (checkEventSpam()) return;
     const info = roomManager.getPlayerBySocket(socket.id);
     if (!info) return;
@@ -550,7 +682,7 @@ io.on('connection', (socket) => {
   });
 
   // 14. Disconnect
-  socket.on('disconnect', () => {
+  on('disconnect', () => {
     const info = roomManager.removeSocket(socket.id);
     if (info) {
       const machine = roomManager.getRoom(info.roomCode);
