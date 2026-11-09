@@ -1,6 +1,5 @@
 import xlsx from 'xlsx';
 import { Question, QuestionSet } from '@olympia/shared';
-import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
 
 export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đề tải lên'): QuestionSet {
   const workbook = xlsx.read(buffer, { type: 'buffer' });
@@ -203,115 +202,175 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
 export function generateExcelTemplate(): Buffer {
   const wb = xlsx.utils.book_new();
 
-  // 1. KhoiDong_Rieng
+  // 1. KhoiDong_Rieng (Mỗi vị trí thí sinh 1 - 4 có 6 câu hỏi mẫu trắc nghiệm A, B, C, D)
   const kdRiengRows: any[] = [];
-  DEFAULT_QUESTION_SET.khoiDong.rieng.forEach((seatQuestions, seatIdx) => {
-    seatQuestions.forEach((q, orderIdx) => {
+  for (let seat = 1; seat <= 4; seat++) {
+    for (let order = 1; order <= 6; order++) {
       kdRiengRows.push({
-        Seat: seatIdx + 1,
-        Order: orderIdx + 1,
-        Prompt: q.prompt,
-        OptionA: q.options?.[0] || '',
-        OptionB: q.options?.[1] || '',
-        OptionC: q.options?.[2] || '',
-        OptionD: q.options?.[3] || '',
-        Answer: q.answer,
-        Alternatives: (q.alternatives || []).join('; '),
+        Seat: seat,
+        Order: order,
+        Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Khởi động riêng số ${order} của Thí sinh ${seat}?`,
+        OptionA: 'Phương án A',
+        OptionB: 'Phương án B',
+        OptionC: 'Phương án C',
+        OptionD: 'Phương án D',
+        Answer: 'A',
+        Alternatives: 'PHƯƠNG ÁN A; ĐÁP ÁN A; A',
       });
-    });
-  });
+    }
+  }
   const wsRieng = xlsx.utils.json_to_sheet(kdRiengRows);
   xlsx.utils.book_append_sheet(wb, wsRieng, 'KhoiDong_Rieng');
 
-  // 2. KhoiDong_Chung
-  const kdChungRows = DEFAULT_QUESTION_SET.khoiDong.chung.map((q, idx) => ({
-    Order: idx + 1,
-    Prompt: q.prompt,
-    OptionA: q.options?.[0] || '',
-    OptionB: q.options?.[1] || '',
-    OptionC: q.options?.[2] || '',
-    OptionD: q.options?.[3] || '',
-    Answer: q.answer,
-    Alternatives: (q.alternatives || []).join('; '),
-  }));
+  // 2. KhoiDong_Chung (12 câu hỏi mẫu trắc nghiệm cho cả 4 thí sinh cùng bấm chuông)
+  const kdChungRows: any[] = [];
+  for (let idx = 1; idx <= 12; idx++) {
+    kdChungRows.push({
+      Order: idx,
+      Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Khởi động chung số ${idx}?`,
+      OptionA: 'Lựa chọn A',
+      OptionB: 'Lựa chọn B',
+      OptionC: 'Lựa chọn C',
+      OptionD: 'Lựa chọn D',
+      Answer: 'A',
+      Alternatives: 'LỰA CHỌN A; ĐÁP ÁN A; A',
+    });
+  }
   const wsChung = xlsx.utils.json_to_sheet(kdChungRows);
   xlsx.utils.book_append_sheet(wb, wsChung, 'KhoiDong_Chung');
 
-  // 3. VCNV
-  const vcnvRows: any[] = [];
-  DEFAULT_QUESTION_SET.vcnv.rows.forEach((r, idx) => {
-    vcnvRows.push({
-      Type: `ROW_${idx + 1}`,
-      Prompt: r.prompt,
-      Answer: r.answer,
-      Alternatives: (r.alternatives || []).join('; '),
-      Image: idx === 0 ? (DEFAULT_QUESTION_SET.vcnv.image || '') : '',
-    });
-  });
-  vcnvRows.push({
-    Type: 'CENTER',
-    Prompt: DEFAULT_QUESTION_SET.vcnv.center.prompt,
-    Answer: DEFAULT_QUESTION_SET.vcnv.center.answer,
-    Alternatives: (DEFAULT_QUESTION_SET.vcnv.center.alternatives || []).join('; '),
-    Image: '',
-  });
-  vcnvRows.push({
-    Type: 'OBSTACLE',
-    Prompt: DEFAULT_QUESTION_SET.vcnv.obstacle.prompt,
-    Answer: DEFAULT_QUESTION_SET.vcnv.obstacle.answer,
-    Alternatives: (DEFAULT_QUESTION_SET.vcnv.obstacle.alternatives || []).join('; '),
-    Image: '',
-  });
+  // 3. VCNV (4 hàng ngang gợi ý, 1 câu trung tâm, 1 từ khóa CNV)
+  const vcnvRows = [
+    {
+      Type: 'ROW_1',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 1?',
+      Answer: 'GỢI Ý 1',
+      Alternatives: 'GOI Y 1',
+      Image: '',
+    },
+    {
+      Type: 'ROW_2',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 2?',
+      Answer: 'GỢI Ý 2',
+      Alternatives: 'GOI Y 2',
+      Image: '',
+    },
+    {
+      Type: 'ROW_3',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 3?',
+      Answer: 'GỢI Ý 3',
+      Alternatives: 'GOI Y 3',
+      Image: '',
+    },
+    {
+      Type: 'ROW_4',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 4?',
+      Answer: 'GỢI Ý 4',
+      Alternatives: 'GOI Y 4',
+      Image: '',
+    },
+    {
+      Type: 'CENTER',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho ô trung tâm?',
+      Answer: 'TRUNG TÂM',
+      Alternatives: 'TRUNG TAM',
+      Image: '',
+    },
+    {
+      Type: 'OBSTACLE',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho từ khóa Chướng ngại vật chính?',
+      Answer: 'TỪ KHÓA CHÍNH',
+      Alternatives: 'TU KHOA CHINH',
+      Image: '',
+    },
+  ];
   const wsVcnv = xlsx.utils.json_to_sheet(vcnvRows);
   xlsx.utils.book_append_sheet(wb, wsVcnv, 'VCNV');
 
-  // 4. TangToc
-  const ttRows = DEFAULT_QUESTION_SET.tangToc.map((q, idx) => ({
-    Order: idx + 1,
-    Prompt: q.prompt,
-    Answer: q.answer,
-    Alternatives: (q.alternatives || []).join('; '),
-    Media: q.media || '',
-  }));
+  // 4. TangToc (4 câu hỏi tăng tốc: 10s, 20s, 30s, 40s)
+  const ttRows = [
+    {
+      Order: 1,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 1 (Thời gian suy nghĩ 10 giây)?',
+      Answer: 'ĐÁP ÁN 1',
+      Alternatives: 'DAP AN 1; CAU TRA LOI 1',
+      Media: '',
+    },
+    {
+      Order: 2,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 2 (Thời gian suy nghĩ 20 giây)?',
+      Answer: 'ĐÁP ÁN 2',
+      Alternatives: 'DAP AN 2; CAU TRA LOI 2',
+      Media: '',
+    },
+    {
+      Order: 3,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 3 (Thời gian suy nghĩ 30 giây)?',
+      Answer: 'ĐÁP ÁN 3',
+      Alternatives: 'DAP AN 3; CAU TRA LOI 3',
+      Media: '',
+    },
+    {
+      Order: 4,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 4 (Thời gian suy nghĩ 40 giây)?',
+      Answer: 'ĐÁP ÁN 4',
+      Alternatives: 'DAP AN 4; CAU TRA LOI 4',
+      Media: '',
+    },
+  ];
   const wsTt = xlsx.utils.json_to_sheet(ttRows);
   xlsx.utils.book_append_sheet(wb, wsTt, 'TangToc');
 
-  // 5. VeDich
+  // 5. VeDich (Mỗi mức điểm 10đ, 20đ, 30đ có các câu hỏi mẫu)
   const vdRows: any[] = [];
-  DEFAULT_QUESTION_SET.veDich.pool10.forEach((q) => {
+  for (let i = 1; i <= 6; i++) {
     vdRows.push({
       Points: 10,
-      Prompt: q.prompt,
-      Answer: q.answer,
-      Alternatives: (q.alternatives || []).join('; '),
+      Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Về đích 10 điểm số ${i}?`,
+      Answer: `ĐÁP ÁN 10Đ SỐ ${i}`,
+      Alternatives: `DAP AN 10D SO ${i}; TRA LOI ${i}`,
     });
-  });
-  DEFAULT_QUESTION_SET.veDich.pool20.forEach((q) => {
+  }
+  for (let i = 1; i <= 6; i++) {
     vdRows.push({
       Points: 20,
-      Prompt: q.prompt,
-      Answer: q.answer,
-      Alternatives: (q.alternatives || []).join('; '),
+      Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Về đích 20 điểm số ${i}?`,
+      Answer: `ĐÁP ÁN 20Đ SỐ ${i}`,
+      Alternatives: `DAP AN 20D SO ${i}; TRA LOI ${i}`,
     });
-  });
-  DEFAULT_QUESTION_SET.veDich.pool30.forEach((q) => {
+  }
+  for (let i = 1; i <= 6; i++) {
     vdRows.push({
       Points: 30,
-      Prompt: q.prompt,
-      Answer: q.answer,
-      Alternatives: (q.alternatives || []).join('; '),
+      Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Về đích 30 điểm số ${i}?`,
+      Answer: `ĐÁP ÁN 30Đ SỐ ${i}`,
+      Alternatives: `DAP AN 30D SO ${i}; TRA LOI ${i}`,
     });
-  });
+  }
   const wsVd = xlsx.utils.json_to_sheet(vdRows);
   xlsx.utils.book_append_sheet(wb, wsVd, 'VeDich');
 
-  // 6. TieBreak
-  const tbRows = DEFAULT_QUESTION_SET.tieBreak.map((q, idx) => ({
-    Order: idx + 1,
-    Prompt: q.prompt,
-    Answer: q.answer,
-    Alternatives: (q.alternatives || []).join('; '),
-  }));
+  // 6. TieBreak (3 câu hỏi phụ)
+  const tbRows = [
+    {
+      Order: 1,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi phụ (Tie-break) số 1?',
+      Answer: 'ĐÁP ÁN PHỤ 1',
+      Alternatives: 'DAP AN PHU 1',
+    },
+    {
+      Order: 2,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi phụ (Tie-break) số 2?',
+      Answer: 'ĐÁP ÁN PHỤ 2',
+      Alternatives: 'DAP AN PHU 2',
+    },
+    {
+      Order: 3,
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi phụ (Tie-break) số 3?',
+      Answer: 'ĐÁP ÁN PHỤ 3',
+      Alternatives: 'DAP AN PHU 3',
+    },
+  ];
   const wsTb = xlsx.utils.json_to_sheet(tbRows);
   xlsx.utils.book_append_sheet(wb, wsTb, 'TieBreak');
 

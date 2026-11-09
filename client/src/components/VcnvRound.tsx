@@ -143,7 +143,7 @@ export const VcnvRound: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-between h-full max-h-full py-1 px-3 overflow-hidden">
+    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-start h-full max-h-full py-1.5 px-3 overflow-hidden">
       {/* ======================================================== */}
       {/* 1. TOP HEADER & TIMER                                    */}
       {/* ======================================================== */}
@@ -179,81 +179,6 @@ export const VcnvRound: React.FC = () => {
         </div>
       </div>
 
-      {/* ======================================================== */}
-      {/* 2. HERO SECTION: TỪ KHÓA CHÍNH (CĂN CENTER & NỔI BẬT)    */}
-      {/* ======================================================== */}
-      <div className="w-full bg-gradient-to-b from-[#1C2638] via-[#151D2C] to-[#111827] border-2 border-[#FFD43B]/60 rounded-2xl p-3 sm:p-4 mb-2.5 shadow-[0_4px_25px_rgba(255,212,59,0.18)] flex flex-col items-center justify-center text-center shrink-0">
-        {/* Title */}
-        <div className="flex items-center justify-center gap-2 text-xs sm:text-sm lg:text-base font-heading font-extrabold text-[#FFD43B] uppercase tracking-wider mb-2">
-          <Key size={18} className="text-[#FFD43B]" />
-          <span>TỪ KHÓA CHƯỚNG NGẠI VẬT ({obstacleLetterCount} CHỮ CÁI)</span>
-        </div>
-
-        {/* Big Prominent Letter Boxes */}
-        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2 flex-wrap">
-          {Array.from({ length: obstacleLetterCount }).map((_, i) => {
-            const char = obstacleAnswerRevealed ? obstacleAnswerRevealed[i] : null;
-            return (
-              <div
-                key={i}
-                className={`w-9 h-11 sm:w-11 sm:h-13 rounded-xl flex items-center justify-center font-digital font-black text-lg sm:text-2xl border-2 transition-all ${
-                  char
-                    ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow scale-105'
-                    : 'bg-[#0B101B] text-[#00D9FF] border-[#303D52] shadow-inner'
-                }`}
-              >
-                {char || '?'}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Text: +xx đ nếu trả lời đúng từ khóa vào lúc này */}
-        <div
-          className="flex items-center justify-center gap-1.5 px-3.5 py-1 rounded-xl bg-[#20D6A0]/15 border border-[#20D6A0]/40 text-[#20D6A0] shadow-glow-success select-none text-xs sm:text-sm font-heading font-bold"
-          title="Đoán từ khóa chính dựa trên 4 hàng gợi ý - Sau mỗi câu hỏi gợi ý được lật mở, số điểm nhận được khi đoán từ khóa chính sẽ giảm"
-        >
-          <Sparkles size={15} className="text-[#20D6A0] shrink-0" />
-          <span>+{currentCnvPoints}đ nếu trả lời đúng từ khóa vào lúc này</span>
-        </div>
-
-        {/* Integrated Buzzer Button directly under keyword */}
-        {subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
-          <div className="mt-2.5 w-full flex items-center justify-center">
-            <button
-              onClick={buzz}
-              disabled={!canBuzz}
-              className={`px-5 sm:px-7 py-2 sm:py-2.5 rounded-full font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer ${
-                canBuzz
-                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_4px_0_#881337,0_0_25px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-0.5 active:shadow-[0_1px_0_#881337] animate-pulse'
-                  : isBuzzerLocked
-                  ? 'bg-[#1C2638] text-[#FF496C] border border-[#FF496C]/40 opacity-70 cursor-not-allowed'
-                  : 'bg-[#0E1524] text-[#64748B] border border-[#303D52] opacity-60 cursor-not-allowed'
-              }`}
-              title={canBuzz ? 'Bấm chuông giành quyền trả lời Chướng ngại vật (Phím Space)' : 'Chuông hiện chưa mở'}
-            >
-              <Bell
-                size={17}
-                className={canBuzz ? 'animate-bounce text-[#FFD43B]' : 'text-[#64748B]'}
-              />
-              <span>
-                {canBuzz
-                  ? 'RUNG CHUÔNG GIẢI TỪ KHÓA (PHÍM SPACE)'
-                  : isBuzzerLocked
-                  ? `🔒 ${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} ĐÃ RUNG CHUÔNG`
-                  : isEliminated
-                  ? 'BẠN ĐÃ DỪNG CUỘC CHƠI Ở VÒNG VCNV'
-                  : isViewer
-                  ? 'BẠN LÀ KHÁN GIẢ'
-                  : vcnvQuestionsAppearedCount < 1
-                  ? 'CHUÔNG SẼ MỞ SAU HÀNG NGANG 1'
-                  : 'CHUÔNG HIỆN CHƯA MỞ'}
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
-
       {buzzRejectedReason && (
         <div className="w-full py-1.5 px-3.5 mb-2 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-center text-xs sm:text-sm font-bold text-[#FF496C] shadow-glow-danger shrink-0">
           {buzzRejectedReason}
@@ -261,109 +186,182 @@ export const VcnvRound: React.FC = () => {
       )}
 
       {/* ======================================================== */}
-      {/* 2. GAME BOARD: 4 HÀNG NGANG (GỢI Ý TÌM TỪ KHÓA)          */}
+      {/* 2. GAME BOARD: 4 HÀNG NGANG & TỪ KHÓA CHÍNH (SIDE-BY-SIDE) */}
       {/* ======================================================== */}
-      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-3 sm:p-3.5 shadow-xl mb-2.5 flex flex-col gap-2 shrink-0">
-        <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider text-[#F8FAFC]">
-            4 Hàng Ngang (Gợi Ý Tìm Từ Khóa)
-          </span>
-          <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2.5 py-0.5 rounded-lg border border-[#303D52]">
-            {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
-          </span>
-        </div>
+      <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3 mb-2 shrink-0">
+        {/* LEFT: 4 HÀNG NGANG (GỢI Ý) */}
+        <div className="md:col-span-7 bg-[#111827] border border-[#303D52] rounded-2xl p-2.5 sm:p-3 shadow-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1.5 px-0.5">
+            <span className="text-xs sm:text-sm font-heading font-black uppercase tracking-wider text-[#F8FAFC]">
+              4 Hàng Ngang (Gợi Ý)
+            </span>
+            <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2 py-0.5 rounded-lg border border-[#303D52]">
+              {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
+            </span>
+          </div>
 
-        <div className="flex flex-col gap-2">
-          {[0, 1, 2, 3].map((idx) => {
-            const isRevealed = rowsRevealed[idx];
-            const isCurrent =
-              activeRowIdx === idx &&
-              (subPhase === 'ROW_QUESTION' || subPhase === 'ROW_REVEAL');
-            const letterCount = rowLetterCounts[idx] || 6;
-            const revealedLetters = rowAnswersRevealed ? rowAnswersRevealed[idx] : null;
-            const isClickable = subPhase === 'PICK_ROW' && isMyTurnToPick && !isRevealed;
+          <div className="flex flex-col gap-1.5">
+            {[0, 1, 2, 3].map((idx) => {
+              const isRevealed = rowsRevealed[idx];
+              const isCurrent =
+                activeRowIdx === idx &&
+                (subPhase === 'ROW_QUESTION' || subPhase === 'ROW_REVEAL');
+              const letterCount = rowLetterCounts[idx] || 6;
+              const revealedLetters = rowAnswersRevealed ? rowAnswersRevealed[idx] : null;
+              const isClickable = subPhase === 'PICK_ROW' && isMyTurnToPick && !isRevealed;
 
-            return (
-              <div
-                key={idx}
-                onClick={() => isClickable && pickVcnvRow(idx)}
-                className={`p-2 sm:p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2.5 ${
-                  isClickable
-                    ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] cursor-pointer active:scale-95 animate-pulse'
-                    : isCurrent
-                    ? 'bg-[#1C2638] border border-[#00D9FF] shadow-glow-cyan font-bold'
-                    : isRevealed
-                    ? 'bg-[#162132] border border-[#303D52]'
-                    : 'bg-[#0E1524] border-[#303D52]/40 opacity-75'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-                  <span
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-heading font-black text-xs sm:text-sm shrink-0 ${
-                      isClickable || isCurrent
-                        ? 'bg-[#FFD43B] text-[#090D18]'
-                        : isRevealed && revealedLetters
-                        ? 'bg-[#20D6A0] text-[#090D18]'
-                        : 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
-                    }`}
-                  >
-                    {idx + 1}
-                  </span>
-
-                  {/* Letter boxes */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {Array.from({ length: letterCount }).map((_, charIdx) => {
-                      const char = isRevealed && revealedLetters ? revealedLetters[charIdx] : null;
-                      return (
-                        <div
-                          key={charIdx}
-                          className={`w-7 h-8 sm:w-8 sm:h-9 rounded-lg flex items-center justify-center font-digital font-bold text-xs sm:text-sm border transition-all ${
-                            char
-                              ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success font-black'
-                              : isCurrent
-                              ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF] shadow-glow-cyan'
-                              : 'bg-[#1C2638] text-[#64748B] border-[#303D52]'
-                          }`}
-                        >
-                          {char || (isCurrent ? '?' : '•')}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Row Status Badge */}
-                <div className="shrink-0">
-                  {isClickable ? (
-                    <button
-                      type="button"
-                      className="px-3 py-1 bg-[#FFD43B] text-[#090D18] font-heading font-black text-xs uppercase tracking-wider rounded-lg shadow-glow-yellow hover:scale-105 transition-transform cursor-pointer"
+              return (
+                <div
+                  key={idx}
+                  onClick={() => isClickable && pickVcnvRow(idx)}
+                  className={`px-2.5 py-1.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+                    isClickable
+                      ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] cursor-pointer active:scale-95 animate-pulse'
+                      : isCurrent
+                      ? 'bg-[#1C2638] border-2 border-[#00D9FF] shadow-glow-cyan font-bold'
+                      : isRevealed
+                      ? 'bg-[#162132] border border-[#303D52]'
+                      : 'bg-[#0E1524] border-[#303D52]/40 opacity-75'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span
+                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-heading font-black text-xs shrink-0 ${
+                        isClickable || isCurrent
+                          ? 'bg-[#FFD43B] text-[#090D18]'
+                          : isRevealed && revealedLetters
+                          ? 'bg-[#20D6A0] text-[#090D18]'
+                          : 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
+                      }`}
                     >
-                      Chọn
-                    </button>
-                  ) : isRevealed ? (
-                    revealedLetters ? (
-                      <span className="px-2.5 py-0.5 rounded-lg text-xs font-heading font-extrabold bg-[#20D6A0]/20 text-[#20D6A0] border border-[#20D6A0]/40 tracking-wider">
-                        ĐÃ MỞ
+                      {idx + 1}
+                    </span>
+
+                    {/* Letter boxes */}
+                    <div className="flex flex-wrap gap-1">
+                      {Array.from({ length: letterCount }).map((_, charIdx) => {
+                        const char = isRevealed && revealedLetters ? revealedLetters[charIdx] : null;
+                        return (
+                          <div
+                            key={charIdx}
+                            className={`w-6 h-7 sm:w-7 sm:h-8 rounded-md flex items-center justify-center font-digital font-bold text-xs border transition-all ${
+                              char
+                                ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success font-black'
+                                : isCurrent
+                                ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF] shadow-glow-cyan'
+                                : 'bg-[#1C2638] text-[#64748B] border-[#303D52]'
+                            }`}
+                          >
+                            {char || (isCurrent ? '?' : '•')}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Row Status Badge */}
+                  <div className="shrink-0">
+                    {isClickable ? (
+                      <button
+                        type="button"
+                        className="px-2.5 py-0.5 bg-[#FFD43B] text-[#090D18] font-heading font-black text-xs uppercase tracking-wider rounded-lg shadow-glow-yellow hover:scale-105 transition-transform cursor-pointer"
+                      >
+                        Chọn
+                      </button>
+                    ) : isRevealed ? (
+                      revealedLetters ? (
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#20D6A0]/20 text-[#20D6A0] border border-[#20D6A0]/40 tracking-wider">
+                          ĐÃ MỞ
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30 tracking-wider">
+                          KHÓA
+                        </span>
+                      )
+                    ) : isCurrent ? (
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/40 tracking-wider animate-pulse">
+                        ĐANG GIẢI
                       </span>
                     ) : (
-                      <span className="px-2.5 py-0.5 rounded-lg text-xs font-heading font-extrabold bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30 tracking-wider">
-                        KHÓA
+                      <span className="text-[#64748B] text-[11px] font-heading font-bold tracking-widest px-1">
+                        CHƯA MỞ
                       </span>
-                    )
-                  ) : isCurrent ? (
-                    <span className="px-2.5 py-0.5 rounded-lg text-xs font-heading font-extrabold bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/40 tracking-wider animate-pulse">
-                      ĐANG GIẢI
-                    </span>
-                  ) : (
-                    <span className="text-[#64748B] text-xs font-heading font-bold tracking-widest px-2">
-                      CHƯA MỞ
-                    </span>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT: TỪ KHÓA CHƯỚNG NGẠI VẬT & RUNG CHUÔNG */}
+        <div className="md:col-span-5 bg-gradient-to-b from-[#1C2638] via-[#151D2C] to-[#111827] border-2 border-[#FFD43B]/60 rounded-2xl p-3 sm:p-3.5 shadow-[0_4px_25px_rgba(255,212,59,0.18)] flex flex-col justify-between text-center">
+          {/* Title & Reward points */}
+          <div className="w-full flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-black text-[#FFD43B] uppercase tracking-wider">
+              <Key size={16} className="text-[#FFD43B]" />
+              <span>TỪ KHÓA ({obstacleLetterCount} CHỮ)</span>
+            </div>
+            <div
+              className="px-2.5 py-0.5 rounded-lg bg-[#20D6A0]/20 border border-[#20D6A0]/40 text-[#20D6A0] text-xs font-digital font-bold shadow-glow-success select-none"
+              title="Điểm khi giải thành công từ khóa lúc này"
+            >
+              +{currentCnvPoints}đ
+            </div>
+          </div>
+
+          {/* Letter boxes */}
+          <div className="my-2 flex items-center justify-center gap-1.5 flex-wrap">
+            {Array.from({ length: obstacleLetterCount }).map((_, i) => {
+              const char = obstacleAnswerRevealed ? obstacleAnswerRevealed[i] : null;
+              return (
+                <div
+                  key={i}
+                  className={`w-8 h-10 sm:w-9 sm:h-11 rounded-xl flex items-center justify-center font-digital font-black text-base sm:text-lg border-2 transition-all ${
+                    char
+                      ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow scale-105'
+                      : 'bg-[#0B101B] text-[#00D9FF] border-[#303D52] shadow-inner'
+                  }`}
+                >
+                  {char || '?'}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Buzzer Button */}
+          {subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
+            <button
+              onClick={buzz}
+              disabled={!canBuzz}
+              className={`w-full py-2 sm:py-2.5 px-3 rounded-xl font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                canBuzz
+                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_4px_0_#881337,0_0_20px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-0.5 active:shadow-[0_1px_0_#881337] animate-pulse'
+                : isBuzzerLocked
+                ? 'bg-[#1C2638] text-[#FF496C] border border-[#FF496C]/40 opacity-70 cursor-not-allowed'
+                : 'bg-[#0E1524] text-[#64748B] border border-[#303D52] opacity-60 cursor-not-allowed'
+              }`}
+              title={canBuzz ? 'Bấm chuông giành quyền trả lời Chướng ngại vật (Phím Space)' : 'Chuông hiện chưa mở'}
+            >
+              <Bell
+                size={16}
+                className={canBuzz ? 'animate-bounce text-[#FFD43B]' : 'text-[#64748B]'}
+              />
+              <span className="truncate">
+                {canBuzz
+                  ? 'RUNG CHUÔNG (PHÍM SPACE)'
+                  : isBuzzerLocked
+                  ? `🔒 ${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} ĐÃ BẤM`
+                  : isEliminated
+                  ? 'ĐÃ BỊ LOẠI KHỎI VCNV'
+                  : isViewer
+                  ? 'BẠN LÀ KHÁN GIẢ'
+                  : vcnvQuestionsAppearedCount < 1
+                  ? 'CHUÔNG MỞ SAU HÀNG 1'
+                  : 'CHUÔNG CHƯA MỞ'}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
