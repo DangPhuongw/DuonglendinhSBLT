@@ -23,7 +23,7 @@ export const VcnvRound: React.FC = () => {
   const subPhase = room?.state?.subPhase;
   const currentQ = room?.state?.currentQuestion;
   const rowsRevealed: boolean[] = room?.state?.rowsRevealed || [false, false, false, false];
-  const rowLetterCounts: number[] = room?.state?.rowLetterCounts || [3, 3, 6, 10];
+  const rowLetterCounts: number[] = room?.state?.rowLetterCounts || [1, 3, 6, 10];
   const rowAnswersRevealed = room?.state?.rowAnswersRevealed;
   const activeRowIdx = room?.state?.activeRowIndex;
 

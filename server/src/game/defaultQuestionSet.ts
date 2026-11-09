@@ -365,8 +365,8 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
       {
         id: 'vcnv-row-1',
         type: 'text',
-        prompt: 'Một giải đấu bóng đá có 8 đội tham gia thi đấu theo thể thức loại trực tiếp một lần thua (không có trận tranh hạng ba). Hỏi ban tổ chức cần phải tổ chức tất cả bao nhiêu trận đấu để tìm ra nhà vô địch?',
-        answer: 'BẢY',
+        prompt: 'Một giải đấu bóng đá có 8 đội tham gia thi đấu theo thể thức loại trực tiếp một lần thua BO1 (không có trận tranh hạng ba). Hỏi ban tổ chức cần phải tổ chức tất cả bao nhiêu trận đấu để tìm ra nhà vô địch? (Nhập chữ số)',
+        answer: '7',
         alternatives: ['7', 'BẢY', 'BAY', '7 TRẬN', '7 TRAN', 'BẢY TRẬN', 'BAY TRAN'],
         ignoreDiacritics: true,
       },
