@@ -34,6 +34,11 @@ export interface StateMachineCallbacks {
   broadcastPlayerUpdate: (players: Player[]) => void;
 }
 
+/** Bỏ token khỏi danh sách người chơi trước khi gửi cho cả phòng. */
+export function toPublicPlayers(players: Player[]): Player[] {
+  return players.map(({ token: _token, ...rest }) => rest);
+}
+
 export class RoomStateMachine {
   public room: Room;
   public eventQueue: EventQueue;
@@ -133,6 +138,7 @@ export class RoomStateMachine {
 
     return {
       ...this.room,
+      players: toPublicPlayers(this.room.players),
       state: {
         ...this.room.state,
         currentQuestion: sanitizedQ,
@@ -275,7 +281,7 @@ export class RoomStateMachine {
     player.seat = targetSeat as 1 | 2 | 3 | 4 | 5;
 
     this.persistSnapshot();
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
 
     return { ok: true };
@@ -297,11 +303,14 @@ export class RoomStateMachine {
     }
 
     this.persistSnapshot();
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
   }
 
   public handleReconnect(token: string): { ok: boolean; player?: Player; error?: string } {
+    if (!token) {
+      return { ok: false, error: 'Token không hợp lệ hoặc người chơi không tồn tại.' };
+    }
     const player = this.room.players.find((p) => p.token === token);
     if (!player) {
       return { ok: false, error: 'Token không hợp lệ hoặc người chơi không tồn tại.' };
@@ -311,7 +320,7 @@ export class RoomStateMachine {
     player.disconnectedAt = undefined;
 
     this.persistSnapshot();
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
     return { ok: true, player };
   }
@@ -323,7 +332,7 @@ export class RoomStateMachine {
     player.ready = true;
     player.mediaLoaded = mediaLoaded;
 
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
 
     // If in READY screen, check if all connected contestants (not viewers) are ready
     if (this.room.state.round === 'READY') {
@@ -345,7 +354,7 @@ export class RoomStateMachine {
 
     // Mark as ready or eliminate from current phase
     player.ready = true;
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
 
     if (this.room.state.round === 'READY') {
       const activeContestants = this.room.players.filter(
@@ -380,7 +389,7 @@ export class RoomStateMachine {
 
     this.room.players.splice(idx, 1);
     this.persistSnapshot();
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
     return true;
   }
@@ -516,7 +525,7 @@ export class RoomStateMachine {
       for (const p of this.room.players) {
         if (p.connected) p.ready = true;
       }
-      this.callbacks.broadcastPlayerUpdate(this.room.players);
+      this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
       this.startReadyCountdown();
     }
   }
@@ -1575,7 +1584,7 @@ export class RoomStateMachine {
     this.callbacks.broadcastReveal(revealPayload);
 
     this.persistSnapshot();
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
 
     // Check if any non-eliminated players remain
@@ -2101,7 +2110,7 @@ export class RoomStateMachine {
     const turnIndex = this.veDichCurrentTurnIndex;
 
     this.persistSnapshot();
-    this.callbacks.broadcastPlayerUpdate(this.room.players);
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
 
     this.eventQueue.enqueue(async () => {
       if (currentQ) {
@@ -2121,7 +2130,7 @@ export class RoomStateMachine {
   ): Promise<void> {
     this.answersMap.clear();
     this.buzzedPlayerId = null;
-    const durationSec = GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[points] || 15;
+    const durationSec = GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[points] || 20;
 
     this.room.state = {
       round: 'VE_DICH',

@@ -242,7 +242,7 @@ export const VeDichRound: React.FC = () => {
           )}
         </div>
         <span className="text-xs sm:text-sm text-[#94A3B8] font-digital font-bold bg-[#1C2638] border border-[#303D52] px-3.5 py-1 rounded-xl tabular-nums">
-          30s
+          20s
         </span>
       </div>
 
@@ -254,7 +254,7 @@ export const VeDichRound: React.FC = () => {
             ? 5
             : subPhase === 'STEAL_ANSWER'
             ? 10
-            : 30
+            : 20
         }
         className="mb-2 sm:mb-3"
       />

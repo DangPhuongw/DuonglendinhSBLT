@@ -16,7 +16,9 @@ export interface Player {
   name: string;
   seat: 1 | 2 | 3 | 4 | 5;
   role?: PlayerRole;
-  token: string;
+  /** Bí mật để vào lại phòng. Chỉ tồn tại ở server và trong callback trả riêng cho chính người chơi;
+   *  luôn bị xóa trước khi broadcast (xem toPublicPlayers). */
+  token?: string;
   connected: boolean;
   disconnectedAt?: number;
   ready: boolean;

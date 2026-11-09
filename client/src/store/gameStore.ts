@@ -17,6 +17,7 @@ interface GameStore {
   room: Room | null;
   player: Player | null;
   myToken: string | null;
+  myPlayerId: string | null;
   mySeat: number | null;
   lastReveal: RevealPayload | null;
   buzzWinner: { winnerId: string; winnerName: string; diffMs?: number } | null;
@@ -44,6 +45,9 @@ interface GameStore {
   leaveRoom: () => void;
 }
 
+const STORAGE_KEYS = ['olympia_token', 'olympia_room_code', 'olympia_seat', 'olympia_player_id'];
+const clearSavedSession = () => STORAGE_KEYS.forEach((k) => localStorage.removeItem(k));
+
 export const useGameStore = create<GameStore>((set, get) => ({
   socket: null,
   connected: false,
@@ -51,6 +55,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   room: null,
   player: null,
   myToken: localStorage.getItem('olympia_token'),
+  myPlayerId: localStorage.getItem('olympia_player_id'),
   mySeat: Number(localStorage.getItem('olympia_seat')) || null,
   lastReveal: null,
   buzzWinner: null,
@@ -93,8 +98,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Room sync
     socket.on('state:sync', (room) => {
-      const currentToken = get().myToken || localStorage.getItem('olympia_token');
-      const me = room.players.find((p) => p.token === currentToken) || null;
+      // Server không gửi token của ai xuống nữa -> nhận diện bản thân bằng player.id
+      const myId = get().myPlayerId;
+      const me = myId ? room.players.find((p) => p.id === myId) || null : get().player;
       const prevRound = get().room?.state?.round;
       const newRound = room.state?.round;
 
@@ -116,8 +122,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     socket.on('player:update', (players) => {
       const currentRoom = get().room;
       if (currentRoom) {
-        const currentToken = get().myToken || localStorage.getItem('olympia_token');
-        const me = players.find((p) => p.token === currentToken) || null;
+        const myId = get().myPlayerId;
+        const me = myId ? players.find((p) => p.id === myId) || null : get().player;
         set({
           room: { ...currentRoom, players },
           player: me,
@@ -187,10 +193,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     socket.on('player:kicked', (data) => {
-      localStorage.removeItem('olympia_token');
-      localStorage.removeItem('olympia_room_code');
-      localStorage.removeItem('olympia_seat');
-      set({ room: null, player: null, myToken: null, mySeat: null });
+      clearSavedSession();
+      set({ room: null, player: null, myToken: null, myPlayerId: null, mySeat: null });
       alert(data.reason || 'Bạn đã bị mời ra khỏi phòng.');
     });
 
@@ -219,8 +223,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
           localStorage.setItem('olympia_token', res.token);
           localStorage.setItem('olympia_room_code', res.roomCode);
           localStorage.setItem('olympia_seat', String(res.seat));
+          if (res.player) localStorage.setItem('olympia_player_id', res.player.id);
           set({
             myToken: res.token,
+            myPlayerId: res.player?.id ?? null,
             mySeat: res.seat,
             room: res.room || get().room,
             player: res.player || get().player,
@@ -243,8 +249,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
           localStorage.setItem('olympia_token', res.token);
           localStorage.setItem('olympia_room_code', res.roomCode);
           localStorage.setItem('olympia_seat', String(res.seat));
+          if (res.player) localStorage.setItem('olympia_player_id', res.player.id);
           set({
             myToken: res.token,
+            myPlayerId: res.player?.id ?? null,
             mySeat: res.seat,
             room: res.room || get().room,
             player: res.player || get().player,
@@ -264,18 +272,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       s.emit('room:rejoin', { roomCode, token }, (res) => {
         if (res.ok && res.player && res.room) {
+          localStorage.setItem('olympia_player_id', res.player.id);
           set({
             room: res.room,
             player: res.player,
             mySeat: res.player.seat,
             myToken: token,
+            myPlayerId: res.player.id,
           });
           resolve({ ok: true });
         } else {
           // Invalidate saved token
-          localStorage.removeItem('olympia_token');
-          localStorage.removeItem('olympia_room_code');
-          localStorage.removeItem('olympia_seat');
+          clearSavedSession();
           resolve({ ok: false, error: res.error || 'Không thể vào lại phòng.' });
         }
       });
@@ -388,10 +396,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   leaveRoom: () => {
-    localStorage.removeItem('olympia_token');
-    localStorage.removeItem('olympia_room_code');
-    localStorage.removeItem('olympia_seat');
-    set({ room: null, player: null, myToken: null, mySeat: null });
+    clearSavedSession();
+    set({ room: null, player: null, myToken: null, myPlayerId: null, mySeat: null });
     window.location.reload();
   },
 }));

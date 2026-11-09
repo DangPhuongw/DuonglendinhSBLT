@@ -92,7 +92,11 @@ export class RoomManager {
       const host = room.players.find((p) => p.id === room.hostId) || room.players[0];
       if (host) {
         const callbacks = this.defaultCallbacksFactory(room.code);
-        const machine = new RoomStateMachine(room.code, host, callbacks);
+        const machine = new RoomStateMachine(
+          room.code,
+          { id: host.id, name: host.name, token: host.token ?? '' },
+          callbacks
+        );
         machine.room = room; // Restore exact room state
         this.rooms.set(room.code, machine);
       }

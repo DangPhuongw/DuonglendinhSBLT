@@ -12,6 +12,7 @@ import {
   QuestionSet,
 } from '@olympia/shared';
 import { RoomManager } from './game/RoomManager.js';
+import { toPublicPlayers } from './game/RoomStateMachine.js';
 import { SnapshotManager } from './game/SnapshotManager.js';
 import { parseExcelQuestionSet, generateExcelTemplate } from './game/questionParser.js';
 
@@ -68,7 +69,7 @@ const roomManager = RoomManager.getInstance();
 // Connect room state machine callbacks to socket.io room broadcasts
 roomManager.setCallbacksFactory((roomCode: string) => ({
   broadcastRoom: (room) => {
-    io.to(roomCode).emit('state:sync', room);
+    io.to(roomCode).emit('state:sync', { ...room, players: toPublicPlayers(room.players) });
   },
   broadcastPhaseChange: (data) => {
     io.to(roomCode).emit('phase:change', data);
@@ -93,7 +94,7 @@ roomManager.setCallbacksFactory((roomCode: string) => ({
     io.to(roomCode).emit('score:update', data);
   },
   broadcastPlayerUpdate: (players) => {
-    io.to(roomCode).emit('player:update', players);
+    io.to(roomCode).emit('player:update', toPublicPlayers(players));
   },
 }));
 
