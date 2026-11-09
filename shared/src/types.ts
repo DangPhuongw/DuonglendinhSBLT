@@ -25,6 +25,8 @@ export interface Player {
   mediaLoaded?: boolean;
   eliminatedVcnv: boolean;
   starUsed: boolean;
+  tabLeaveCount?: number;   // Số lần bị phát hiện rời tab trong trận
+  disqualified?: boolean;   // Bị loại khỏi trận vì vi phạm chống gian lận
   score: number;
   roundScores: {
     kd: number;
@@ -87,6 +89,18 @@ export interface ScoreEvent {
   playerId: string;
   delta: number;
   reason: ScoreReason | string;
+  at: number;
+}
+
+export type TabLeaveReason = 'hidden' | 'blur';
+
+export interface AntiCheatAlert {
+  playerId: string;
+  playerName: string;
+  count: number;           // Lần vi phạm thứ mấy
+  disqualified: boolean;   // true = đã bị loại
+  reason: TabLeaveReason;
+  round: RoundType;
   at: number;
 }
 
@@ -158,6 +172,7 @@ export interface ServerToClientEvents {
   'player:update': (players: Player[]) => void;
   'time:pong': (data: { clientSentAt: number; serverReceivedAt: number }) => void;
   'player:kicked': (data: { reason: string }) => void;
+  'anticheat:alert': (data: AntiCheatAlert) => void;
 }
 
 export interface ClientToServerEvents {
@@ -179,4 +194,5 @@ export interface ClientToServerEvents {
   'dev:jumpRound': (data: { targetRound: string }) => void;
   'dev:forceStartRound'?: () => void;
   'time:ping': (data: { clientSentAt: number }) => void;
+  'anticheat:leave': (data: { reason: TabLeaveReason }) => void;
 }

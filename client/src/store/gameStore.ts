@@ -7,6 +7,7 @@ import {
   ServerToClientEvents,
   RevealPayload,
   ScoreEvent,
+  AntiCheatAlert,
 } from '@olympia/shared';
 import { soundManager } from '../utils/soundEffects';
 
@@ -22,6 +23,7 @@ interface GameStore {
   lastReveal: RevealPayload | null;
   buzzWinner: { winnerId: string; winnerName: string; diffMs?: number } | null;
   buzzRejectedReason: string | null;
+  antiCheatAlert: (AntiCheatAlert & { receivedAt: number }) | null;
 
   initSocket: () => void;
   syncClock: () => void;
@@ -60,6 +62,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lastReveal: null,
   buzzWinner: null,
   buzzRejectedReason: null,
+  antiCheatAlert: null,
 
   initSocket: () => {
     if (get().socket) return;
@@ -190,6 +193,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
           room: { ...currentRoom, players: updatedPlayers },
         });
       }
+    });
+
+    socket.on('anticheat:alert', (data) => {
+      soundManager.playWrong();
+      set({ antiCheatAlert: { ...data, receivedAt: Date.now() } });
     });
 
     socket.on('player:kicked', (data) => {

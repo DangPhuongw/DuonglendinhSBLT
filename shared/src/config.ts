@@ -8,6 +8,14 @@ export const GAME_CONFIG = {
   HOST_OVERRIDE_WINDOW_SECONDS: 10,// Thời gian chủ phòng được sửa kết quả chấm sau REVEAL
   READY_COUNTDOWN_SECONDS: 3,      // Đếm ngược sau khi tất cả bấm Sẵn sàng
 
+  ANTI_CHEAT: {
+    ENABLED: true,                 // Bật/tắt cơ chế phát hiện rời tab
+    MAX_WARNINGS: 1,               // Số lần được cảnh cáo; vi phạm lần kế tiếp -> bị loại
+    DEDUPE_MS: 2000,               // Gộp các tín hiệu (blur + hidden) trong 2s thành 1 lần vi phạm
+    // Chỉ tính vi phạm trong các vòng đang thi (không tính ở Sảnh chờ / màn Sẵn sàng / Kết thúc)
+    ACTIVE_ROUNDS: ['KD_RIENG', 'KD_CHUNG', 'VCNV', 'TANG_TOC', 'VE_DICH', 'TIEBREAK'] as string[],
+  },
+
   KHOI_DONG: {
     RIENG_QUESTIONS_PER_PLAYER: 6,
     RIENG_TIME_SECONDS: 15,

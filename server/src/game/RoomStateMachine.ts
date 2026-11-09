@@ -9,6 +9,8 @@ import {
   ScoreEvent,
   RevealPayload,
   RevealResult,
+  AntiCheatAlert,
+  TabLeaveReason,
   GAME_CONFIG,
   matchAnswer,
   normalizeAnswer,
@@ -32,6 +34,7 @@ export interface StateMachineCallbacks {
   broadcastReveal: (data: RevealPayload) => void;
   broadcastScoreUpdate: (data: { scores: Record<string, number>; lastEvents: ScoreEvent[] }) => void;
   broadcastPlayerUpdate: (players: Player[]) => void;
+  broadcastAntiCheat?: (data: AntiCheatAlert) => void;
 }
 
 /** Bỏ token khỏi danh sách người chơi trước khi gửi cho cả phòng. */
@@ -45,6 +48,8 @@ export class RoomStateMachine {
   public questionSet: QuestionSet;
   private callbacks: StateMachineCallbacks;
   private activeTimer: NodeJS.Timeout | null = null;
+  private activeExpire: (() => Promise<void>) | null = null;
+  private lastTabLeaveAt: Map<string, number> = new Map();
 
   // Working state during rounds
   private answersMap: Map<string, { answer: string; timestamp: number }> = new Map();
@@ -167,6 +172,7 @@ export class RoomStateMachine {
     this.clearTimer();
     const now = Date.now();
     this.room.state.deadline = now + durationMs;
+    this.activeExpire = onExpire;
 
     this.activeTimer = setTimeout(() => {
       this.eventQueue.enqueue(async () => {
@@ -176,6 +182,13 @@ export class RoomStateMachine {
         }
       });
     }, durationMs);
+  }
+
+  /** Kết thúc ngay pha đang đếm giờ (chạy luôn hành động hết giờ của pha đó). */
+  private expireNow(): void {
+    if (this.activeExpire && this.room.state.deadline) {
+      this.setDeadline(0, this.activeExpire);
+    }
   }
 
   // --- Player Management ---
@@ -337,7 +350,7 @@ export class RoomStateMachine {
     // If in READY screen, check if all connected contestants (not viewers) are ready
     if (this.room.state.round === 'READY') {
       const connectedContestants = this.room.players.filter(
-        (p) => p.connected && p.role !== 'viewer'
+        (p) => p.connected && p.role !== 'viewer' && !p.disqualified
       );
       const allReady =
         connectedContestants.length > 0 && connectedContestants.every((p) => p.ready);
@@ -358,7 +371,7 @@ export class RoomStateMachine {
 
     if (this.room.state.round === 'READY') {
       const activeContestants = this.room.players.filter(
-        (p) => (p.connected || p.ready) && p.role !== 'viewer'
+        (p) => (p.connected || p.ready) && p.role !== 'viewer' && !p.disqualified
       );
       const allReady = activeContestants.length > 0 && activeContestants.every((p) => p.ready);
       if (allReady) {
@@ -392,6 +405,93 @@ export class RoomStateMachine {
     this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
     return true;
+  }
+
+  // --- Chống gian lận: rời tab ---
+
+  /**
+   * Thí sinh rời tab/cửa sổ trò chơi trong lúc thi.
+   * Lần 1..MAX_WARNINGS: cảnh cáo. Lần kế tiếp: loại khỏi trận.
+   */
+  public reportTabLeave(playerId: string, reason: TabLeaveReason): AntiCheatAlert | null {
+    const cfg = GAME_CONFIG.ANTI_CHEAT;
+    if (!cfg.ENABLED) return null;
+
+    const player = this.room.players.find((p) => p.id === playerId);
+    if (!player || player.role === 'viewer' || player.disqualified) return null;
+
+    const round = this.room.state.round;
+    if (!cfg.ACTIVE_ROUNDS.includes(round)) return null;
+
+    const now = Date.now();
+    const last = this.lastTabLeaveAt.get(playerId);
+    if (last && now - last < cfg.DEDUPE_MS) return null;
+    this.lastTabLeaveAt.set(playerId, now);
+
+    player.tabLeaveCount = (player.tabLeaveCount || 0) + 1;
+    const disqualified = player.tabLeaveCount > cfg.MAX_WARNINGS;
+
+    // Ghi biên bản (xuất hiện trong file CSV, không đổi điểm)
+    this.room.history.push({
+      id: `cheat-${now}-${Math.random().toString(36).substring(2, 6)}`,
+      round,
+      questionId: this.room.state.currentQuestion?.id || '',
+      playerId,
+      delta: 0,
+      reason: disqualified ? 'tab_leave_disqualified' : 'tab_leave_warning',
+      at: now,
+    });
+
+    const alert: AntiCheatAlert = {
+      playerId,
+      playerName: player.name,
+      count: player.tabLeaveCount,
+      disqualified,
+      reason: reason === 'hidden' ? 'hidden' : 'blur',
+      round,
+      at: now,
+    };
+    this.callbacks.broadcastAntiCheat?.(alert);
+
+    if (disqualified) {
+      this.disqualifyPlayer(player);
+    }
+
+    this.persistSnapshot();
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
+    this.syncRoom();
+    return alert;
+  }
+
+  private disqualifyPlayer(player: Player): void {
+    player.disqualified = true;
+    player.eliminatedVcnv = true;
+
+    const state = this.room.state;
+    const holdsTurn = state.activePlayerId === player.id || state.buzzerLockedBy === player.id;
+    if (!holdsTurn) return;
+
+    // VCNV: đang tới lượt chọn hàng (pha này không đếm giờ) -> chuyển quyền chọn cho người khác
+    if (state.round === 'VCNV' && state.subPhase === 'PICK_ROW') {
+      this.eventQueue.enqueue(async () => {
+        await this.promptVcnvPickRow(this.room.state.stepIndex || 0);
+      });
+      return;
+    }
+
+    // Đang giữ lượt trả lời / chọn gói -> kết thúc ngay như hết giờ (không để cả phòng chờ)
+    const fastForwardPhases = [
+      'CHOOSE_PACKAGE',
+      'STAR_DECISION',
+      'QUESTION',
+      'ANSWERING',
+      'CNV_ANSWERING',
+      'FINAL_GUESS_ANSWERING',
+      'STEAL_ANSWER',
+    ];
+    if (fastForwardPhases.includes(state.subPhase)) {
+      this.expireNow();
+    }
   }
 
   // --- Score Ledger ---
@@ -713,6 +813,10 @@ export class RoomStateMachine {
     }
 
     const currentPlayer = players[playerIndex];
+    if (currentPlayer.disqualified) {
+      await this.runKhoiDongRiengTurn(players, playerIndex + 1, 0);
+      return;
+    }
     const pkgIdx = this.chosenKdPackages.get(currentPlayer.id);
 
     // If player hasn't chosen package yet, prompt choice
@@ -742,7 +846,7 @@ export class RoomStateMachine {
     const playerQuestions = this.questionSet.khoiDong.rieng[pkgIdx] || this.questionSet.khoiDong.rieng[0] || [];
     const question = playerQuestions[questionIndex];
 
-    if (!question) {
+    if (!question || currentPlayer.disqualified) {
       await this.runKhoiDongRiengTurn(players, playerIndex + 1, 0);
       return;
     }
@@ -770,7 +874,7 @@ export class RoomStateMachine {
 
   public submitAnswer(playerId: string, questionId: string, answer: string): boolean {
     const player = this.room.players.find((p) => p.id === playerId);
-    if (!player || player.role === 'viewer') {
+    if (!player || player.role === 'viewer' || player.disqualified) {
       return false;
     }
 
@@ -1005,6 +1109,7 @@ export class RoomStateMachine {
       this.callbacks.broadcastBuzzRejected(null, { reason: 'Khán giả không thể bấm chuông.' });
       return false;
     }
+    if (player.disqualified) return false;
 
     const now = Date.now();
     const round = this.room.state.round;
@@ -1253,7 +1358,7 @@ export class RoomStateMachine {
 
     // Reset VCNV state
     for (const p of this.room.players) {
-      p.eliminatedVcnv = false;
+      p.eliminatedVcnv = Boolean(p.disqualified);
     }
 
     // Sort players by seat for turn order (contestants only)
@@ -1929,7 +2034,7 @@ export class RoomStateMachine {
 
     const activePlayer = this.room.players.find((p) => p.id === activePlayerId);
     // If contestant disconnected, immediately skip them to prevent game stall
-    if (!activePlayer || !activePlayer.connected) {
+    if (!activePlayer || !activePlayer.connected || activePlayer.disqualified) {
       this.veDichCompletedPlayerIds.add(activePlayerId);
       await this.runVeDichTurn(playerQueueIndex + 1);
       return;
@@ -2020,7 +2125,8 @@ export class RoomStateMachine {
     questionIdx: number,
     turnIndex: number
   ): Promise<void> {
-    if (questionIdx >= 3) {
+    const contestant = this.room.players.find((p) => p.id === playerId);
+    if (questionIdx >= 3 || !contestant || contestant.disqualified) {
       // Contestant has finished their 3 questions! Mark completed!
       this.veDichCompletedPlayerIds.add(playerId);
       await this.runVeDichTurn(turnIndex + 1);
@@ -2128,6 +2234,13 @@ export class RoomStateMachine {
     pointsList: number[],
     turnIndex: number
   ): Promise<void> {
+    const contestant = this.room.players.find((p) => p.id === playerId);
+    if (!contestant || contestant.disqualified) {
+      this.veDichCompletedPlayerIds.add(playerId);
+      await this.runVeDichTurn(turnIndex + 1);
+      return;
+    }
+
     this.answersMap.clear();
     this.buzzedPlayerId = null;
     const durationSec = GAME_CONFIG.VE_DICH.QUESTION_TIME_BY_POINTS[points] || 20;
@@ -2341,7 +2454,9 @@ export class RoomStateMachine {
 
   private async checkFinishOrTiebreak(): Promise<void> {
     // Sort players by score (contestants only)
-    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => b.score - a.score);
+    const sorted = [...this.room.players]
+      .filter((p) => p.role !== 'viewer' && !p.disqualified)
+      .sort((a, b) => b.score - a.score);
     if (sorted.length === 0) {
       await this.finishGame();
       return;
@@ -2454,7 +2569,9 @@ export class RoomStateMachine {
 
   private async finishGame(winnerId?: string): Promise<void> {
     this.room.status = 'FINISHED';
-    const sorted = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => b.score - a.score);
+    const sorted = [...this.room.players]
+      .filter((p) => p.role !== 'viewer' && !p.disqualified)
+      .sort((a, b) => b.score - a.score);
     const finalWinnerId = winnerId || (sorted[0] ? sorted[0].id : this.room.players[0]?.id);
 
     this.room.state = {

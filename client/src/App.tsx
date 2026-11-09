@@ -11,6 +11,7 @@ import { VeDichRound } from './components/VeDichRound';
 import { TieBreakRound } from './components/TieBreakRound';
 import { Podium } from './components/Podium';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AntiCheatGuard } from './components/AntiCheatGuard';
 import { GalaxyBackground } from './components/GalaxyBackground';
 import { bgmManager } from './utils/bgmManager';
 
@@ -86,6 +87,7 @@ export const App: React.FC = () => {
       <div className="h-screen h-[100dvh] max-h-screen w-full overflow-hidden text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative">
         <GalaxyBackground />
         <Navbar />
+        <AntiCheatGuard />
         <main className="flex-1 min-h-0 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1450px] mx-auto px-2 py-1 sm:px-4 sm:py-2 flex flex-col items-center justify-center overflow-hidden relative">
           {renderCurrentView()}
         </main>

@@ -96,6 +96,9 @@ roomManager.setCallbacksFactory((roomCode: string) => ({
   broadcastPlayerUpdate: (players) => {
     io.to(roomCode).emit('player:update', toPublicPlayers(players));
   },
+  broadcastAntiCheat: (data) => {
+    io.to(roomCode).emit('anticheat:alert', data);
+  },
 }));
 
 // Load snapshots on startup
@@ -531,6 +534,19 @@ io.on('connection', (socket) => {
     if (machine) {
       machine.forceStartReadyRound();
     }
+  });
+
+  // 13b. Chống gian lận: client báo đã rời tab / cửa sổ trò chơi
+  socket.on('anticheat:leave', (data) => {
+    if (checkEventSpam()) return;
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return;
+    const machine = roomManager.getRoom(info.roomCode);
+    if (!machine) return;
+    const reason = data?.reason === 'hidden' ? 'hidden' : 'blur';
+    machine.eventQueue.enqueue(async () => {
+      machine.reportTabLeave(info.playerId, reason);
+    });
   });
 
   // 14. Disconnect
