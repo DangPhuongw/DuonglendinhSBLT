@@ -236,9 +236,6 @@ export const TangTocRound: React.FC = () => {
                         <span className="font-bold text-[#F8FAFC] text-xs sm:text-sm md:text-base truncate max-w-[90px] sm:max-w-[140px]">
                           {p.name}
                         </span>
-                        <span className="text-[10px] sm:text-xs font-heading font-black px-1.5 py-0.5 rounded bg-[#090D18] border border-[#303D52] text-[#FFD43B] tabular-nums">
-                          G{p.seat}
-                        </span>
                       </div>
                       <div className="text-xs sm:text-sm mt-0.5">
                         {hasSubmitted ? (

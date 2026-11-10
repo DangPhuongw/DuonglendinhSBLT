@@ -155,7 +155,6 @@ export const Podium: React.FC = () => {
                   <td className="py-2 px-3">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-[#F8FAFC] text-xs sm:text-sm">{p.name}</span>
-                      <span className="text-[10px] sm:text-xs text-[#FFD43B] font-heading font-black px-1.5 py-0.5 rounded bg-[#090D18] border border-[#303D52] tabular-nums">G{p.seat}</span>
                       {p.disqualified && (
                         <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded bg-[#FF496C]/15 text-[#FF496C] border border-[#FF496C]/50">LOẠI · RỜI TAB</span>
                       )}

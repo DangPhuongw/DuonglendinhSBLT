@@ -246,7 +246,7 @@ export const Lobby: React.FC = () => {
             </span>
           ) : (
             <span className="bg-[#FFD43B]/15 text-[#FFD43B] border border-[#FFD43B]/40 px-3 py-1 rounded-full font-heading font-bold text-xs sm:text-sm shadow-glow-yellow">
-              🏆 Bạn: Ghế {myPlayer.seat} (Thí sinh)
+              🏆 Bạn: Thí sinh
             </span>
           )}
         </div>

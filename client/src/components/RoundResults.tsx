@@ -182,9 +182,11 @@ const ResultRow: React.FC<{
             </span>
           )}
         </div>
-        <span className="text-[11px] sm:text-xs font-heading font-bold uppercase tracking-wider text-[#64748B]">
-          {entry.disqualified ? 'Bị loại' : `Ghế ${entry.seat}`}
-        </span>
+        {entry.disqualified && (
+          <span className="text-[11px] sm:text-xs font-heading font-bold uppercase tracking-wider text-[#FF496C]/80">
+            Bị loại
+          </span>
+        )}
       </div>
 
       {/* Điểm vòng này */}
