@@ -1,4 +1,4 @@
-import { QuestionSet } from '@olympia/shared';
+import { GAME_CONFIG, QuestionDifficulty, QuestionSet } from '@olympia/shared';
 
 export const DEFAULT_QUESTION_SET: QuestionSet = {
   id: 'olympia-sample-01',
@@ -1068,3 +1068,25 @@ export const DEFAULT_QUESTION_SET: QuestionSet = {
     },
   ],
 };
+
+// Nhãn độ khó của bộ đề mặc định (bản nháp, có thể chỉnh trong kho Excel).
+// Khởi động riêng: 20 dễ / 10 trung bình; Khởi động chung: 5 dễ / 4 trung bình / 3 khó.
+const MEDIUM_RIENG = ['kd-r-1-3', 'kd-r-1-4', 'kd-r-2-3', 'kd-r-2-5', 'kd-r-3-3', 'kd-r-4-4', 'kd-r-4-5', 'kd-r-5-2', 'kd-r-5-5', 'kd-r-5-6'];
+const CHUNG_DIFFICULTY: Record<string, QuestionDifficulty> = {
+  'kd-c-1': 'easy', 'kd-c-2': 'easy', 'kd-c-8': 'easy', 'kd-c-11': 'easy', 'kd-c-12': 'easy',
+  'kd-c-4': 'medium', 'kd-c-5': 'medium', 'kd-c-7': 'medium', 'kd-c-9': 'medium',
+  'kd-c-3': 'hard', 'kd-c-6': 'hard', 'kd-c-10': 'hard',
+};
+for (const q of DEFAULT_QUESTION_SET.khoiDong.rieng.flat()) {
+  q.difficulty = MEDIUM_RIENG.includes(q.id) ? 'medium' : 'easy';
+}
+for (const q of DEFAULT_QUESTION_SET.khoiDong.chung) {
+  q.difficulty = CHUNG_DIFFICULTY[q.id];
+}
+for (const [points, pool] of [
+  [10, DEFAULT_QUESTION_SET.veDich.pool10],
+  [20, DEFAULT_QUESTION_SET.veDich.pool20],
+  [30, DEFAULT_QUESTION_SET.veDich.pool30],
+] as const) {
+  for (const q of pool) q.difficulty = GAME_CONFIG.VE_DICH.DIFFICULTY_BY_POINTS[points];
+}

@@ -37,6 +37,9 @@ export interface Player {
   };
 }
 
+/** Độ khó câu hỏi (Khởi động riêng, Khởi động chung, Về đích). */
+export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
+
 export interface Question {
   id: string;
   type: 'mcq' | 'text';
@@ -48,6 +51,7 @@ export interface Question {
   media?: string;                             // Đường dẫn file ảnh/video trong thư mục uploads
   timeLimit?: number;
   points?: 10 | 20 | 30;
+  difficulty?: QuestionDifficulty;            // Nhãn độ khó hiển thị cho người chơi
 }
 
 export type ClientQuestion = Omit<Question, 'answer' | 'alternatives'>;
@@ -57,7 +61,7 @@ export interface QuestionSet {
   title: string;
   khoiDong: {
     rieng: Question[][]; // [5 người][6 câu]
-    chung: Question[];   // [12 câu]
+    chung: Question[];   // 10 câu được dùng (4 dễ, 4 trung bình, 2 khó)
   };
   vcnv: {
     rows: Question[];    // 4 hàng ngang

@@ -17,6 +17,8 @@ import { SnapshotManager } from './game/SnapshotManager.js';
 import { parseExcelQuestionSet, generateExcelTemplate } from './game/questionParser.js';
 import { validateQuestionSet } from './game/questionValidator.js';
 import { csvCell } from './utils/csv.js';
+import { QuestionBankService, resolveBankDir } from './game/questionBankService.js';
+import { QuestionUsage, listQuestionIds } from './game/questionComposer.js';
 
 const app = express();
 app.set('trust proxy', 1); // Trust Render / Cloudflare reverse proxy headers
@@ -103,8 +105,16 @@ roomManager.setCallbacksFactory((roomCode: string) => ({
   },
 }));
 
-// Load snapshots on startup
+// Kho câu hỏi: mỗi trận ghép đề ngẫu nhiên từ các file Excel trong thư mục question-bank
 SnapshotManager.init();
+const questionBank = new QuestionBankService(
+  resolveBankDir(),
+  new QuestionUsage(SnapshotManager.questionUsageFile())
+);
+questionBank.refresh(true);
+roomManager.setQuestionBank(questionBank);
+
+// Load snapshots on startup
 roomManager.loadSavedSnapshots();
 
 // Health check endpoint for Render
@@ -205,7 +215,7 @@ app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, re
     }
     const questionSet = validation.questionSet;
 
-    machine.setQuestionSet(questionSet);
+    machine.setQuestionSet(questionSet, 'custom');
     console.log(`[Room ${machine.room.code}] Updated custom question set: ${questionSet.title}`);
 
     res.json({ ok: true, questionSet, roomUpdated: true });
@@ -241,7 +251,13 @@ app.get('/api/room/:code/export-csv', (req, res) => {
       ev.reason,
     ]);
   }
-  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n') + '\n';
+  let csv = rows.map((r) => r.map(csvCell).join(',')).join('\n') + '\n';
+
+  // Phần cuối biên bản: các câu hỏi đã dùng trong trận (để đối chiếu với kho câu hỏi)
+  csv += '\n' + ['BoDe', 'VongThi', 'MaCauHoi'].map(csvCell).join(',') + '\n';
+  for (const q of listQuestionIds(machine.questionSet)) {
+    csv += [machine.questionSet.id, q.round, q.id].map(csvCell).join(',') + '\n';
+  }
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="bien-ban-tran-dau-${code}.csv"`);

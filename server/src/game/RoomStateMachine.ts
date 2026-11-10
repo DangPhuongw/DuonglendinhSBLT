@@ -19,6 +19,7 @@ import {
 import { EventQueue } from './EventQueue.js';
 import { SnapshotManager } from './SnapshotManager.js';
 import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
+import type { ComposeResult } from './questionComposer.js';
 
 export interface StateMachineCallbacks {
   broadcastRoom: (room: Room) => void;
@@ -63,6 +64,10 @@ export class RoomStateMachine {
   /** VCNV: thời gian còn lại của 15s đoán cuối khi có người bấm chuông (để chạy tiếp, không đếm lại từ đầu). */
   private vcnvFinalGuessRemainingMs: number | null = null;
   private lastTabLeaveAt: Map<string, number> = new Map();
+  /** true nếu chủ phòng tự tải bộ đề lên: khi bắt đầu trận sẽ giữ nguyên, không ghép đề ngẫu nhiên từ kho. */
+  public customQuestionSet = false;
+  /** Hàm ghép đề ngẫu nhiên từ kho câu hỏi (do RoomManager gắn vào). */
+  private questionComposer: (() => ComposeResult) | null = null;
   private hostTransferTimer: NodeJS.Timeout | null = null;
 
   // Working state during rounds
@@ -99,6 +104,7 @@ export class RoomStateMachine {
     this.eventQueue = new EventQueue();
     this.callbacks = callbacks;
     this.questionSet = initialQuestionSet || DEFAULT_QUESTION_SET;
+    this.customQuestionSet = Boolean(initialQuestionSet);
 
     const host: Player = {
       id: hostPlayer.id,
@@ -141,8 +147,9 @@ export class RoomStateMachine {
   }
 
   /** Đổi bộ đề của phòng và lưu ra đĩa (để khởi động lại server không bị mất bộ đề). */
-  public setQuestionSet(questionSet: QuestionSet): void {
+  public setQuestionSet(questionSet: QuestionSet, source: 'custom' | 'bank' = 'custom'): void {
     this.questionSet = questionSet;
+    this.customQuestionSet = source === 'custom';
     this.room.questionSetId = questionSet.id;
     SnapshotManager.saveQuestionSet(this.room.code, questionSet);
     this.persistSnapshot();
@@ -870,9 +877,29 @@ export class RoomStateMachine {
 
   // --- Flow & Transitions ---
 
+  public setQuestionComposer(composer: (() => ComposeResult) | null): void {
+    this.questionComposer = composer;
+  }
+
+  /** Ghép đề ngẫu nhiên từ kho (nếu chủ phòng không tự tải bộ đề). Lỗi kho thì dùng bộ đề mặc định. */
+  private prepareQuestionSet(): void {
+    if (this.customQuestionSet || !this.questionComposer) return;
+    const result = this.questionComposer();
+    if (result.ok) {
+      this.setQuestionSet(result.questionSet, 'bank');
+      console.log(`[Room ${this.room.code}] Đã ghép bộ đề ngẫu nhiên ${result.questionSet.id}.`);
+    } else {
+      console.error(`[Room ${this.room.code}] Không ghép được đề từ kho, dùng bộ đề mặc định. ${result.error}`);
+    }
+  }
+
   public startGame(hostId: string): { ok: boolean; error?: string } {
     if (this.room.hostId !== hostId) {
       return { ok: false, error: 'Chỉ chủ phòng mới có quyền bắt đầu.' };
+    }
+    // Chỉ bắt đầu từ Sảnh chờ: bấm lại giữa trận sẽ làm đổi cả bộ đề đang chơi
+    if (this.room.status !== 'LOBBY') {
+      return { ok: false, error: 'Trận đấu đã bắt đầu.' };
     }
 
     const connectedContestants = this.room.players.filter(
@@ -882,6 +909,7 @@ export class RoomStateMachine {
       return { ok: false, error: `Cần tối thiểu ${GAME_CONFIG.MIN_PLAYERS_FOR_TEST} thí sinh để bắt đầu.` };
     }
 
+    this.prepareQuestionSet();
     this.transitionToReady('KD_RIENG');
     return { ok: true };
   }

@@ -264,9 +264,9 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     expect(machine.room.state.openedPieces).toBeUndefined();
   });
 
-  it('configures KD_CHUNG with 15 seconds to buzz and 3 seconds to answer, with 6 KD_RIENG and 12 KD_CHUNG questions', async () => {
+  it('configures KD_CHUNG with 15 seconds to buzz and 3 seconds to answer, with 6 KD_RIENG and 10 KD_CHUNG questions', async () => {
     expect(GAME_CONFIG.KHOI_DONG.RIENG_QUESTIONS_PER_PLAYER).toBe(6);
-    expect(GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS).toBe(12);
+    expect(GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS).toBe(10);
     expect(GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS).toBe(15);
     expect(GAME_CONFIG.KHOI_DONG.CHUNG_ANSWER_SECONDS).toBe(3);
 
@@ -284,7 +284,8 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     qSet.khoiDong.rieng.forEach((box: any[]) => {
       expect(box).toHaveLength(6);
     });
-    expect(qSet.khoiDong.chung).toHaveLength(12);
+    // Bộ đề mặc định có 12 câu, trận chỉ dùng 10 câu đầu
+    expect(qSet.khoiDong.chung.length).toBeGreaterThanOrEqual(GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS);
 
     // Start KD_CHUNG question
     machine.room.status = 'KD_CHUNG';

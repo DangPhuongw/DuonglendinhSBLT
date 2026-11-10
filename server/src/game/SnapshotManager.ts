@@ -13,6 +13,11 @@ export class SnapshotManager {
     }
   }
 
+  /** File lịch sử câu hỏi đã dùng (tên bắt đầu bằng _ để không bị đọc nhầm thành snapshot phòng). */
+  public static questionUsageFile(): string {
+    return path.join(this.snapshotDir, '_question-usage.json');
+  }
+
   public static saveRoom(room: Room): void {
     try {
       this.init();
@@ -30,7 +35,7 @@ export class SnapshotManager {
       this.init();
       const files = fs
         .readdirSync(this.snapshotDir)
-        .filter((f) => f.endsWith('.json') && !f.endsWith(QUESTIONS_SUFFIX));
+        .filter((f) => f.endsWith('.json') && !f.endsWith(QUESTIONS_SUFFIX) && !f.startsWith('_'));
       const rooms: Room[] = [];
       for (const file of files) {
         try {

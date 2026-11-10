@@ -1,5 +1,10 @@
 import xlsx from 'xlsx';
-import { Question, QuestionSet } from '@olympia/shared';
+import { GAME_CONFIG, Question, QuestionSet } from '@olympia/shared';
+import { parseDifficulty } from './questionBank.js';
+
+/** Cột độ khó (tùy chọn) của file đề tải lên: Dễ / Trung bình / Khó. */
+const readDifficulty = (row: any) =>
+  parseDifficulty(String(row.Difficulty ?? row.difficulty ?? row['Độ khó'] ?? row['Do kho'] ?? '')) || undefined;
 
 export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đề tải lên'): QuestionSet {
   const workbook = xlsx.read(buffer, { type: 'buffer' });
@@ -31,9 +36,10 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
         String(row.OptionD || row.D || ''),
       ],
       answer: String(row.Answer || row.answer || '').trim().toUpperCase(),
+      difficulty: readDifficulty(row),
       alternatives,
     };
-    if (kdRieng[seatIdx].length < 5) {
+    if (kdRieng[seatIdx].length < 6) {
       kdRieng[seatIdx].push(q);
     }
   }
@@ -55,6 +61,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
         String(row.OptionD || row.D || ''),
       ],
       answer: String(row.Answer || row.answer || '').trim().toUpperCase(),
+      difficulty: readDifficulty(row),
       alternatives,
     });
   }
@@ -152,6 +159,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       answer: String(row.Answer || row.answer || '').trim(),
       alternatives,
       points: points as any,
+      difficulty: GAME_CONFIG.VE_DICH.DIFFICULTY_BY_POINTS[points],
       timeLimit: 20,
       ignoreDiacritics: true,
     };
@@ -216,15 +224,17 @@ export function generateExcelTemplate(): Buffer {
         OptionD: 'Phương án D',
         Answer: 'A',
         Alternatives: 'PHƯƠNG ÁN A; ĐÁP ÁN A; A',
+        Difficulty: order <= GAME_CONFIG.KHOI_DONG.RIENG_DIFFICULTY.easy ? 'Dễ' : 'Trung bình',
       });
     }
   }
   const wsRieng = xlsx.utils.json_to_sheet(kdRiengRows);
   xlsx.utils.book_append_sheet(wb, wsRieng, 'KhoiDong_Rieng');
 
-  // 2. KhoiDong_Chung (12 câu hỏi mẫu trắc nghiệm cho cả 4 thí sinh cùng bấm chuông)
+  // 2. KhoiDong_Chung (10 câu hỏi mẫu trắc nghiệm: 4 dễ, 4 trung bình, 2 khó)
   const kdChungRows: any[] = [];
-  for (let idx = 1; idx <= 12; idx++) {
+  const chungCfg = GAME_CONFIG.KHOI_DONG.CHUNG_DIFFICULTY;
+  for (let idx = 1; idx <= GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS; idx++) {
     kdChungRows.push({
       Order: idx,
       Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Khởi động chung số ${idx}?`,
@@ -234,6 +244,7 @@ export function generateExcelTemplate(): Buffer {
       OptionD: 'Lựa chọn D',
       Answer: 'A',
       Alternatives: 'LỰA CHỌN A; ĐÁP ÁN A; A',
+      Difficulty: idx <= chungCfg.easy ? 'Dễ' : idx <= chungCfg.easy + chungCfg.medium ? 'Trung bình' : 'Khó',
     });
   }
   const wsChung = xlsx.utils.json_to_sheet(kdChungRows);

@@ -1,3 +1,9 @@
+export const DIFFICULTY_LABELS: Record<'easy' | 'medium' | 'hard', string> = {
+  easy: 'Dễ',
+  medium: 'Trung bình',
+  hard: 'Khó',
+};
+
 export const GAME_CONFIG = {
   MAX_PLAYERS: 5,                  // Tối đa 5 thí sinh
   MAX_VIEWERS: 5,                  // Tối đa 5 người theo dõi / khán giả
@@ -30,10 +36,14 @@ export const GAME_CONFIG = {
 
   KHOI_DONG: {
     RIENG_QUESTIONS_PER_PLAYER: 6,
+    // Mỗi ô Khởi động riêng: 4 câu dễ + 2 câu trung bình (thứ tự trộn lẫn) (tổng = RIENG_QUESTIONS_PER_PLAYER)
+    RIENG_DIFFICULTY: { easy: 4, medium: 2, hard: 0 },
     RIENG_TIME_SECONDS: 15,
     RIENG_CORRECT_POINTS: 10,
     RIENG_WRONG_POINTS: 0,
-    CHUNG_QUESTIONS: 12,
+    CHUNG_QUESTIONS: 10,
+    // Khởi động chung: 4 dễ, 4 trung bình, 2 khó (thứ tự trộn lẫn) (tổng = CHUNG_QUESTIONS)
+    CHUNG_DIFFICULTY: { easy: 4, medium: 4, hard: 2 },
     CHUNG_BUZZ_SECONDS: 15,
     CHUNG_ANSWER_SECONDS: 3,
     CHUNG_CORRECT_POINTS: 10,
@@ -68,6 +78,8 @@ export const GAME_CONFIG = {
       60: [10, 20, 30],
       80: [20, 30, 30],
     },
+    // Độ khó theo mức điểm: 10 điểm = dễ, 20 điểm = trung bình, 30 điểm = khó
+    DIFFICULTY_BY_POINTS: { 10: 'easy', 20: 'medium', 30: 'hard' } as Record<number, 'easy' | 'medium' | 'hard'>,
     STAR_DECISION_SECONDS: 7,
     QUESTION_TIME_BY_POINTS: {
       10: 20,

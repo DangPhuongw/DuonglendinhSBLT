@@ -1,12 +1,14 @@
 import { RoomStateMachine, StateMachineCallbacks } from './RoomStateMachine.js';
 import { SnapshotManager } from './SnapshotManager.js';
 import { GAME_CONFIG, QuestionSet } from '@olympia/shared';
+import type { QuestionBankService } from './questionBankService.js';
 
 export class RoomManager {
   private static instance: RoomManager;
   private rooms: Map<string, RoomStateMachine> = new Map();
   private socketToPlayer: Map<string, { roomCode: string; playerId: string }> = new Map();
   private defaultCallbacksFactory: (roomCode: string) => StateMachineCallbacks = () => ({} as any);
+  private questionBank: QuestionBankService | null = null;
 
   private constructor() {
     this.startCleanupInterval();
@@ -17,6 +19,16 @@ export class RoomManager {
       RoomManager.instance = new RoomManager();
     }
     return RoomManager.instance;
+  }
+
+  /** Gắn kho câu hỏi: mỗi phòng mới sẽ ghép đề ngẫu nhiên từ kho khi bắt đầu trận. */
+  public setQuestionBank(service: QuestionBankService | null): void {
+    this.questionBank = service;
+  }
+
+  private attachComposer(machine: RoomStateMachine): void {
+    const bank = this.questionBank;
+    machine.setQuestionComposer(bank ? () => bank.compose() : null);
   }
 
   public setCallbacksFactory(factory: (roomCode: string) => StateMachineCallbacks): void {
@@ -51,6 +63,7 @@ export class RoomManager {
       customQuestionSet
     );
 
+    this.attachComposer(machine);
     this.rooms.set(roomCode, machine);
     return { roomCode, machine, playerId };
   }
@@ -115,7 +128,10 @@ export class RoomManager {
           callbacks,
           savedQuestionSet
         );
+        // Phòng còn ở Sảnh chờ mà đã có bộ đề lưu riêng = bộ đề do chủ phòng tải lên -> giữ nguyên
+        machine.customQuestionSet = Boolean(savedQuestionSet) && room.status === 'LOBBY';
         machine.restoreFromSnapshot(room);
+        this.attachComposer(machine);
         this.rooms.set(room.code, machine);
       }
     }

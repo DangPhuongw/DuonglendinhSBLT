@@ -43,6 +43,7 @@ export function validateQuestionSet(input: unknown): QuestionSetValidation {
       ...(q as Question),
       type: q.type === 'mcq' || q.type === 'text' ? q.type : hasOptions ? 'mcq' : 'text',
       options: hasOptions ? (q.options.map((o: unknown) => String(o ?? '')) as Question['options']) : undefined,
+      difficulty: ['easy', 'medium', 'hard'].includes(q.difficulty) ? q.difficulty : undefined,
       alternatives: Array.isArray(q.alternatives)
         ? q.alternatives.filter((a: unknown): a is string => typeof a === 'string')
         : [],

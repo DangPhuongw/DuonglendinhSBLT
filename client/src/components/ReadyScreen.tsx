@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
+import { GAME_CONFIG } from '@olympia/shared';
 import {
   CheckCircle2,
   AlertCircle,
@@ -122,7 +123,7 @@ export const ReadyScreen: React.FC = () => {
               <div className="space-y-1.5 text-left text-xs sm:text-sm lg:text-base font-medium text-[#94A3B8] mt-2">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#00D9FF] shrink-0" />
-                  <span>12 câu hỏi chung cho tất cả</span>
+                  <span>{GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS} câu hỏi chung cho tất cả</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#20D6A0] shrink-0" />

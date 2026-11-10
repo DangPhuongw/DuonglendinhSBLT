@@ -6,7 +6,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bank:export": "tsx scripts/exportBank.ts",
+    "bank:check": "tsx scripts/checkBank.ts"
   },
   "dependencies": {
     "@olympia/shared": "*",

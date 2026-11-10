@@ -4,6 +4,7 @@ import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
 import { Bell, Sparkles, Lock, Eye } from 'lucide-react';
+import { GAME_CONFIG } from '@olympia/shared';
 
 export const KhoiDongRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -260,8 +261,8 @@ export const KhoiDongRound: React.FC = () => {
       <div className="w-full flex items-center justify-between mb-2.5 px-1 gap-2 flex-wrap">
         <span className="text-xs sm:text-sm lg:text-base font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1.5 rounded-xl border border-[#FFD43B]/40 shadow-glow-yellow">
           {currentRound === 'KD_RIENG'
-            ? `KHỞI ĐỘNG RIÊNG - LƯỢT CỦA ${activePlayer?.name?.toUpperCase() || 'THÍ SINH'} - ${(room.state.questionIndex ?? 0) + 1}/6 CÂU`
-            : 'KHỞI ĐỘNG CHUNG - GIÀNH CHUÔNG (12 CÂU)'}
+            ? `KHỞI ĐỘNG RIÊNG - LƯỢT CỦA ${activePlayer?.name?.toUpperCase() || 'THÍ SINH'} - ${(room.state.questionIndex ?? 0) + 1}/${GAME_CONFIG.KHOI_DONG.RIENG_QUESTIONS_PER_PLAYER} CÂU`
+            : `KHỞI ĐỘNG CHUNG - GIÀNH CHUÔNG - CÂU ${(room.state.questionIndex ?? 0) + 1}/${GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS}`}
         </span>
         <span className="text-xs sm:text-sm text-[#94A3B8] font-bold bg-[#1C2638] border border-[#303D52] px-3.5 py-1.5 rounded-xl tabular-nums">
           {currentRound === 'KD_RIENG' ? 'Đúng +10đ | Sai 0đ' : 'Đúng +10đ | Sai -5đ'}

@@ -16,7 +16,11 @@ describe('generateExcelTemplate & questionParser', () => {
     const parsed = parseExcelQuestionSet(buffer, 'Sample Test Template');
     expect(parsed.title).toBe('Sample Test Template');
     expect(parsed.khoiDong.rieng.length).toBe(5);
-    expect(parsed.khoiDong.chung.length).toBe(12);
+    expect(parsed.khoiDong.chung.length).toBe(10);
+    // File mẫu có cột độ khó: ô riêng 4 dễ + 2 trung bình, chung 4 / 4 / 2
+    expect(parsed.khoiDong.rieng[0].map((q) => q.difficulty)).toEqual(['easy', 'easy', 'easy', 'easy', 'medium', 'medium']);
+    expect(parsed.khoiDong.chung.map((q) => q.difficulty).join(',')).toBe('easy,easy,easy,easy,medium,medium,medium,medium,hard,hard');
+    expect(parsed.veDich.pool30[0].difficulty).toBe('hard');
     expect(parsed.vcnv.rows.length).toBe(4);
     expect(parsed.vcnv.obstacle.answer).toBe('TỪ KHÓA CHÍNH');
     expect(parsed.tangToc.length).toBe(4);

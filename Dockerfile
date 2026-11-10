@@ -41,6 +41,7 @@ RUN npm install --omit=dev
 COPY --from=builder /app/shared/dist ./shared/dist
 COPY --from=builder /app/client/dist ./client/dist
 COPY --from=builder /app/server/dist ./server/dist
+COPY --from=builder /app/server/question-bank ./server/question-bank
 
 EXPOSE 4000
 
