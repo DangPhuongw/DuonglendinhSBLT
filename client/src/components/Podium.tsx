@@ -8,6 +8,13 @@ export const Podium: React.FC = () => {
   const room = useGameStore((s) => s.room);
 
   useEffect(() => {
+    // Không có quán quân (tất cả bị loại) thì không ăn mừng
+    const current = useGameStore.getState().room;
+    const hasChampion = Boolean(
+      current?.players.some((p) => p.id === current.state.winnerId && !p.disqualified)
+    );
+    if (!hasChampion) return;
+
     soundManager.playFanfare();
 
     // Trigger confetti with Neo-Brutalism vibrant palette
@@ -39,12 +46,20 @@ export const Podium: React.FC = () => {
 
   if (!room) return null;
 
-  // Sort contestants by total score (viewers excluded)
+  // Quán quân do server quyết định (có thể thắng nhờ câu hỏi phụ / bốc thăm / là người duy nhất còn lại)
+  const winnerId: string | undefined = room.state.winnerId;
+  const finishReason: string | undefined = room.state.finishReason;
+  const champ = room.players.find((p) => p.id === winnerId && !p.disqualified);
+
+  // Quán quân đứng đầu; còn lại theo điểm, thí sinh bị loại (chống gian lận) luôn xếp cuối
   const sorted = [...room.players]
     .filter((p) => (p.role || 'player') === 'player')
-    // Thí sinh bị loại (chống gian lận) luôn xếp cuối, không được tính vô địch
-    .sort((a, b) => Number(Boolean(a.disqualified)) - Number(Boolean(b.disqualified)) || b.score - a.score);
-  const champ = sorted[0];
+    .sort(
+      (a, b) =>
+        Number(b.id === champ?.id) - Number(a.id === champ?.id) ||
+        Number(Boolean(a.disqualified)) - Number(Boolean(b.disqualified)) ||
+        b.score - a.score
+    );
 
   return (
     <div className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-center h-full max-h-full py-1.5 px-3 overflow-hidden">
@@ -57,6 +72,25 @@ export const Podium: React.FC = () => {
           BỤC VINH QUANG OLYMPIA
         </h1>
       </div>
+
+      {/* Kết thúc sớm do chống gian lận */}
+      {finishReason === 'LAST_STANDING' && champ && (
+        <div className="w-full max-w-lg mb-2.5 px-4 py-2 rounded-xl bg-[#FF496C]/10 border border-[#FF496C]/40 text-center text-xs sm:text-sm font-bold text-[#FFB4C2]">
+          Trận đấu kết thúc sớm: các thí sinh còn lại đã bị loại vì rời tab. {champ.name} là người duy nhất còn thi.
+        </div>
+      )}
+      {!champ && (
+        <div className="w-full max-w-lg bg-[#1A0D14] border-2 border-[#FF496C]/60 rounded-3xl p-5 sm:p-6 mb-3 text-center flex flex-col items-center">
+          <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#FF496C]/15 px-3.5 py-1 rounded-full border border-[#FF496C]/50 text-[#FF496C] mb-2">
+            KHÔNG CÓ QUÁN QUÂN
+          </span>
+          <p className="text-sm sm:text-base text-[#F8FAFC] font-bold">
+            {finishReason === 'ALL_DISQUALIFIED'
+              ? 'Tất cả thí sinh đã bị loại vì rời tab trong lúc thi.'
+              : 'Không còn thí sinh hợp lệ để trao giải.'}
+          </p>
+        </div>
+      )}
 
       {/* Champion Laurel Box */}
       {champ && (
@@ -98,14 +132,16 @@ export const Podium: React.FC = () => {
                 <tr
                   key={p.id}
                   className={`transition-colors ${
-                    idx === 0 ? 'bg-[#FFD43B]/10 font-bold' : 'hover:bg-[#1C2638]/50'
+                    p.id === champ?.id ? 'bg-[#FFD43B]/10 font-bold' : 'hover:bg-[#1C2638]/50'
                   }`}
                 >
                   <td className="py-2 px-3">
                     <span
                       className={`inline-flex items-center justify-center w-6 h-6 rounded-lg font-heading font-black text-xs ${
-                        idx === 0
+                        p.id === champ?.id
                           ? 'bg-[#FFD43B] text-[#090D18] shadow-glow-yellow'
+                          : p.disqualified
+                          ? 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
                           : idx === 1
                           ? 'bg-[#00D9FF] text-[#090D18]'
                           : idx === 2

@@ -628,13 +628,56 @@ export class RoomStateMachine {
     this.callbacks.broadcastAntiCheat?.(alert);
 
     if (disqualified) {
-      this.disqualifyPlayer(player);
+      // Còn tối đa 1 người thi (hoặc 1 người trong câu hỏi phụ) thì kết thúc trận luôn, không chơi tiếp
+      const early = this.getEarlyFinishOutcome(player.id);
+      if (early) {
+        player.disqualified = true;
+        player.eliminatedVcnv = true;
+        this.clearTimer();
+        this.eventQueue.enqueue(async () => {
+          await this.finishGame(early.winnerId, early.reason);
+        });
+      } else {
+        this.disqualifyPlayer(player);
+      }
     }
 
     this.persistSnapshot();
     this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
     this.syncRoom();
     return alert;
+  }
+
+  /**
+   * Trận có phải kết thúc sớm không nếu thêm `newlyDisqualifiedId` bị loại.
+   * - Không còn ai: kết thúc, không có người thắng.
+   * - Còn đúng 1 người: người đó thắng luôn.
+   * - Đang câu hỏi phụ mà chỉ còn 1 (hoặc 0) người trong nhóm bằng điểm: tương tự.
+   */
+  private getEarlyFinishOutcome(
+    newlyDisqualifiedId: string
+  ): { winnerId?: string; reason?: 'LAST_STANDING' | 'ALL_DISQUALIFIED' } | null {
+    const stillIn = (id: string) => {
+      const p = this.room.players.find((pl) => pl.id === id);
+      return Boolean(p && (p.role || 'player') === 'player' && !p.disqualified && p.id !== newlyDisqualifiedId);
+    };
+
+    const remaining = this.room.players.filter((p) => stillIn(p.id)).map((p) => p.id);
+    if (remaining.length === 0) return { reason: 'ALL_DISQUALIFIED' };
+    if (remaining.length === 1) return { winnerId: remaining[0], reason: 'LAST_STANDING' };
+
+    if (this.room.state.round === 'TIEBREAK') {
+      const tied: string[] = (this.room.state.eligiblePlayerIds || []).filter(stillIn);
+      if (tied.length === 1) return { winnerId: tied[0], reason: 'LAST_STANDING' };
+      if (tied.length === 0) {
+        // Cả nhóm bằng điểm bị loại -> người điểm cao nhất trong số còn lại thắng
+        const best = this.room.players
+          .filter((p) => remaining.includes(p.id))
+          .sort((a, b) => b.score - a.score || a.seat - b.seat)[0];
+        return { winnerId: best.id };
+      }
+    }
+    return null;
   }
 
   private disqualifyPlayer(player: Player): void {
@@ -2922,17 +2965,25 @@ export class RoomStateMachine {
     });
   }
 
-  private async finishGame(winnerId?: string): Promise<void> {
+  private async finishGame(
+    winnerId?: string,
+    finishReason?: 'LAST_STANDING' | 'ALL_DISQUALIFIED'
+  ): Promise<void> {
+    this.clearTimer();
+    this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
     this.room.status = 'FINISHED';
     const sorted = [...this.room.players]
       .filter((p) => p.role !== 'viewer' && !p.disqualified)
       .sort((a, b) => b.score - a.score);
-    const finalWinnerId = winnerId || (sorted[0] ? sorted[0].id : this.room.players[0]?.id);
+    // Không còn thí sinh hợp lệ nào thì không có người thắng (không lấy người bị loại làm quán quân)
+    const finalWinnerId = winnerId || sorted[0]?.id;
 
     this.room.state = {
       round: 'FINISHED',
       subPhase: 'PODIUM',
       winnerId: finalWinnerId,
+      finishReason,
       deadline: null,
     };
 
