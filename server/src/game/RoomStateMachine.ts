@@ -11,6 +11,7 @@ import {
   RevealResult,
   AntiCheatAlert,
   TabLeaveReason,
+  RoundResultEntry,
   GAME_CONFIG,
   matchAnswer,
   normalizeAnswer,
@@ -173,6 +174,9 @@ export class RoomStateMachine {
 
     if (round === 'READY') {
       this.transitionToReady(room.state.targetRound || 'KD_RIENG');
+    } else if (round === 'ROUND_RESULTS') {
+      const next = room.state.roundResults?.nextRound;
+      this.transitionToReady(!next || next === 'FINAL' ? 'TIEBREAK' : next);
     } else if (round && restartTarget[round]) {
       const target = restartTarget[round]!;
       this.rollbackRoundScores(target);
@@ -863,6 +867,84 @@ export class RoomStateMachine {
     this.syncRoom();
   }
 
+  /**
+   * Màn công bố điểm sau mỗi vòng: tên thí sinh lần lượt bay vào từ điểm thấp tới cao, giữ một lúc rồi
+   * mờ dần. Server giữ nhịp (deadline) để mọi máy chuyển màn cùng lúc; client tự chạy hiệu ứng theo startedAt.
+   */
+  private showRoundResults(finishedRound: RoundType, next: RoundType | 'FINAL'): void {
+    this.clearTimer();
+    this.buzzedPlayerId = null;
+    this.pendingCnvBuzzerId = null;
+    this.answersMap.clear();
+
+    const roundKey: Partial<Record<RoundType, keyof Player['roundScores']>> = {
+      KD_RIENG: 'kd',
+      KD_CHUNG: 'kd',
+      VCNV: 'vcnv',
+      TANG_TOC: 'tt',
+      VE_DICH: 'vd',
+    };
+    const key = roundKey[finishedRound];
+    const contestants = this.room.players.filter((p) => (p.role || 'player') === 'player');
+
+    // Hạng tính trên thí sinh còn thi (bị loại xếp cuối); bằng điểm thì cùng hạng
+    const ranked = contestants
+      .filter((p) => !p.disqualified)
+      .map((p) => p.score)
+      .sort((a, b) => b - a);
+    const rankOf = (p: Player) =>
+      p.disqualified ? ranked.length + 1 : ranked.indexOf(p.score) + 1;
+
+    const entries: RoundResultEntry[] = contestants
+      .map((p) => ({
+        playerId: p.id,
+        name: p.name,
+        seat: p.seat,
+        score: p.score,
+        roundScore: key ? p.roundScores[key] : 0,
+        rank: rankOf(p),
+        disqualified: Boolean(p.disqualified),
+      }))
+      // Thứ tự xuất hiện: bị loại trước, rồi điểm thấp -> cao; bằng điểm thì ghế nhỏ xuất hiện sau (đứng trên)
+      .sort(
+        (a, b) =>
+          Number(b.disqualified) - Number(a.disqualified) || a.score - b.score || b.seat - a.seat
+      );
+
+    const cfg = GAME_CONFIG.ROUND_RESULTS;
+    const durationMs =
+      cfg.START_DELAY_MS +
+      Math.max(0, entries.length - 1) * cfg.STAGGER_MS +
+      cfg.ENTRY_MS +
+      cfg.HOLD_MS +
+      cfg.FADE_MS;
+
+    this.room.status = 'ROUND_RESULTS';
+    this.room.state = {
+      round: 'ROUND_RESULTS',
+      subPhase: 'REVEALING',
+      deadline: null,
+      buzzerLockedBy: null,
+      roundResults: {
+        finishedRound,
+        nextRound: next,
+        startedAt: Date.now(),
+        entries,
+      },
+    };
+
+    this.setDeadline(durationMs, async () => {
+      if (next === 'FINAL') {
+        await this.checkFinishOrTiebreak();
+      } else {
+        this.transitionToReady(next);
+      }
+    });
+
+    this.persistSnapshot();
+    this.syncRoom();
+  }
+
   private startReadyCountdown(): void {
     this.room.state.subPhase = 'COUNTDOWN';
     const countdownSec = GAME_CONFIG.READY_COUNTDOWN_SECONDS;
@@ -1278,8 +1360,8 @@ export class RoomStateMachine {
   private async runKdChungQuestion(questionIndex: number): Promise<void> {
     const questions = this.questionSet.khoiDong.chung;
     if (questionIndex >= GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS || questionIndex >= questions.length) {
-      // Done Khởi động -> Transition to VCNV
-      this.transitionToReady('VCNV');
+      // Done Khởi động -> công bố điểm -> VCNV
+      this.showRoundResults('KD_CHUNG', 'VCNV');
       return;
     }
 
@@ -1657,7 +1739,7 @@ export class RoomStateMachine {
 
     if (activeQueue.length === 0) {
       // No active players left -> transition to Tăng Tốc
-      this.transitionToReady('TANG_TOC');
+      this.showRoundResults('VCNV', 'TANG_TOC');
       return;
     }
 
@@ -1906,7 +1988,7 @@ export class RoomStateMachine {
 
       // Proceed to Tăng Tốc
       this.setDeadline(5000, async () => {
-        this.transitionToReady('TANG_TOC');
+        this.showRoundResults('VCNV', 'TANG_TOC');
       });
       return;
     }
@@ -1946,7 +2028,7 @@ export class RoomStateMachine {
       });
       this.syncRoom();
       this.setDeadline(4000, async () => {
-        this.transitionToReady('TANG_TOC');
+        this.showRoundResults('VCNV', 'TANG_TOC');
       });
       return;
     }
@@ -2079,7 +2161,7 @@ export class RoomStateMachine {
     const nonEliminated = this.getActiveVcnvContestants();
     if (nonEliminated.length === 0) {
       // Nobody left -> finish VCNV
-      this.transitionToReady('TANG_TOC');
+      this.showRoundResults('VCNV', 'TANG_TOC');
       return;
     }
 
@@ -2102,7 +2184,7 @@ export class RoomStateMachine {
     this.vcnvFinalGuessRemainingMs = null;
     this.setDeadline(durationMs, async () => {
       // Time expired without final guess
-      this.transitionToReady('TANG_TOC');
+      this.showRoundResults('VCNV', 'TANG_TOC');
     });
 
     this.persistSnapshot();
@@ -2123,7 +2205,7 @@ export class RoomStateMachine {
   private async runTangTocQuestion(questionIndex: number): Promise<void> {
     const questions = this.questionSet.tangToc;
     if (questionIndex >= GAME_CONFIG.TANG_TOC.QUESTION_COUNT || questionIndex >= questions.length) {
-      this.transitionToReady('VE_DICH');
+      this.showRoundResults('TANG_TOC', 'VE_DICH');
       return;
     }
 
@@ -2284,7 +2366,8 @@ export class RoomStateMachine {
 
   private async runVeDichTurn(playerQueueIndex: number): Promise<void> {
     if (playerQueueIndex >= this.veDichPlayerQueue.length) {
-      await this.checkFinishOrTiebreak();
+      // Hết lượt Về đích -> công bố điểm -> câu hỏi phụ (nếu hòa) hoặc bục vinh quang
+      this.showRoundResults('VE_DICH', 'FINAL');
       return;
     }
 

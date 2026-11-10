@@ -7,6 +7,7 @@ export type RoundType =
   | 'TANG_TOC'
   | 'VE_DICH'
   | 'TIEBREAK'
+  | 'ROUND_RESULTS' // Màn công bố điểm sau mỗi vòng
   | 'FINISHED';
 
 export type PlayerRole = 'player' | 'viewer';
@@ -120,6 +121,25 @@ export interface RevealPayload {
   overrideWindowExpiresAt?: number;
 }
 
+/** Một dòng trên màn công bố điểm sau vòng. */
+export interface RoundResultEntry {
+  playerId: string;
+  name: string;
+  seat: number;
+  score: number;        // Tổng điểm sau vòng
+  roundScore: number;   // Điểm giành được trong vòng vừa kết thúc
+  rank: number;         // Hạng (1 = cao nhất, bằng điểm thì cùng hạng)
+  disqualified: boolean;
+}
+
+export interface RoundResults {
+  finishedRound: RoundType;
+  nextRound: RoundType | 'FINAL'; // FINAL = sau vòng 4 (sang câu hỏi phụ hoặc bục vinh quang)
+  startedAt: number;              // Mốc thời gian server khi bắt đầu hiệu ứng
+  /** Thứ tự xuất hiện: điểm thấp nhất trước, cao nhất sau cùng. */
+  entries: RoundResultEntry[];
+}
+
 export interface RoomState {
   round: RoundType;
   targetRound?: RoundType; // For READY screen (e.g. targetRound: 'KD_RIENG')
@@ -138,6 +158,7 @@ export interface RoomState {
   obstacleLetterCount?: number;
   obstacleAnswerRevealed?: string[] | null;
   vcnvQuestionsAppearedCount?: number;
+  roundResults?: RoundResults;
   // Additional dynamic state fields
   [key: string]: any;
 }

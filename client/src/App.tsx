@@ -10,6 +10,7 @@ import { TangTocRound } from './components/TangTocRound';
 import { VeDichRound } from './components/VeDichRound';
 import { TieBreakRound } from './components/TieBreakRound';
 import { Podium } from './components/Podium';
+import { RoundResults } from './components/RoundResults';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AntiCheatGuard } from './components/AntiCheatGuard';
 import { GalaxyBackground } from './components/GalaxyBackground';
@@ -75,6 +76,10 @@ export const App: React.FC = () => {
       return <TieBreakRound />;
     }
 
+    if (currentRound === 'ROUND_RESULTS') {
+      return <RoundResults />;
+    }
+
     if (currentRound === 'FINISHED') {
       return <Podium />;
     }
@@ -91,7 +96,7 @@ export const App: React.FC = () => {
         <main className="flex-1 min-h-0 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1450px] mx-auto px-2 py-1 sm:px-4 sm:py-2 flex flex-col items-center justify-center overflow-hidden relative">
           {renderCurrentView()}
         </main>
-        {room && currentRound !== 'LOBBY' && currentRound !== 'FINISHED' && (
+        {room && currentRound !== 'LOBBY' && currentRound !== 'FINISHED' && currentRound !== 'ROUND_RESULTS' && (
           <footer className="shrink-0 w-full z-30">
             <Scoreboard />
           </footer>

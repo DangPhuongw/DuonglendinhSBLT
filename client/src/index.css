@@ -276,3 +276,74 @@
   animation-delay: 8s;
   box-shadow: 0 0 8px rgba(255, 212, 59, 0.8);
 }
+
+/* ---------- Màn công bố điểm sau vòng ---------- */
+
+/* Tên bay từ ngoài mép trái vào, trượt quá một chút rồi dừng ở giữa */
+@keyframes rr-fly-in {
+  0% {
+    transform: translateX(-120vw) skewX(-12deg);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  78% {
+    transform: translateX(3%) skewX(4deg);
+  }
+  100% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+}
+
+.rr-fly-in {
+  animation-name: rr-fly-in;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+/* Ô điểm của vòng bật ra sau khi tên đã dừng */
+@keyframes rr-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.rr-pop {
+  animation: rr-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes rr-title-in {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.rr-title {
+  animation: rr-title-in 600ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rr-fly-in {
+    animation-name: rr-title-in;
+  }
+  .rr-pop,
+  .rr-title {
+    animation-duration: 1ms;
+  }
+}

@@ -8,6 +8,15 @@ export const GAME_CONFIG = {
   HOST_OVERRIDE_WINDOW_SECONDS: 10,// Thời gian chủ phòng được sửa kết quả chấm sau REVEAL
   READY_COUNTDOWN_SECONDS: 3,      // Đếm ngược sau khi tất cả bấm Sẵn sàng
 
+  // Màn công bố điểm sau mỗi vòng (server và client dùng chung để khớp thời gian hiệu ứng)
+  ROUND_RESULTS: {
+    START_DELAY_MS: 1200,          // Hiện tiêu đề trước khi tên đầu tiên bay vào
+    STAGGER_MS: 1100,              // Khoảng cách giữa 2 tên liên tiếp
+    ENTRY_MS: 750,                 // Thời gian 1 tên bay từ trái vào giữa
+    HOLD_MS: 3500,                 // Giữ bảng điểm sau khi tên cuối cùng xuất hiện
+    FADE_MS: 900,                  // Mờ dần trước khi chuyển màn
+  },
+
   ANTI_CHEAT: {
     ENABLED: true,                 // Bật/tắt cơ chế phát hiện rời tab
     MAX_WARNINGS: 1,               // Số lần được cảnh cáo; vi phạm lần kế tiếp -> bị loại

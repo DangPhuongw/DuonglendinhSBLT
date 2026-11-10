@@ -229,8 +229,10 @@ describe('Đợt 7: bộ đề và khôi phục', () => {
     p1.score = 10; // có người dẫn đầu rõ ràng -> kết thúc trận, không vào câu hỏi phụ
     (machine as any).veDichPlayerQueue = [p1.id];
     await (machine as any).runVeDichQuestion(p1.id, [10, 10, 20], 0, 0);
-    // Hết người trong hàng đợi -> kết thúc trận
-    expect(machine.room.state.round).toBe('FINISHED');
+    // Hết người trong hàng đợi -> màn công bố điểm, sau đó mới kết thúc trận
+    expect(machine.room.state.round).toBe('ROUND_RESULTS');
+    expect(machine.room.state.roundResults?.nextRound).toBe('FINAL');
+    machine.dispose();
   });
 });
 

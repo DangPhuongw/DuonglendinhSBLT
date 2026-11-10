@@ -99,6 +99,25 @@ class SoundManager {
     });
   }
 
+  /** Tiếng "vút" khi một tên bay vào màn công bố điểm. */
+  public playWhoosh() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.exponentialRampToValueAtTime(880, t + 0.28);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.18, t + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.36);
+  }
+
   public playFanfare() {
     const ctx = this.getContext();
     if (!ctx) return;
