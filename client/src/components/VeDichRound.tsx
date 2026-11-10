@@ -4,6 +4,9 @@ import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
 import { Star, Bell, Send, Trophy, CheckCircle2, Eye } from 'lucide-react';
+import { GAME_CONFIG } from '@olympia/shared';
+import { LockedBuzzer } from './LockedBuzzer';
+import { useBuzzLock } from '../utils/useBuzzLock';
 
 export const VeDichRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -13,6 +16,10 @@ export const VeDichRound: React.FC = () => {
   const setHopeStar = useGameStore((s) => s.setHopeStar);
   const buzz = useGameStore((s) => s.buzz);
   const buzzWinner = useGameStore((s) => s.buzzWinner);
+  const buzzUnlockAt = useGameStore((s) => s.room?.state?.buzzUnlockAt);
+  // Chuông cướp điểm khóa 3 giây đầu, đếm ngược đến mili giây
+  const buzzLockMs = useBuzzLock(buzzUnlockAt);
+  const buzzLocked = buzzLockMs > 0;
   const lastReveal = useGameStore((s) => s.lastReveal);
 
   const [inputAnswer, setInputAnswer] = useState('');
@@ -59,13 +66,17 @@ export const VeDichRound: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !isViewer && subPhase === 'STEAL_BUZZ' && !isMyTurn) {
+        if (buzzLocked) {
+          e.preventDefault();
+          return;
+        }
         e.preventDefault();
         buzz();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [subPhase, isMyTurn, buzz]);
+  }, [subPhase, isMyTurn, buzz, buzzLocked]);
 
   if (!room || !myPlayer) return null;
 
@@ -251,7 +262,7 @@ export const VeDichRound: React.FC = () => {
         deadline={room.state.deadline}
         totalDurationSeconds={
           subPhase === 'STEAL_BUZZ'
-            ? 5
+            ? GAME_CONFIG.BUZZ_LOCK_SECONDS + GAME_CONFIG.VE_DICH.STEAL_BUZZ_SECONDS
             : subPhase === 'STEAL_ANSWER'
             ? 10
             : 20
@@ -272,6 +283,12 @@ export const VeDichRound: React.FC = () => {
                 Chờ thí sinh bấm chuông
               </span>
             </div>
+          ) : !isMyTurn && buzzLocked ? (
+            <LockedBuzzer
+              remainingMs={buzzLockMs}
+              totalMs={GAME_CONFIG.BUZZ_LOCK_SECONDS * 1000}
+              accent="#FF496C"
+            />
           ) : !isMyTurn ? (
             <button
               onClick={buzz}

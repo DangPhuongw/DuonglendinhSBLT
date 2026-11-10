@@ -14,6 +14,10 @@ export const GAME_CONFIG = {
   HOST_OVERRIDE_WINDOW_SECONDS: 10,// Thời gian chủ phòng được sửa kết quả chấm sau REVEAL
   READY_COUNTDOWN_SECONDS: 3,      // Đếm ngược sau khi tất cả bấm Sẵn sàng
 
+  // Chuông bị khóa trong N giây đầu của mỗi lượt giành chuông (Khởi động chung, cướp điểm Về đích).
+  // Thời gian khóa được cộng thêm vào lượt: thời gian bấm chuông thực sự (15s / 5s) không bị rút ngắn.
+  BUZZ_LOCK_SECONDS: 3,
+
   // Màn công bố điểm sau mỗi vòng (server và client dùng chung để khớp thời gian hiệu ứng)
   ROUND_RESULTS: {
     START_DELAY_MS: 1200,          // Hiện tiêu đề trước khi tên đầu tiên bay vào

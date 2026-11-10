@@ -5,6 +5,8 @@ import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
 import { Bell, Sparkles, Lock, Eye } from 'lucide-react';
 import { GAME_CONFIG } from '@olympia/shared';
+import { LockedBuzzer } from './LockedBuzzer';
+import { useBuzzLock } from '../utils/useBuzzLock';
 
 export const KhoiDongRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -17,6 +19,9 @@ export const KhoiDongRound: React.FC = () => {
   const lastReveal = useGameStore((s) => s.lastReveal);
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  // Chuông khóa 3 giây đầu lượt giành chuông, đếm ngược đến mili giây
+  const buzzLockMs = useBuzzLock(room?.state?.buzzUnlockAt);
+  const buzzLocked = buzzLockMs > 0;
 
   const currentRound = room?.state?.round; // 'KD_RIENG' or 'KD_CHUNG'
   const subPhase = room?.state?.subPhase;
@@ -62,6 +67,10 @@ export const KhoiDongRound: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Space for buzzer (contestants only)
       if (e.code === 'Space' && !isViewer && currentRound === 'KD_CHUNG' && subPhase === 'QUESTION_BUZZ') {
+        if (buzzLocked) {
+          e.preventDefault();
+          return;
+        }
         e.preventDefault();
         buzz();
         return;
@@ -93,7 +102,7 @@ export const KhoiDongRound: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentRound, subPhase, isMyTurn, currentQ, selectedOption, buzz, submitAnswer]);
+  }, [currentRound, subPhase, isMyTurn, currentQ, selectedOption, buzz, submitAnswer, buzzLocked]);
 
   if (!room || !myPlayer) return null;
 
@@ -274,7 +283,7 @@ export const KhoiDongRound: React.FC = () => {
         deadline={room.state.deadline}
         totalDurationSeconds={
           subPhase === 'QUESTION_BUZZ'
-            ? 15
+            ? GAME_CONFIG.BUZZ_LOCK_SECONDS + GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS
             : subPhase === 'ANSWERING'
             ? 3
             : 15
@@ -295,6 +304,12 @@ export const KhoiDongRound: React.FC = () => {
                 Chờ thí sinh bấm chuông
               </span>
             </div>
+          ) : buzzLocked ? (
+            <LockedBuzzer
+              remainingMs={buzzLockMs}
+              totalMs={GAME_CONFIG.BUZZ_LOCK_SECONDS * 1000}
+              accent="#FFD43B"
+            />
           ) : (
             <button
               onClick={buzz}

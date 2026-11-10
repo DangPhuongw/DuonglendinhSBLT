@@ -56,6 +56,8 @@ describe('Đợt 4: đồng hồ', () => {
     await (machine as any).runKdChungQuestion(0);
     const q = (machine as any).questionSet.khoiDong.chung[0];
 
+    // Chuông khóa 3s đầu mỗi lượt giành chuông
+    await vi.advanceTimersByTimeAsync(GAME_CONFIG.BUZZ_LOCK_SECONDS * 1000 + 10);
     expect(machine.handleBuzzer(p2.id)).toBe(true);
     // Quá deadline 3s nhưng vẫn trong 300ms bù trễ
     await vi.advanceTimersByTimeAsync(GAME_CONFIG.KHOI_DONG.CHUNG_ANSWER_SECONDS * 1000 + GRACE / 2);

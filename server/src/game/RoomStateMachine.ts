@@ -1440,18 +1440,22 @@ export class RoomStateMachine {
     this.buzzedPlayerId = null;
     this.answersMap.clear();
     this.disqualifiedBuzzers.clear();
-    this.buzzerOpenTime = Date.now();
+    // Chuông khóa BUZZ_LOCK_SECONDS đầu; thời gian giành chuông tính từ lúc mở khóa
+    const lockMs = GAME_CONFIG.BUZZ_LOCK_SECONDS * 1000;
+    const buzzUnlockAt = Date.now() + lockMs;
+    this.buzzerOpenTime = buzzUnlockAt;
 
     this.room.state = {
       round: 'KD_CHUNG',
       subPhase: 'QUESTION_BUZZ',
       deadline: null,
+      buzzUnlockAt,
       currentQuestion: question,
       buzzerLockedBy: null,
       activePlayerId: undefined,
     };
 
-    const durationMs = GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS * 1000;
+    const durationMs = lockMs + GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS * 1000;
     this.setDeadline(durationMs, async () => {
       // Nobody buzzed
       await this.skipKdChungQuestion(questionIndex, question);
@@ -1459,6 +1463,17 @@ export class RoomStateMachine {
 
     this.persistSnapshot();
     this.syncRoom();
+  }
+
+  /** Chuông còn đang khóa: báo riêng cho người bấm và bỏ qua lần bấm (không bị phạt). */
+  private rejectIfBuzzLocked(playerId: string, now: number): boolean {
+    const unlockAt = this.room.state.buzzUnlockAt;
+    // Cho lệch đồng hồ tối đa 30ms giữa client và server
+    if (typeof unlockAt === 'number' && now + 30 < unlockAt) {
+      this.callbacks.broadcastBuzzRejected(playerId, { reason: 'Chuông đang bị khóa, chưa thể bấm!' });
+      return true;
+    }
+    return false;
   }
 
   public handleBuzzer(playerId: string): boolean {
@@ -1480,6 +1495,7 @@ export class RoomStateMachine {
 
     // KD_CHUNG Buzzer
     if (round === 'KD_CHUNG' && subPhase === 'QUESTION_BUZZ') {
+      if (this.rejectIfBuzzLocked(playerId, now)) return false;
       if (this.buzzedPlayerId) return false;
       this.buzzedPlayerId = playerId;
       this.room.state.buzzerLockedBy = playerId;
@@ -1581,6 +1597,7 @@ export class RoomStateMachine {
     if (round === 'VE_DICH' && subPhase === 'STEAL_BUZZ') {
       const mainPlayerId = this.veDichActiveContestantId || this.room.state.mainPlayerId || this.room.state.activePlayerId;
       if (playerId === mainPlayerId) return false; // Main contestant cannot steal their own question
+      if (this.rejectIfBuzzLocked(playerId, now)) return false;
       if (this.buzzedPlayerId) return false;
 
       this.buzzedPlayerId = playerId;
@@ -2753,9 +2770,11 @@ export class RoomStateMachine {
       this.addScore(playerId, 'VE_DICH', question.id, -p, 'star_wrong');
     }
 
-    // Open Steal Buzz (5s) for the other players (G11)
+    // Open Steal Buzz (5s) for the other players (G11); chuông khóa BUZZ_LOCK_SECONDS đầu
     this.buzzedPlayerId = null;
-    this.buzzerOpenTime = Date.now();
+    const stealLockMs = GAME_CONFIG.BUZZ_LOCK_SECONDS * 1000;
+    const stealUnlockAt = Date.now() + stealLockMs;
+    this.buzzerOpenTime = stealUnlockAt;
 
     this.room.state = {
       round: 'VE_DICH',
@@ -2768,12 +2787,13 @@ export class RoomStateMachine {
       currentQuestion: question,
       questionPoints: p,
       questionIndex: this.veDichCurrentQuestionIndex,
+      buzzUnlockAt: stealUnlockAt,
       deadline: null,
       buzzerLockedBy: null,
     };
 
     const stealBuzzSec = GAME_CONFIG.VE_DICH.STEAL_BUZZ_SECONDS;
-    this.setDeadline(stealBuzzSec * 1000, async () => {
+    this.setDeadline(stealLockMs + stealBuzzSec * 1000, async () => {
       // Nobody buzzed to steal
       const revealPayload: RevealPayload = {
         questionId: question.id,

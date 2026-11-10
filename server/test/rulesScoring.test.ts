@@ -291,12 +291,13 @@ describe('VCNV Turn-based Row Selection & Letter Counts', () => {
     machine.room.status = 'KD_CHUNG';
     await (machine as any).runKdChungQuestion(0);
     expect(machine.room.state.subPhase).toBe('QUESTION_BUZZ');
-    // Buzz window: 15s deadline set
+    // Buzz window: 3s khóa chuông + 15s giành chuông
     const buzzDeadline = machine.room.state.deadline;
-    expect(buzzDeadline).toBeGreaterThan(Date.now() + 14000);
-    expect(buzzDeadline).toBeLessThanOrEqual(Date.now() + 15100);
+    expect(buzzDeadline).toBeGreaterThan(Date.now() + 17000);
+    expect(buzzDeadline).toBeLessThanOrEqual(Date.now() + 18100);
 
-    // Player 1 buzzes
+    // Hết 3s khóa: Player 1 buzzes
+    machine.room.state.buzzUnlockAt = Date.now() - 1;
     const buzzed = machine.handleBuzzer('p1');
     expect(buzzed).toBe(true);
     expect(machine.room.state.subPhase).toBe('ANSWERING');
