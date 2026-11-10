@@ -61,7 +61,7 @@ export interface QuestionSet {
   title: string;
   khoiDong: {
     rieng: Question[][]; // [5 người][6 câu]
-    chung: Question[];   // 10 câu được dùng (4 dễ, 4 trung bình, 2 khó)
+    chung: Question[];   // 12 câu được dùng (5 dễ, 4 trung bình, 3 khó)
   };
   vcnv: {
     rows: Question[];    // 4 hàng ngang

@@ -45,9 +45,9 @@ export const GAME_CONFIG = {
     RIENG_TIME_SECONDS: 15,
     RIENG_CORRECT_POINTS: 10,
     RIENG_WRONG_POINTS: 0,
-    CHUNG_QUESTIONS: 10,
-    // Khởi động chung: 4 dễ, 4 trung bình, 2 khó (thứ tự trộn lẫn) (tổng = CHUNG_QUESTIONS)
-    CHUNG_DIFFICULTY: { easy: 4, medium: 4, hard: 2 },
+    CHUNG_QUESTIONS: 12,
+    // Khởi động chung: 5 dễ, 4 trung bình, 3 khó (thứ tự trộn lẫn) (tổng = CHUNG_QUESTIONS)
+    CHUNG_DIFFICULTY: { easy: 5, medium: 4, hard: 3 },
     CHUNG_BUZZ_SECONDS: 15,
     CHUNG_ANSWER_SECONDS: 3,
     CHUNG_CORRECT_POINTS: 10,

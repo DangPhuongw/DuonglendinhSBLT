@@ -231,7 +231,7 @@ export function generateExcelTemplate(): Buffer {
   const wsRieng = xlsx.utils.json_to_sheet(kdRiengRows);
   xlsx.utils.book_append_sheet(wb, wsRieng, 'KhoiDong_Rieng');
 
-  // 2. KhoiDong_Chung (10 câu hỏi mẫu trắc nghiệm: 4 dễ, 4 trung bình, 2 khó)
+  // 2. KhoiDong_Chung (12 câu hỏi mẫu trắc nghiệm: 5 dễ, 4 trung bình, 3 khó)
   const kdChungRows: any[] = [];
   const chungCfg = GAME_CONFIG.KHOI_DONG.CHUNG_DIFFICULTY;
   for (let idx = 1; idx <= GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS; idx++) {

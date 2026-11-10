@@ -8,7 +8,7 @@ Mỗi trận, server **bốc ngẫu nhiên** câu hỏi từ các file `.xlsx` t
 | Sheet | Cần tối thiểu | Mỗi trận bốc |
 |---|---|---|
 | `KhoiDong_Rieng` | 20 Dễ + 10 Trung bình | 5 ô, mỗi ô 4 Dễ + 2 Trung bình |
-| `KhoiDong_Chung` | 4 Dễ + 4 Trung bình + 2 Khó | 10 câu: 4 Dễ, 4 Trung bình, 2 Khó |
+| `KhoiDong_Chung` | 5 Dễ + 4 Trung bình + 3 Khó | 12 câu: 5 Dễ, 4 Trung bình, 3 Khó |
 | `VCNV` | 1 cụm | 1 cụm (4 hàng ngang + ô trung tâm + từ khóa) |
 | `TangToc` | 4 | 4 |
 | `VeDich` | 10 câu 10đ, 6 câu 20đ, 10 câu 30đ | đúng số đó (10đ = Dễ, 20đ = Trung bình, 30đ = Khó) |
@@ -43,7 +43,7 @@ thừa dòng sẽ bị bỏ qua cả cụm.
 Độ khó chỉ dùng để chọn câu, **người chơi không nhìn thấy**. Số câu mỗi mức ở 3 vòng:
 
 - **Khởi động riêng**: mỗi ô 6 câu = 4 câu Dễ + 2 câu Trung bình.
-- **Khởi động chung**: 10 câu = 4 Dễ, 4 Trung bình, 2 Khó.
+- **Khởi động chung**: 12 câu = 5 Dễ, 4 Trung bình, 3 Khó.
 - Thứ tự xuất hiện được **trộn lẫn** các mức.
 - **Về đích**: theo mức điểm, câu 10 điểm là Dễ, 20 điểm là Trung bình, 30 điểm là Khó (không cần cột Difficulty).
 

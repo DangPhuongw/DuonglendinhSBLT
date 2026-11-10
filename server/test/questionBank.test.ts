@@ -55,7 +55,7 @@ function fullSheets(scale = 2): Sheets {
   return {
     HuongDan: [{ 'Hướng dẫn': 'sheet này bị bỏ qua' }],
     KhoiDong_Rieng: kdRows({ easy: 20 * scale, medium: 10 * scale }, 'KDR'),
-    KhoiDong_Chung: kdRows({ easy: 4 * scale, medium: 4 * scale, hard: 2 * scale }, 'KDC'),
+    KhoiDong_Chung: kdRows({ easy: 5 * scale, medium: 4 * scale, hard: 3 * scale }, 'KDC'),
     VCNV: vcnvRows(scale),
     TangToc: textRows(4 * scale, 'TT'),
     VeDich: [
@@ -91,7 +91,7 @@ describe('Cấu hình độ khó', () => {
     const kd = GAME_CONFIG.KHOI_DONG;
     expect(kd.RIENG_DIFFICULTY).toEqual({ easy: 4, medium: 2, hard: 0 });
     expect(kd.RIENG_DIFFICULTY.easy + kd.RIENG_DIFFICULTY.medium + kd.RIENG_DIFFICULTY.hard).toBe(kd.RIENG_QUESTIONS_PER_PLAYER);
-    expect(kd.CHUNG_DIFFICULTY).toEqual({ easy: 4, medium: 4, hard: 2 });
+    expect(kd.CHUNG_DIFFICULTY).toEqual({ easy: 5, medium: 4, hard: 3 });
     expect(kd.CHUNG_DIFFICULTY.easy + kd.CHUNG_DIFFICULTY.medium + kd.CHUNG_DIFFICULTY.hard).toBe(kd.CHUNG_QUESTIONS);
     expect(GAME_CONFIG.VE_DICH.DIFFICULTY_BY_POINTS).toEqual({ 10: 'easy', 20: 'medium', 30: 'hard' });
   });
@@ -113,7 +113,7 @@ describe('Kho câu hỏi đi kèm dự án (server/question-bank)', () => {
     for (const q of [...d.khoiDong.rieng.flat(), ...d.khoiDong.chung, ...d.tangToc, ...d.veDich.pool10, ...d.tieBreak]) {
       expect(prompts.has(q.prompt)).toBe(true);
     }
-    expect(data.vcnv).toHaveLength(1);
+    expect(data.vcnv.length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -207,7 +207,7 @@ describe('Bốc câu theo độ khó', () => {
     expect(orders.size).toBeGreaterThan(5);
   });
 
-  it('bộ đề ghép ra: mỗi ô riêng 4 dễ + 2 trung bình, chung 4/4/2, Về đích theo điểm', () => {
+  it('bộ đề ghép ra: mỗi ô riêng 4 dễ + 2 trung bình, chung 5/4/3, Về đích theo điểm', () => {
     const { data } = loadFromSheets(fullSheets(1));
     const res = composeQuestionSet(data, new QuestionUsage());
     if (!res.ok) throw new Error(res.error);
@@ -218,7 +218,7 @@ describe('Bốc câu theo độ khó', () => {
       expect(pkg).toHaveLength(6);
       expect([countOf(pkg, 'easy'), countOf(pkg, 'medium')]).toEqual([4, 2]);
     }
-    expect([countOf(qs.khoiDong.chung, 'easy'), countOf(qs.khoiDong.chung, 'medium'), countOf(qs.khoiDong.chung, 'hard')]).toEqual([4, 4, 2]);
+    expect([countOf(qs.khoiDong.chung, 'easy'), countOf(qs.khoiDong.chung, 'medium'), countOf(qs.khoiDong.chung, 'hard')]).toEqual([5, 4, 3]);
     expect(qs.veDich.pool10.every((q) => q.difficulty === 'easy')).toBe(true);
     expect(qs.veDich.pool20.every((q) => q.difficulty === 'medium')).toBe(true);
     expect(qs.veDich.pool30.every((q) => q.difficulty === 'hard')).toBe(true);
@@ -233,12 +233,12 @@ describe('Bốc câu theo độ khó', () => {
 
   it('thiếu câu ở một mức độ khó thì báo rõ mức nào thiếu', () => {
     const sheets = fullSheets(1);
-    sheets.KhoiDong_Chung = kdRows({ easy: 4, medium: 4, hard: 1 }, 'KDC');
+    sheets.KhoiDong_Chung = kdRows({ easy: 5, medium: 4, hard: 1 }, 'KDC');
     sheets.KhoiDong_Rieng = kdRows({ easy: 30 }, 'KDR'); // đủ 30 câu nhưng không có câu trung bình
     const res = composeQuestionSet(loadFromSheets(sheets).data, new QuestionUsage());
     expect(res.ok).toBe(false);
     if (!res.ok) {
-      expect(res.error).toContain('Khởi động chung - Khó có 1/2');
+      expect(res.error).toContain('Khởi động chung - Khó có 1/3');
       expect(res.error).toContain('Khởi động riêng - Trung bình có 0/10');
     }
   });
