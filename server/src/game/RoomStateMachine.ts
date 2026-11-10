@@ -914,7 +914,24 @@ export class RoomStateMachine {
     return { ok: true };
   }
 
+  /**
+   * Trạng thái "bị loại khỏi VCNV" chỉ có ý nghĩa trong vòng VCNV: hết vòng thì xóa, để vòng sau
+   * không còn hiện nhãn "Bị loại". Người bị loại vì rời tab thì giữ nguyên (có nhãn riêng).
+   */
+  private clearVcnvElimination(): void {
+    let changed = false;
+    for (const p of this.room.players) {
+      const keep = Boolean(p.disqualified);
+      if (p.eliminatedVcnv !== keep) {
+        p.eliminatedVcnv = keep;
+        changed = true;
+      }
+    }
+    if (changed) this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
+  }
+
   private transitionToReady(targetRound: RoundType): void {
+    if (targetRound !== 'VCNV') this.clearVcnvElimination();
     this.clearTimer();
     this.buzzedPlayerId = null;
     this.pendingCnvBuzzerId = null;
@@ -943,6 +960,7 @@ export class RoomStateMachine {
    * mờ dần. Server giữ nhịp (deadline) để mọi máy chuyển màn cùng lúc; client tự chạy hiệu ứng theo startedAt.
    */
   private showRoundResults(finishedRound: RoundType, next: RoundType | 'FINAL'): void {
+    if (finishedRound === 'VCNV') this.clearVcnvElimination();
     this.clearTimer();
     this.buzzedPlayerId = null;
     this.pendingCnvBuzzerId = null;

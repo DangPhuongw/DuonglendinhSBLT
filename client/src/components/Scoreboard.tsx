@@ -122,7 +122,7 @@ export const Scoreboard: React.FC = () => {
                 }`}>
                   {player.disqualified ? (
                     <span className="text-[#FF496C] bg-[#FF496C]/10 px-2 py-0.5 rounded-md border border-[#FF496C]/40 text-xs font-bold">Loại · rời tab</span>
-                  ) : player.eliminatedVcnv ? (
+                  ) : player.eliminatedVcnv && room.state.round === 'VCNV' ? (
                     <span className="text-[#FF496C] bg-[#FF496C]/10 px-2 py-0.5 rounded-md border border-[#FF496C]/40 text-xs font-bold">Bị loại</span>
                   ) : (
                     'Điểm'
