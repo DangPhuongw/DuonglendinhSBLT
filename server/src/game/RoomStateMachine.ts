@@ -1322,7 +1322,8 @@ export class RoomStateMachine {
       const player = this.room.players.find((p) => p.id === playerId);
       if (!player || player.eliminatedVcnv) return false;
 
-      if (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') {
+      // Chỉ câu hàng ngang nhận đáp án. Câu ô trung tâm chỉ là gợi ý để đoán từ khóa (bấm chuông).
+      if (subPhase === 'ROW_QUESTION') {
         // Can overwrite until deadline
         this.answersMap.set(playerId, { answer, timestamp: now });
         this.callbacks.emitAnswerAck(playerId, { questionId, receivedAt: now });
@@ -2140,6 +2141,10 @@ export class RoomStateMachine {
     }
   }
 
+  /**
+   * Câu hỏi thứ 5 (ô trung tâm): KHÔNG nhận đáp án, không tính điểm. Câu hỏi chỉ hiện ra làm gợi ý để
+   * người chơi đoán từ khóa chính (bấm chuông như mọi lúc). Hết giờ thì sang lượt đoán cuối.
+   */
   private async presentVcnvCenter(): Promise<void> {
     const centerQ = this.questionSet.vcnv.center;
     this.answersMap.clear();
@@ -2156,55 +2161,9 @@ export class RoomStateMachine {
 
     const durationMs = GAME_CONFIG.VCNV.CENTER_TIME_SECONDS * 1000;
     this.setDeadline(durationMs, async () => {
-      await this.revealVcnvCenter(centerQ);
-    });
-
-    this.persistSnapshot();
-    this.syncRoom();
-  }
-
-  private async revealVcnvCenter(question: Question): Promise<void> {
-    const results: RevealResult[] = [];
-    let atLeastOneCorrect = false;
-
-    for (const p of this.room.players.filter((pl) => pl.role !== 'viewer')) {
-      if (p.eliminatedVcnv) continue;
-      const sub = this.answersMap.get(p.id);
-      const ans = sub ? sub.answer : '';
-      const isCorrect = matchAnswer(ans, question.answer, question.alternatives, {
-        ignoreDiacritics: question.ignoreDiacritics,
-      });
-
-      const delta = isCorrect ? GAME_CONFIG.VCNV.CENTER_CORRECT_POINTS : 0;
-      if (isCorrect) {
-        atLeastOneCorrect = true;
-        this.addScore(p.id, 'VCNV', question.id, delta, 'correct');
-      }
-
-      results.push({ playerId: p.id, answer: ans, isCorrect, delta });
-    }
-
-    const revealPayload: RevealPayload = {
-      questionId: question.id,
-      correctAnswer: atLeastOneCorrect ? question.answer : '',
-      results,
-    };
-    this.lastRevealedPayload = revealPayload;
-
-    this.room.state = {
-      ...this.room.state,
-      round: 'VCNV',
-      subPhase: 'CENTER_REVEAL',
-      deadline: null,
-      currentQuestion: question,
-      vcnvQuestionsAppearedCount: 5,
-    };
-
-    this.setDeadline(5000, async () => {
       await this.presentVcnvFinalGuess();
     });
 
-    this.callbacks.broadcastReveal(revealPayload);
     this.persistSnapshot();
     this.syncRoom();
   }

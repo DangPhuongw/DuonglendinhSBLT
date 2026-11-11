@@ -172,3 +172,39 @@ describe('VCNV: nhập đúng từ khóa thì kết thúc vòng', () => {
     machine.dispose();
   });
 });
+
+describe('VCNV: câu hỏi thứ 5 (ô trung tâm) chỉ là gợi ý', () => {
+  it('không nhận đáp án, không tính điểm; hết giờ thì sang lượt đoán cuối', async () => {
+    vi.useFakeTimers();
+    const { machine, callbacks, p1, p2 } = await setup('VB0009');
+    await (machine as any).presentVcnvRow(0, 0);
+    await (machine as any).presentVcnvCenter();
+    const center = state(machine).currentQuestion;
+    expect(state(machine).subPhase).toBe('CENTER_QUESTION');
+
+    // Gửi đúng đáp án của câu trung tâm cũng không được nhận
+    expect(machine.submitAnswer(p1.id, center.id, (machine as any).questionSet.vcnv.center.answer)).toBe(false);
+    expect((machine as any).answersMap.size).toBe(0);
+
+    await vi.advanceTimersByTimeAsync(GAME_CONFIG.VCNV.CENTER_TIME_SECONDS * 1000 + GRACE + 100);
+    expect(state(machine).subPhase).toBe('FINAL_GUESS');
+    expect(p1.score).toBe(0);
+    expect(p2.score).toBe(0);
+    // Không có màn công bố đáp án câu trung tâm
+    expect(callbacks.broadcastReveal).not.toHaveBeenCalled();
+    machine.dispose();
+  });
+
+  it('trong lúc câu gợi ý hiện, vẫn bấm chuông đoán từ khóa được (+20 nếu đúng)', async () => {
+    vi.useFakeTimers();
+    const { machine, p2, obstacle } = await setup('VB0010');
+    await (machine as any).presentVcnvRow(0, 0);
+    await (machine as any).presentVcnvCenter();
+    expect(machine.handleBuzzer(p2.id)).toBe(true);
+    machine.submitAnswer(p2.id, obstacle.id, obstacle.answer);
+    await vi.advanceTimersByTimeAsync(50);
+    expect(state(machine).subPhase).toBe('CNV_RESULT');
+    expect(p2.score).toBe(GAME_CONFIG.VCNV.FINAL_GUESS_CORRECT_POINTS);
+    machine.dispose();
+  });
+});

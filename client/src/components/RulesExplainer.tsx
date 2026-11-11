@@ -254,8 +254,8 @@ function vcnvScenes(): Scene[] {
       ),
     },
     {
-      title: 'Ô trung tâm và lượt đoán cuối',
-      text: <>Hết 4 hàng ngang là câu hỏi ô trung tâm (đúng <b className="text-[#20D6A0]">+{VC.CENTER_CORRECT_POINTS}</b>), rồi <b>{VC.FINAL_GUESS_SECONDS} giây đoán cuối</b>: đoán đúng từ khóa <b className="text-[#20D6A0]">+{VC.FINAL_GUESS_CORRECT_POINTS}</b>.</>,
+      title: 'Câu hỏi thứ 5 là gợi ý',
+      text: <>Hết 4 hàng ngang, câu hỏi ô trung tâm hiện ra <b>{VC.CENTER_TIME_SECONDS} giây</b> làm gợi ý: <b>không cần trả lời</b>, hãy dùng nó để đoán từ khóa và bấm chuông. Sau đó còn <b>{VC.FINAL_GUESS_SECONDS} giây đoán cuối</b>. Đoán đúng lúc này <b className="text-[#20D6A0]">+{VC.FINAL_GUESS_CORRECT_POINTS}</b>.</>,
       visual: (
         <div className="relative flex flex-col items-center gap-2">
           <div className="grid grid-cols-2 gap-1.5">
@@ -266,7 +266,9 @@ function vcnvScenes(): Scene[] {
           <div className="rx-pop -mt-12 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#FFD43B] text-[#090D18] font-heading font-black flex items-center justify-center shadow-glow-yellow" style={d(700)}>
             ★
           </div>
-          <Points value={VC.CENTER_CORRECT_POINTS} delay={1600} className="-right-10 top-2" />
+          <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-[#090D18] bg-[#FFD43B] px-2 py-0.5 rounded-full" style={d(1500)}>
+            GỢI Ý
+          </span>
         </div>
       ),
     },
