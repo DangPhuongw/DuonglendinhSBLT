@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldAlert, ShieldX, AlertTriangle } from 'lucide-react';
+import { ShieldX, AlertTriangle } from 'lucide-react';
 import { GAME_CONFIG, TabLeaveReason } from '@olympia/shared';
 import { useGameStore } from '../store/gameStore';
-import { ANTI_CHEAT_RULE, FREE_WARNINGS } from '../utils/antiCheatRules';
+import { FREE_WARNINGS } from '../utils/antiCheatRules';
 
 /**
  * Chống gian lận rời tab.
@@ -111,13 +111,7 @@ export const AntiCheatGuard: React.FC = () => {
 
   return (
     <>
-      {/* Nhắc luật ở màn Sẵn sàng */}
-      {round === 'READY' && isContestant && GAME_CONFIG.ANTI_CHEAT.ENABLED && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-40 max-w-[92vw] flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#FF496C]/15 border border-[#FF496C]/50 text-[#FFB4C2] text-xs sm:text-sm font-bold shadow-lg pointer-events-none">
-          <ShieldAlert size={16} className="text-[#FF496C] shrink-0" />
-          <span>Chống gian lận: {ANTI_CHEAT_RULE}</span>
-        </div>
-      )}
+      {/* Luật được nhắc ở Sảnh chờ và trong phần trình chiếu luật của màn Sẵn sàng (RulesExplainer) */}
 
       {/* Nhãn đã bị cảnh cáo (cho chính thí sinh) */}
       {warnedOnce && !showModal && (
