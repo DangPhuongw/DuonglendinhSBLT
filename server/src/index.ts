@@ -149,7 +149,18 @@ const ALLOWED_MEDIA_EXTS = new Set([
   '.mp4', '.webm', '.mp3', '.wav', '.ogg', '.m4a',
 ]);
 
-app.post('/api/upload-media', uploadLimiter, upload.single('media'), (req, res) => {
+/** multer báo lỗi (vd. file quá lớn) bằng JSON thay vì trang lỗi HTML. */
+const singleFile = (field: string): express.RequestHandler => (req, res, next) => {
+  upload.single(field)(req, res, (err: unknown) => {
+    if (!err) return next();
+    const tooBig = err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE';
+    res.status(tooBig ? 413 : 400).json({
+      error: tooBig ? 'File quá lớn (tối đa 25MB).' : 'Không đọc được file tải lên.',
+    });
+  });
+};
+
+app.post('/api/upload-media', uploadLimiter, singleFile('media'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Không có file nào được tải lên.' });
   }
@@ -184,12 +195,17 @@ app.get('/api/question-template', (req, res) => {
   }
 });
 
-app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, res) => {
+app.post('/api/upload-questions', uploadLimiter, singleFile('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Vui lòng chọn file đề thi.' });
   }
 
   const filePath = req.file.path;
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  if (!['.xlsx', '.xls', '.json'].includes(ext)) {
+    removeTempFile(filePath);
+    return res.status(400).json({ error: 'Chỉ nhận file đề .xlsx, .xls hoặc .json.' });
+  }
   try {
     // Chỉ chủ phòng (có token chủ phòng) mới được thay bộ đề, và chỉ khi còn ở Sảnh chờ.
     // Nếu không, thí sinh có thể tự nạp bộ đề mình đã biết đáp án.
@@ -202,11 +218,26 @@ app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, re
     }
 
     const buffer = fs.readFileSync(filePath);
-    const raw: unknown = req.file.originalname.toLowerCase().endsWith('.json')
+    const isJson = ext === '.json';
+    const raw: any = isJson
       ? JSON.parse(buffer.toString('utf-8'))
-      : parseExcelQuestionSet(buffer, req.file.originalname);
+      : parseExcelQuestionSet(buffer, path.parse(req.file.originalname).name);
 
-    const validation = validateQuestionSet(raw);
+    // File Excel chỉ có một số vòng: phần thiếu được bù ngẫu nhiên từ kho câu hỏi (JSON phải đủ phần)
+    let filled: string[] = [];
+    let borrowedIds: string[] = [];
+    let candidate: unknown = raw;
+    if (!isJson) {
+      const fill = questionBank.fillMissing(raw);
+      if (!fill.ok) {
+        return res.status(400).json({ error: fill.error });
+      }
+      candidate = fill.questionSet;
+      filled = fill.filled;
+      borrowedIds = fill.borrowedIds;
+    }
+
+    const validation = validateQuestionSet(candidate);
     if (!validation.ok) {
       return res.status(400).json({
         error: 'Bộ đề chưa hợp lệ: ' + validation.errors.join(' '),
@@ -216,9 +247,13 @@ app.post('/api/upload-questions', uploadLimiter, upload.single('file'), (req, re
     const questionSet = validation.questionSet;
 
     machine.setQuestionSet(questionSet, 'custom');
-    console.log(`[Room ${machine.room.code}] Updated custom question set: ${questionSet.title}`);
+    questionBank.markUsed(borrowedIds);
+    console.log(
+      `[Room ${machine.room.code}] Updated custom question set: ${questionSet.title}` +
+        (filled.length ? ` (bù từ kho: ${filled.join(', ')})` : '')
+    );
 
-    res.json({ ok: true, questionSet, roomUpdated: true });
+    res.json({ ok: true, questionSet, roomUpdated: true, filled });
   } catch (err: any) {
     console.error('Error parsing question file:', err);
     res.status(400).json({ error: 'Lỗi đọc file đề thi: ' + err.message });

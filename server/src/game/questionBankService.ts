@@ -4,6 +4,7 @@ import { QuestionSet } from '@olympia/shared';
 import { LoadedBank, loadQuestionBank, summarizeBank } from './questionBank.js';
 import { ComposeResult, QuestionUsage, composeQuestionSet } from './questionComposer.js';
 import { validateQuestionSet } from './questionValidator.js';
+import { FillResult, fillMissingFromBank } from './questionFill.js';
 
 /** Thư mục kho: biến môi trường QUESTION_BANK_DIR, hoặc ./question-bank, hoặc ./server/question-bank. */
 export function resolveBankDir(): string {
@@ -59,6 +60,17 @@ export class QuestionBankService {
       if (issues.length > 20) console.warn(`  ... và ${issues.length - 20} lỗi khác (chạy "npm run bank:check" để xem đủ).`);
     }
     return this.loaded;
+  }
+
+  /** Bù các phần còn thiếu của bộ đề tải lên bằng câu hỏi ngẫu nhiên từ kho. */
+  fillMissing(qs: QuestionSet): FillResult {
+    const bank = this.refresh();
+    return fillMissingFromBank(qs, bank.data, this.usage);
+  }
+
+  /** Ghi nhớ các câu mượn từ kho đã được dùng (gọi sau khi bộ đề được chấp nhận). */
+  markUsed(ids: string[]): void {
+    if (ids.length > 0) this.usage.mark(ids);
   }
 
   /** Ghép một bộ đề mới cho trận, ghi nhớ các câu đã dùng. */

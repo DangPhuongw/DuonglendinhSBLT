@@ -1,15 +1,38 @@
 import xlsx from 'xlsx';
 import { GAME_CONFIG, Question, QuestionSet } from '@olympia/shared';
 import { parseDifficulty } from './questionBank.js';
-import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
 
 /** Cột độ khó (tùy chọn) của file đề tải lên: Dễ / Trung bình / Khó. */
 const readDifficulty = (row: any) =>
   parseDifficulty(String(row.Difficulty ?? row.difficulty ?? row['Độ khó'] ?? row['Do kho'] ?? '')) || undefined;
 
+/** Tên các sheet mà bộ đọc nhận ra (so khớp không phân biệt hoa thường, chỉ cần chứa tên). */
+const KNOWN_SHEETS = ['khoidong_rieng', 'khoidong_chung', 'vcnv', 'tangtoc', 'tăng tốc', 'vedich', 'về đích', 'tiebreak', 'phụ'];
+
+/**
+ * Đọc file Excel đề thi. Phần nào file không có thì để trống (KHÔNG tự lấy đề mặc định);
+ * người gọi quyết định bù phần thiếu từ kho (xem questionFill.ts).
+ * Ném lỗi nếu file không giống file đề (không có sheet nào hợp lệ) hoặc là file theo định dạng kho.
+ */
 export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đề tải lên'): QuestionSet {
   const workbook = xlsx.read(buffer, { type: 'buffer' });
   const sheetNames = workbook.SheetNames;
+
+  const recognised = sheetNames.filter((n) => KNOWN_SHEETS.some((k) => n.toLowerCase().includes(k)));
+  if (recognised.length === 0) {
+    throw new Error(
+      'Không tìm thấy sheet nào hợp lệ trong file. File đề cần có các sheet: KhoiDong_Rieng, KhoiDong_Chung, VCNV, TangToc, VeDich, TieBreak. Hãy tải "Excel mẫu" ở Sảnh chờ rồi điền câu hỏi vào.'
+    );
+  }
+  const vcnvSheetName = sheetNames.find((n) => n.toLowerCase().includes('vcnv'));
+  if (vcnvSheetName) {
+    const vcnvRowsRaw = xlsx.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[vcnvSheetName]);
+    if (vcnvRowsRaw.some((r) => Object.keys(r).some((k) => k.toLowerCase() === 'cluster'))) {
+      throw new Error(
+        'File này theo định dạng kho câu hỏi (sheet VCNV có cột Cluster). Hãy đặt file vào thư mục question-bank trên máy chủ thay vì nạp trực tiếp, hoặc dùng "Excel mẫu" để nạp một bộ đề riêng.'
+      );
+    }
+  }
 
   const getSheetData = (name: string): any[] => {
     const found = sheetNames.find((s) => s.toLowerCase().includes(name.toLowerCase()));
@@ -185,31 +208,18 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
     });
   }
 
-  // Dự phòng an toàn: Nếu người dùng nạp file chỉ có một số vòng (vd: chỉ nạp Khởi động riêng),
-  // hoặc VCNV có nhiều hơn 4 hàng, tự động chuẩn hóa và lấy phần mặc định bù vào các vòng còn thiếu
-  // để trận đấu không bao giờ bị lỗi giữa chừng và luôn nạp thành công 100%.
-  const hasKdRieng = kdRieng.some((pkg) => pkg.length > 0);
-  const finalKdRieng = hasKdRieng ? kdRieng : DEFAULT_QUESTION_SET.khoiDong.rieng;
-  const finalKdChung = kdChung.length > 0 ? kdChung : DEFAULT_QUESTION_SET.khoiDong.chung;
-
-  let finalVcnvRows = vcnvRows;
-  if (finalVcnvRows.length > 4) {
-    finalVcnvRows = finalVcnvRows.slice(0, 4);
-  }
-  let finalCenterQ = centerQ;
-  let finalObsQ = obsQ;
-  let finalVcnvImage = vcnvImage || DEFAULT_QUESTION_SET.vcnv.image;
-  if (finalVcnvRows.length < 4 || !finalCenterQ.prompt || !finalObsQ.prompt) {
-    if (finalVcnvRows.length < 4) finalVcnvRows = DEFAULT_QUESTION_SET.vcnv.rows;
-    if (!finalCenterQ.prompt) finalCenterQ = DEFAULT_QUESTION_SET.vcnv.center;
-    if (!finalObsQ.prompt) finalObsQ = DEFAULT_QUESTION_SET.vcnv.obstacle;
-  }
-
-  const finalTangToc = tangToc.length > 0 ? tangToc : DEFAULT_QUESTION_SET.tangToc;
-  const finalPool10 = pool10.length > 0 ? pool10 : DEFAULT_QUESTION_SET.veDich.pool10;
-  const finalPool20 = pool20.length > 0 ? pool20 : DEFAULT_QUESTION_SET.veDich.pool20;
-  const finalPool30 = pool30.length > 0 ? pool30 : DEFAULT_QUESTION_SET.veDich.pool30;
-  const finalTieBreak = tieBreak.length > 0 ? tieBreak : DEFAULT_QUESTION_SET.tieBreak;
+  // Không tự bù bằng đề mặc định: phần thiếu để trống và được bù từ kho (hoặc báo lỗi) ở nơi gọi
+  const finalKdRieng = kdRieng;
+  const finalKdChung = kdChung;
+  const finalVcnvRows = vcnvRows.length > 4 ? vcnvRows.slice(0, 4) : vcnvRows;
+  const finalCenterQ = centerQ;
+  const finalObsQ = obsQ;
+  const finalVcnvImage = vcnvImage || undefined;
+  const finalTangToc = tangToc;
+  const finalPool10 = pool10;
+  const finalPool20 = pool20;
+  const finalPool30 = pool30;
+  const finalTieBreak = tieBreak;
 
   return {
     id: `qs-${Date.now()}`,
@@ -237,10 +247,10 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
 export function generateExcelTemplate(): Buffer {
   const wb = xlsx.utils.book_new();
 
-  // 1. KhoiDong_Rieng (Mỗi vị trí thí sinh 1 - 4 có 6 câu hỏi mẫu trắc nghiệm A, B, C, D)
+  // 1. KhoiDong_Rieng (Mỗi ghế thí sinh 1 - 5 có 6 câu hỏi mẫu trắc nghiệm A, B, C, D)
   const kdRiengRows: any[] = [];
-  for (let seat = 1; seat <= 4; seat++) {
-    for (let order = 1; order <= 6; order++) {
+  for (let seat = 1; seat <= 5; seat++) {
+    for (let order = 1; order <= GAME_CONFIG.KHOI_DONG.RIENG_QUESTIONS_PER_PLAYER; order++) {
       kdRiengRows.push({
         Seat: seat,
         Order: order,
@@ -284,73 +294,67 @@ export function generateExcelTemplate(): Buffer {
       Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 1?',
       Answer: 'GỢI Ý 1',
       Alternatives: 'GOI Y 1',
-      Image: '',
     },
     {
       Type: 'ROW_2',
       Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 2?',
       Answer: 'GỢI Ý 2',
       Alternatives: 'GOI Y 2',
-      Image: '',
     },
     {
       Type: 'ROW_3',
       Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 3?',
       Answer: 'GỢI Ý 3',
       Alternatives: 'GOI Y 3',
-      Image: '',
     },
     {
       Type: 'ROW_4',
       Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho hàng ngang số 4?',
       Answer: 'GỢI Ý 4',
       Alternatives: 'GOI Y 4',
-      Image: '',
     },
     {
       Type: 'CENTER',
       Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý hiển thị cho cả phòng để đoán từ khóa (không cần đáp án)',
       Answer: '',
       Alternatives: '',
-      Image: '',
     },
     {
       Type: 'OBSTACLE',
       Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho từ khóa Chướng ngại vật chính?',
       Answer: 'TỪ KHÓA CHÍNH',
       Alternatives: 'TU KHOA CHINH',
-      Image: '',
     },
   ];
   const wsVcnv = xlsx.utils.json_to_sheet(vcnvRows);
   xlsx.utils.book_append_sheet(wb, wsVcnv, 'VCNV');
 
-  // 4. TangToc (4 câu hỏi tăng tốc: 10s, 20s, 30s, 40s)
+  // 4. TangToc (4 câu hỏi, mỗi câu 30 giây)
   const ttRows = [
     {
       Order: 1,
-      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 1 (Thời gian suy nghĩ 10 giây)?',
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 1?',
       Answer: 'ĐÁP ÁN 1',
       Alternatives: 'DAP AN 1; CAU TRA LOI 1',
       Media: '',
     },
     {
       Order: 2,
-      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 2 (Thời gian suy nghĩ 20 giây)?',
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 2?',
       Answer: 'ĐÁP ÁN 2',
       Alternatives: 'DAP AN 2; CAU TRA LOI 2',
       Media: '',
     },
     {
       Order: 3,
-      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 3 (Thời gian suy nghĩ 30 giây)?',
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 3?',
       Answer: 'ĐÁP ÁN 3',
       Alternatives: 'DAP AN 3; CAU TRA LOI 3',
       Media: '',
     },
     {
       Order: 4,
-      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 4 (Thời gian suy nghĩ 40 giây)?',
+      Prompt: '[Câu hỏi mẫu] Nội dung câu hỏi Tăng tốc số 4?',
       Answer: 'ĐÁP ÁN 4',
       Alternatives: 'DAP AN 4; CAU TRA LOI 4',
       Media: '',
@@ -361,7 +365,7 @@ export function generateExcelTemplate(): Buffer {
 
   // 5. VeDich (Mỗi mức điểm 10đ, 20đ, 30đ có các câu hỏi mẫu)
   const vdRows: any[] = [];
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 10; i++) {
     vdRows.push({
       Points: 10,
       Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Về đích 10 điểm số ${i}?`,
@@ -377,7 +381,7 @@ export function generateExcelTemplate(): Buffer {
       Alternatives: `DAP AN 20D SO ${i}; TRA LOI ${i}`,
     });
   }
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 10; i++) {
     vdRows.push({
       Points: 30,
       Prompt: `[Câu hỏi mẫu] Nội dung câu hỏi Về đích 30 điểm số ${i}?`,

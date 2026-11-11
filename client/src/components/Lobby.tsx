@@ -41,6 +41,7 @@ export const Lobby: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [uploadOk, setUploadOk] = useState<boolean | null>(null);
   const [copied, setCopied] = useState(false);
 
   // If not joined yet:
@@ -188,9 +189,13 @@ export const Lobby: React.FC = () => {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
+    // Đặt lại ô chọn file để chọn lại đúng file đó (sau khi sửa trong Excel) vẫn có tác dụng
+    input.value = '';
     if (!file) return;
 
+    setUploadOk(null);
     setUploadStatus('Đang tải và xử lý bộ đề...');
     const formData = new FormData();
     formData.append('file', file);
@@ -202,14 +207,34 @@ export const Lobby: React.FC = () => {
         method: 'POST',
         body: formData,
       });
-      const data = await res.json();
-      if (data.ok) {
-        setUploadStatus(`Đã nạp và áp dụng thành công bộ đề: ${data.questionSet.title}`);
+      // Lỗi từ máy chủ / proxy có thể không phải JSON
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+      if (data?.ok) {
+        setUploadOk(true);
+        const filled: string[] = data.filled || [];
+        setUploadStatus(
+          `Đã nạp bộ đề "${data.questionSet.title}".` +
+            (filled.length ? ` Phần file chưa có (${filled.join(', ')}) được lấy ngẫu nhiên từ kho câu hỏi.` : '')
+        );
       } else {
-        setUploadStatus(`Lỗi: ${data.error}`);
+        setUploadOk(false);
+        setUploadStatus(
+          data?.errors?.length
+            ? `Bộ đề chưa hợp lệ:\n- ${data.errors.join('\n- ')}`
+            : data?.error ||
+              (res.status === 413
+                ? 'File quá lớn (tối đa 25MB).'
+                : `Không nạp được bộ đề (mã lỗi ${res.status}). Vui lòng thử lại.`)
+        );
       }
     } catch (err: any) {
-      setUploadStatus(`Lỗi khi nạp file: ${err.message}`);
+      setUploadOk(false);
+      setUploadStatus(`Không kết nối được máy chủ: ${err.message}`);
     }
   };
 
@@ -441,6 +466,25 @@ export const Lobby: React.FC = () => {
         </div>
       </div>
 
+      {/* Kết quả nạp bộ đề: hiện đầy đủ (nhiều dòng), không bị cắt */}
+      {isHost && uploadStatus && (
+        <div
+          role="status"
+          className={`w-full my-1.5 px-3 py-2 rounded-xl border text-xs sm:text-sm font-bold whitespace-pre-line max-h-32 overflow-y-auto shrink-0 flex items-start justify-between gap-2 ${
+            uploadOk === false
+              ? 'bg-[#FF496C]/10 border-[#FF496C]/50 text-[#FFB4C2]'
+              : uploadOk
+              ? 'bg-[#20D6A0]/10 border-[#20D6A0]/50 text-[#20D6A0]'
+              : 'bg-[#FFD43B]/10 border-[#FFD43B]/40 text-[#FFD43B]'
+          }`}
+        >
+          <span className="min-w-0 break-words">{uploadStatus}</span>
+          <button onClick={() => setUploadStatus('')} className="shrink-0 opacity-80 hover:opacity-100" aria-label="Đóng thông báo">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Bottom Host / Waiting Control Bar */}
       {isHost ? (
         <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl px-4 py-2.5 sm:py-3 shadow-xl flex flex-wrap items-center justify-between gap-3 shrink-0">
@@ -463,9 +507,6 @@ export const Lobby: React.FC = () => {
               <span>Nạp file (.xlsx / .json)</span>
               <input type="file" accept=".xlsx,.xls,.json" onChange={handleFileUpload} className="hidden" />
             </label>
-            {uploadStatus && (
-              <span className="text-xs font-bold text-[#FFD43B] truncate max-w-xs">{uploadStatus}</span>
-            )}
           </div>
 
           <div className="flex items-center gap-3">
