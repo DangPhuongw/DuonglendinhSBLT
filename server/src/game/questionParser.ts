@@ -6,6 +6,15 @@ import { parseDifficulty } from './questionBank.js';
 const readDifficulty = (row: any) =>
   parseDifficulty(String(row.Difficulty ?? row.difficulty ?? row['Độ khó'] ?? row['Do kho'] ?? '')) || undefined;
 
+/** Đọc giá trị phương án trắc nghiệm, bảo toàn các giá trị như số 0 */
+const readOption = (row: any, ...keys: string[]): string => {
+  for (const k of keys) {
+    const v = row[k];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+  }
+  return '';
+};
+
 /** Tên các sheet mà bộ đọc nhận ra (so khớp không phân biệt hoa thường, chỉ cần chứa tên). */
 const KNOWN_SHEETS = ['khoidong_rieng', 'khoidong_chung', 'vcnv', 'tangtoc', 'tăng tốc', 'vedich', 'về đích', 'tiebreak', 'phụ'];
 
@@ -54,10 +63,10 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       type: 'mcq',
       prompt: String(row.Prompt || row.prompt || ''),
       options: [
-        String(row.OptionA || row.A || ''),
-        String(row.OptionB || row.B || ''),
-        String(row.OptionC || row.C || ''),
-        String(row.OptionD || row.D || ''),
+        readOption(row, 'OptionA', 'optionA', 'A', 'a', 'Phương án A'),
+        readOption(row, 'OptionB', 'optionB', 'B', 'b', 'Phương án B'),
+        readOption(row, 'OptionC', 'optionC', 'C', 'c', 'Phương án C'),
+        readOption(row, 'OptionD', 'optionD', 'D', 'd', 'Phương án D'),
       ],
       answer: String(row.Answer || row.answer || '').trim().toUpperCase(),
       difficulty: readDifficulty(row),
@@ -79,10 +88,10 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       type: 'mcq',
       prompt: String(row.Prompt || row.prompt || ''),
       options: [
-        String(row.OptionA || row.A || ''),
-        String(row.OptionB || row.B || ''),
-        String(row.OptionC || row.C || ''),
-        String(row.OptionD || row.D || ''),
+        readOption(row, 'OptionA', 'optionA', 'A', 'a', 'Phương án A'),
+        readOption(row, 'OptionB', 'optionB', 'B', 'b', 'Phương án B'),
+        readOption(row, 'OptionC', 'optionC', 'C', 'c', 'Phương án C'),
+        readOption(row, 'OptionD', 'optionD', 'D', 'd', 'Phương án D'),
       ],
       answer: String(row.Answer || row.answer || '').trim().toUpperCase(),
       difficulty: readDifficulty(row),

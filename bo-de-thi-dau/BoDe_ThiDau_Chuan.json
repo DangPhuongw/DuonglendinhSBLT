@@ -1,6 +1,6 @@
 {
-  "id": "qs-1794401839532",
-  "title": "BoDe_ThiDau_Chuan",
+  "id": "qs-1794402560202",
+  "title": "BoDe_ThiDau_Chuan.xlsx",
   "khoiDong": {
     "rieng": [
       [
@@ -840,37 +840,46 @@
     {
       "id": "tt-1",
       "type": "text",
-      "prompt": "Sắp xếp các đơn vị đo dung lượng dữ liệu sau theo thứ tự từ nhỏ đến lớn: [1] Megabyte (MB), [2] Kilobyte (KB), [3] Terabyte (TB), [4] Gigabyte (GB).",
-      "answer": "2-1-4-3",
+      "prompt": "Một người xếp các que diêm thành hình tam giác đều: tầng thứ nhất (đỉnh) có 1 que, tầng thứ hai có 2 que, ..., tầng thứ 10 có 10 que. Hỏi người đó đã dùng tất cả bao nhiêu que diêm để xếp đủ 10 tầng như vậy?",
+      "answer": "55",
       "alternatives": [
-        "2143",
-        "2, 1, 4, 3",
-        "2 1 4 3",
-        "[2] [1] [4] [3]"
+        "55",
+        "NĂM MƯƠI LĂM",
+        "NAM MUOI LAM",
+        "55 QUE",
+        "55 QUE DIÊM",
+        "55 QUE DIEM"
       ],
       "ignoreDiacritics": true
     },
     {
       "id": "tt-2",
       "type": "text",
-      "prompt": "Điền số tiếp theo vào dãy số theo quy luật: 3, 6, 12, 24, 48, ...?",
-      "answer": "96",
+      "prompt": "Cho dãy số: 2, 3, 5, 9, 17, 33, ... Hỏi số hạng tiếp theo trong dãy số này là số nào?",
+      "answer": "65",
       "alternatives": [
-        "96",
-        "CHÍN MƯƠI SÁU"
+        "65",
+        "SỐ 65",
+        "SO 65",
+        "SÁU MƯƠI LĂM",
+        "SAU MUOI LAM",
+        "SÁU LĂM"
       ],
       "ignoreDiacritics": true
     },
     {
       "id": "tt-3",
       "type": "text",
-      "prompt": "Sắp xếp các thời kỳ phát triển xã hội loài người theo tiến trình lịch sử từ xưa đến nay: [1] Thời đại đồ sắt, [2] Thời đại đồ đá, [3] Thời đại công nghệ thông tin, [4] Thời đại đồ đồng.",
-      "answer": "2-4-1-3",
+      "prompt": "Một khối lập phương bằng gỗ kích thước 3 x 3 x 3 được sơn màu đỏ toàn bộ 6 mặt ngoài, sau đó cưa thành 27 khối lập phương nhỏ kích thước 1 x 1 x 1. Hỏi có tất cả bao nhiêu khối lập phương nhỏ không bị sơn màu đỏ ở bất kỳ mặt nào?",
+      "answer": "1",
       "alternatives": [
-        "2413",
-        "2, 4, 1, 3",
-        "2 4 1 3",
-        "[2] [4] [1] [3]"
+        "1",
+        "MỘT",
+        "MOT",
+        "1 KHỐI",
+        "1 KHOI",
+        "MỘT KHỐI",
+        "MOT KHOI"
       ],
       "ignoreDiacritics": true
     },
