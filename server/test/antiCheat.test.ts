@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { RoomStateMachine, StateMachineCallbacks } from '../src/game/RoomStateMachine.js';
 import { GAME_CONFIG } from '@olympia/shared';
 
@@ -26,7 +26,77 @@ function setup(code: string) {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+describe('Luật mặc định: 2 lần cảnh cáo, từ lần 3 mỗi lần trừ 20 điểm', () => {
+  it('lần 1, 2 chỉ cảnh cáo; lần 3, 4 mỗi lần trừ 20 điểm; không bao giờ tự loại', () => {
+    vi.useFakeTimers();
+    const { machine, callbacks, b } = setup('ACP001');
+    expect(GAME_CONFIG.ANTI_CHEAT.PENALTY_FROM_VIOLATION).toBe(3);
+    expect(GAME_CONFIG.ANTI_CHEAT.PENALTY_POINTS).toBe(20);
+    expect(GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION).toBe(0);
+    machine.room.status = 'TANG_TOC';
+    machine.room.state = { round: 'TANG_TOC', subPhase: 'QUESTION', deadline: Date.now() + 30000 };
+    b.score = 50;
+
+    const leave = () => {
+      const a = machine.reportTabLeave(b.id, 'hidden');
+      vi.advanceTimersByTime(GAME_CONFIG.ANTI_CHEAT.DEDUPE_MS + 10);
+      return a;
+    };
+
+    expect(leave()).toMatchObject({ count: 1, penalty: 0, disqualified: false });
+    expect(leave()).toMatchObject({ count: 2, penalty: 0, disqualified: false });
+    expect(b.score).toBe(50);
+
+    expect(leave()).toMatchObject({ count: 3, penalty: 20, disqualified: false });
+    expect(b.score).toBe(30);
+    expect(b.roundScores.tt).toBe(-20);
+
+    expect(leave()).toMatchObject({ count: 4, penalty: 20 });
+    expect(b.score).toBe(10);
+
+    // Vẫn tiếp tục trừ (có thể âm điểm), không bị loại
+    for (let i = 0; i < 3; i++) leave();
+    expect(b.score).toBe(-50);
+    expect(b.disqualified).toBeFalsy();
+
+    // Biên bản: 2 lần cảnh cáo (0 điểm) rồi các lần trừ điểm
+    const reasons = machine.room.history.filter((e) => e.playerId === b.id).map((e) => `${e.reason}:${e.delta}`);
+    expect(reasons.slice(0, 4)).toEqual(['tab_leave_warning:0', 'tab_leave_warning:0', 'tab_leave_penalty:-20', 'tab_leave_penalty:-20']);
+    // Bảng điểm cả phòng được cập nhật khi trừ
+    expect(callbacks.broadcastScoreUpdate).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+});
+
+describe('Chỉ tính khi câu hỏi đang mở', () => {
+  it('lúc công bố đáp án, chọn gói, chọn hàng... rời tab không bị tính', () => {
+    const { machine, b } = setup('ACP002');
+    const notCounted: [string, string][] = [
+      ['TANG_TOC', 'REVEAL'], ['KD_RIENG', 'CHOOSE_PACKAGE'], ['KD_RIENG', 'REVEAL'], ['VCNV', 'PICK_ROW'],
+      ['VCNV', 'ROW_REVEAL'], ['VE_DICH', 'CHOOSE_PACKAGE'], ['VE_DICH', 'PACKAGE_CHOSEN'], ['TIEBREAK', 'DRAW_LOTS'],
+    ];
+    for (const [round, subPhase] of notCounted) {
+      machine.room.state = { round: round as any, subPhase, deadline: Date.now() + 5000 };
+      expect(machine.reportTabLeave(b.id, 'hidden')).toBeNull();
+    }
+    expect(b.tabLeaveCount || 0).toBe(0);
+
+    machine.room.state = { round: 'VCNV', subPhase: 'ROW_QUESTION', deadline: Date.now() + 5000 };
+    expect(machine.reportTabLeave(b.id, 'hidden')).toMatchObject({ count: 1 });
+  });
+});
+
 describe('Chống gian lận rời tab', () => {
+
+  // Các test dưới đây kiểm tra cơ chế tự loại khỏi trận, nên bật lại tùy chọn đó (mặc định đang tắt)
+  const DEFAULT_DISQUALIFY_AT = GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION;
+  beforeEach(() => {
+    GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION = 2;
+  });
+  afterEach(() => {
+    GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION = DEFAULT_DISQUALIFY_AT;
+  });
+
   it('lần 1 cảnh cáo, lần 2 bị loại; có ghi biên bản', () => {
     vi.useFakeTimers();
     const { machine, callbacks, b } = setup('AC0001');
@@ -91,16 +161,25 @@ describe('Chống gian lận rời tab', () => {
     expect(machine.room.state.round).toBe('KD_RIENG');
     expect(machine.room.state.activePlayerId).toBe(a.id);
 
-    // Người 1 vi phạm 2 lần (bỏ qua chống trùng bằng cách xóa mốc thời gian)
+    // Lúc chọn ô (chưa có câu hỏi) rời tab không bị tính
+    expect(machine.reportTabLeave(a.id, 'hidden')).toBeNull();
+    expect(a.tabLeaveCount || 0).toBe(0);
+
+    // Chọn ô -> 2.5s xác nhận -> câu hỏi mở
+    machine.chooseKdPackage(a.id, 0);
+    await sleep(3000);
+    expect(machine.room.state.subPhase).toBe('QUESTION');
+
+    // Người 1 vi phạm 2 lần khi câu hỏi đang mở (bỏ qua chống trùng bằng cách xóa mốc thời gian)
     machine.reportTabLeave(a.id, 'hidden');
     (machine as any).lastTabLeaveAt.clear();
     machine.reportTabLeave(a.id, 'hidden');
     expect(a.disqualified).toBe(true);
 
-    // Pha chọn gói bị kết thúc ngay -> xác nhận 2.5s -> bỏ qua người bị loại -> tới lượt người 2
-    await sleep(3000); // 2.5s xác nhận + 0.3s bù trễ mạng
+    // Câu hỏi bị kết thúc ngay -> công bố 3s -> bỏ qua người bị loại -> tới lượt người 2
+    await sleep(3500);
     expect(machine.room.state.activePlayerId).toBe(b.id);
-  }, 10000);
+  }, 15000);
 
   it('người bị loại không thể vô địch dù điểm cao nhất', async () => {
     const { machine, a, b, c } = setup('AC0005');

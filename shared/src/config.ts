@@ -29,13 +29,27 @@ export const GAME_CONFIG = {
 
   ANTI_CHEAT: {
     ENABLED: true,                 // Bật/tắt cơ chế phát hiện rời tab
-    MAX_WARNINGS: 1,               // Số lần được cảnh cáo; vi phạm lần kế tiếp -> bị loại
+    // Lần 1, 2: cảnh cáo. Từ lần PENALTY_FROM_VIOLATION (lần 3) trở đi: mỗi lần trừ PENALTY_POINTS điểm.
+    PENALTY_FROM_VIOLATION: 3,
+    PENALTY_POINTS: 20,
+    // Tự loại khỏi trận ở lần vi phạm thứ N. 0 = không bao giờ tự loại (mặc định).
+    DISQUALIFY_AT_VIOLATION: 0,
     DEDUPE_MS: 2000,               // Gộp các tín hiệu (blur + hidden) trong 2s thành 1 lần vi phạm
-    // Mất focus cửa sổ (blur) chỉ tính vi phạm nếu kéo dài quá thời gian này. Tránh báo nhầm khi bấm vào
-    // thanh địa chỉ, khung media, hộp thoại hệ thống... Chuyển tab / thu nhỏ (hidden) vẫn tính ngay.
-    BLUR_GRACE_MS: 1500,
-    // Chỉ tính vi phạm trong các vòng đang thi (không tính ở Sảnh chờ / màn Sẵn sàng / Kết thúc)
+    // Chỉ tính khi trang thật sự bị ẩn (chuyển tab, thu nhỏ cửa sổ, chuyển ứng dụng toàn màn hình).
+    // Mất focus mà trang vẫn hiện (chỉnh âm lượng, bấm thông báo, bấm sang màn hình phụ...) KHÔNG tính.
+    // Ẩn dưới HIDDEN_GRACE_MS (lỡ tay) cũng bỏ qua.
+    HIDDEN_GRACE_MS: 2000,
+    // Chỉ tính trong các vòng đang thi...
     ACTIVE_ROUNDS: ['KD_RIENG', 'KD_CHUNG', 'VCNV', 'TANG_TOC', 'VE_DICH', 'TIEBREAK'] as string[],
+    // ...và chỉ khi câu hỏi đang mở (đồng hồ trả lời / giành chuông đang chạy). Lúc chọn gói, chọn hàng,
+    // công bố đáp án... rời tab không bị tính vì không có gì để tra cứu.
+    ACTIVE_SUB_PHASES: [
+      'QUESTION', 'QUESTION_BUZZ', 'ANSWERING',                       // Khởi động, Tăng tốc, Về đích
+      'ROW_QUESTION', 'CENTER_QUESTION', 'CNV_ANSWERING',             // VCNV
+      'FINAL_GUESS', 'FINAL_GUESS_ANSWERING',
+      'STAR_DECISION', 'STEAL_BUZZ', 'STEAL_ANSWER',                  // Về đích
+      'WAIT_SIGNAL', 'BUZZ_OPEN',                                     // Câu hỏi phụ
+    ] as string[],
   },
 
   KHOI_DONG: {

@@ -103,6 +103,7 @@ export interface AntiCheatAlert {
   playerId: string;
   playerName: string;
   count: number;           // Lần vi phạm thứ mấy
+  penalty: number;         // Số điểm bị trừ ở lần này (0 = chỉ cảnh cáo)
   disqualified: boolean;   // true = đã bị loại
   reason: TabLeaveReason;
   round: RoundType;

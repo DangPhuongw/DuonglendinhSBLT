@@ -592,7 +592,8 @@ export class RoomStateMachine {
 
   /**
    * Thí sinh rời tab/cửa sổ trò chơi trong lúc thi.
-   * Lần 1..MAX_WARNINGS: cảnh cáo. Lần kế tiếp: loại khỏi trận.
+   * Lần 1, 2: cảnh cáo. Từ lần 3: mỗi lần trừ PENALTY_POINTS điểm (xem GAME_CONFIG.ANTI_CHEAT).
+   * Chỉ tự loại khỏi trận nếu bật DISQUALIFY_AT_VIOLATION.
    */
   public reportTabLeave(playerId: string, reason: TabLeaveReason): AntiCheatAlert | null {
     const cfg = GAME_CONFIG.ANTI_CHEAT;
@@ -603,6 +604,8 @@ export class RoomStateMachine {
 
     const round = this.room.state.round;
     if (!cfg.ACTIVE_ROUNDS.includes(round)) return null;
+    // Chỉ tính khi câu hỏi đang mở; lúc công bố, chọn gói... rời tab không bị phạt
+    if (!cfg.ACTIVE_SUB_PHASES.includes(this.room.state.subPhase)) return null;
 
     const now = Date.now();
     const last = this.lastTabLeaveAt.get(playerId);
@@ -610,23 +613,32 @@ export class RoomStateMachine {
     this.lastTabLeaveAt.set(playerId, now);
 
     player.tabLeaveCount = (player.tabLeaveCount || 0) + 1;
-    const disqualified = player.tabLeaveCount > cfg.MAX_WARNINGS;
+    const count = player.tabLeaveCount;
+    const disqualified = cfg.DISQUALIFY_AT_VIOLATION > 0 && count >= cfg.DISQUALIFY_AT_VIOLATION;
+    const penalty = !disqualified && count >= cfg.PENALTY_FROM_VIOLATION ? cfg.PENALTY_POINTS : 0;
+    const questionId = this.room.state.currentQuestion?.id || '';
 
-    // Ghi biên bản (xuất hiện trong file CSV, không đổi điểm)
-    this.room.history.push({
-      id: `cheat-${now}-${Math.random().toString(36).substring(2, 6)}`,
-      round,
-      questionId: this.room.state.currentQuestion?.id || '',
-      playerId,
-      delta: 0,
-      reason: disqualified ? 'tab_leave_disqualified' : 'tab_leave_warning',
-      at: now,
-    });
+    if (penalty > 0) {
+      // Trừ điểm (ghi vào biên bản CSV và cập nhật bảng điểm cho cả phòng)
+      this.addScore(playerId, round, questionId, -penalty, 'tab_leave_penalty');
+    } else {
+      // Chỉ ghi biên bản, không đổi điểm
+      this.room.history.push({
+        id: `cheat-${now}-${Math.random().toString(36).substring(2, 6)}`,
+        round,
+        questionId,
+        playerId,
+        delta: 0,
+        reason: disqualified ? 'tab_leave_disqualified' : 'tab_leave_warning',
+        at: now,
+      });
+    }
 
     const alert: AntiCheatAlert = {
       playerId,
       playerName: player.name,
-      count: player.tabLeaveCount,
+      count,
+      penalty,
       disqualified,
       reason: reason === 'hidden' ? 'hidden' : 'blur',
       round,

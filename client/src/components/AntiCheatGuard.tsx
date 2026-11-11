@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { ShieldAlert, ShieldX, AlertTriangle } from 'lucide-react';
 import { GAME_CONFIG, TabLeaveReason } from '@olympia/shared';
 import { useGameStore } from '../store/gameStore';
+import { ANTI_CHEAT_RULE, FREE_WARNINGS } from '../utils/antiCheatRules';
 
 /**
  * Chống gian lận rời tab.
- * - Phát hiện khi thí sinh chuyển tab / thu nhỏ / bấm sang cửa sổ khác trong lúc thi
- *   (Page Visibility API + sự kiện blur của cửa sổ) và báo lên server.
- * - Server quyết định: lần 1 cảnh cáo đỏ, lần 2 loại khỏi trận, rồi thông báo cho cả phòng.
+ * - Phát hiện khi thí sinh chuyển tab / thu nhỏ cửa sổ quá 2 giây trong lúc câu hỏi đang mở
+ *   (Page Visibility API) và báo lên server. Mất focus mà trang vẫn hiện (chỉnh âm lượng...) không tính.
+ * - Server quyết định: lần 1, 2 cảnh cáo; từ lần 3 mỗi lần trừ điểm; rồi thông báo cho cả phòng.
  * Lưu ý: trình duyệt chỉ cho PHÁT HIỆN, không chặn được việc tra cứu bằng thiết bị khác.
  */
 export const AntiCheatGuard: React.FC = () => {
@@ -17,68 +18,66 @@ export const AntiCheatGuard: React.FC = () => {
   const alert = useGameStore((s) => s.antiCheatAlert);
 
   const round = room?.state?.round;
+  const subPhase = room?.state?.subPhase;
   const isContestant = Boolean(me && (me.role || 'player') === 'player');
   const guardActive =
     GAME_CONFIG.ANTI_CHEAT.ENABLED &&
     Boolean(socket) &&
     isContestant &&
     !me?.disqualified &&
-    Boolean(round && GAME_CONFIG.ANTI_CHEAT.ACTIVE_ROUNDS.includes(round));
+    Boolean(round && GAME_CONFIG.ANTI_CHEAT.ACTIVE_ROUNDS.includes(round)) &&
+    Boolean(subPhase && GAME_CONFIG.ANTI_CHEAT.ACTIVE_SUB_PHASES.includes(subPhase));
 
   // 1. Theo dõi rời tab
   useEffect(() => {
     if (!guardActive || !socket) return;
 
-    let away = false;
+    // Chỉ theo dõi việc trang bị ẩn (chuyển tab / thu nhỏ). Không dùng sự kiện mất focus (blur): chỉnh âm
+    // lượng, bấm thông báo hay bấm sang màn hình phụ làm mất focus nhưng người chơi vẫn đang nhìn trò chơi.
+    let reported = false; // đã báo cho lần rời tab hiện tại
     let unloading = false; // Tải lại / đóng trang không tính là rời tab
-    let blurTimer: ReturnType<typeof setTimeout> | null = null;
+    let hiddenTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const cancelBlurTimer = () => {
-      if (blurTimer) {
-        clearTimeout(blurTimer);
-        blurTimer = null;
+    const cancelTimer = () => {
+      if (hiddenTimer) {
+        clearTimeout(hiddenTimer);
+        hiddenTimer = null;
       }
     };
-    const report = (reason: TabLeaveReason) => {
-      cancelBlurTimer();
-      if (away || unloading) return;
-      away = true;
-      socket.emit('anticheat:leave', { reason });
+    // Ẩn quá HIDDEN_GRACE_MS mới tính; quay lại trước đó (lỡ tay) thì bỏ qua.
+    // Trình duyệt có thể bắn sự kiện "hidden" lặp lại khi trang vẫn đang ẩn: giữ nguyên mốc bắt đầu,
+    // không đếm lại từ đầu (nếu không, sự kiện lặp sẽ làm không bao giờ đủ 2 giây).
+    const startHiddenTimer = () => {
+      if (hiddenTimer || reported) return;
+      hiddenTimer = setTimeout(() => {
+        hiddenTimer = null;
+        if (document.visibilityState === 'hidden' && !reported && !unloading) {
+          reported = true;
+          socket.emit('anticheat:leave', { reason: 'hidden' as TabLeaveReason });
+        }
+      }, GAME_CONFIG.ANTI_CHEAT.HIDDEN_GRACE_MS);
     };
     const onVisibility = () => {
-      if (document.visibilityState === 'hidden') report('hidden');
-      else if (document.hasFocus()) away = false;
-    };
-    // Mất focus thoáng qua (bấm thanh địa chỉ, khung media, hộp thoại...) không tính;
-    // chỉ báo khi vẫn chưa quay lại sau BLUR_GRACE_MS.
-    const onBlur = () => {
-      cancelBlurTimer();
-      blurTimer = setTimeout(() => {
-        blurTimer = null;
-        if (!document.hasFocus()) report('blur');
-      }, GAME_CONFIG.ANTI_CHEAT.BLUR_GRACE_MS);
-    };
-    const onFocus = () => {
-      cancelBlurTimer();
-      away = false;
+      if (document.visibilityState === 'hidden') {
+        startHiddenTimer();
+      } else {
+        cancelTimer();
+        reported = false;
+      }
     };
     const onUnload = () => {
       unloading = true;
     };
 
-    // Vào vòng thi khi đang ở tab khác -> tính luôn
-    if (document.visibilityState === 'hidden') report('hidden');
+    // Câu hỏi mở ra khi đang ở tab khác -> bắt đầu tính từ lúc này
+    if (document.visibilityState === 'hidden') startHiddenTimer();
 
     document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('blur', onBlur);
-    window.addEventListener('focus', onFocus);
     window.addEventListener('beforeunload', onUnload);
     window.addEventListener('pagehide', onUnload);
     return () => {
-      cancelBlurTimer();
+      cancelTimer();
       document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('blur', onBlur);
-      window.removeEventListener('focus', onFocus);
       window.removeEventListener('beforeunload', onUnload);
       window.removeEventListener('pagehide', onUnload);
     };
@@ -101,24 +100,30 @@ export const AntiCheatGuard: React.FC = () => {
 
   const showModal = alert && me && alert.playerId === me.id && modalFor === alert.receivedAt;
   const showToast = alert && me && alert.playerId !== me.id && toastFor === alert.receivedAt;
-  const warnedOnce = isContestant && !me?.disqualified && (me?.tabLeaveCount || 0) > 0;
-  const maxWarnings = GAME_CONFIG.ANTI_CHEAT.MAX_WARNINGS;
+  const leaveCount = me?.tabLeaveCount || 0;
+  const warnedOnce = isContestant && !me?.disqualified && leaveCount > 0;
+  const cfg = GAME_CONFIG.ANTI_CHEAT;
+  const penaltiesSoFar = Math.max(0, leaveCount - FREE_WARNINGS) * cfg.PENALTY_POINTS;
+  const badgeText =
+    leaveCount <= FREE_WARNINGS
+      ? `Đã cảnh cáo ${leaveCount}/${FREE_WARNINGS} – lần thứ ${cfg.PENALTY_FROM_VIOLATION} sẽ bị trừ ${cfg.PENALTY_POINTS} điểm`
+      : `Đã rời tab ${leaveCount} lần – đã bị trừ ${penaltiesSoFar} điểm, mỗi lần nữa trừ ${cfg.PENALTY_POINTS} điểm`;
 
   return (
     <>
       {/* Nhắc luật ở màn Sẵn sàng */}
       {round === 'READY' && isContestant && GAME_CONFIG.ANTI_CHEAT.ENABLED && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FF496C]/15 border border-[#FF496C]/50 text-[#FFB4C2] text-xs sm:text-sm font-bold shadow-lg pointer-events-none">
-          <ShieldAlert size={16} className="text-[#FF496C]" />
-          Chống gian lận: rời tab lần 1 bị cảnh cáo, lần 2 bị loại khỏi trận
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-40 max-w-[92vw] flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#FF496C]/15 border border-[#FF496C]/50 text-[#FFB4C2] text-xs sm:text-sm font-bold shadow-lg pointer-events-none">
+          <ShieldAlert size={16} className="text-[#FF496C] shrink-0" />
+          <span>Chống gian lận: {ANTI_CHEAT_RULE}</span>
         </div>
       )}
 
       {/* Nhãn đã bị cảnh cáo (cho chính thí sinh) */}
       {warnedOnce && !showModal && (
-        <div className="fixed top-16 right-3 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF496C] text-white text-xs sm:text-sm font-black shadow-[0_0_18px_rgba(255,73,108,0.6)] pointer-events-none animate-pulse">
+        <div className="fixed top-16 right-3 z-40 max-w-[92vw] flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-[#FF496C] text-white text-xs sm:text-sm font-black shadow-[0_0_18px_rgba(255,73,108,0.6)] pointer-events-none animate-pulse">
           <AlertTriangle size={15} />
-          Đã cảnh cáo {me?.tabLeaveCount}/{maxWarnings} – rời tab lần nữa sẽ bị loại
+          {badgeText}
         </div>
       )}
 
@@ -133,6 +138,8 @@ export const AntiCheatGuard: React.FC = () => {
           <span>
             {alert.disqualified
               ? `${alert.playerName} đã bị LOẠI vì rời tab lần ${alert.count}`
+              : alert.penalty > 0
+              ? `${alert.playerName} rời tab lần ${alert.count} – bị trừ ${alert.penalty} điểm`
               : `${alert.playerName} rời tab trò chơi – cảnh cáo lần ${alert.count}`}
           </span>
         </div>
@@ -148,16 +155,26 @@ export const AntiCheatGuard: React.FC = () => {
               <AlertTriangle size={64} className="mx-auto text-[#FF496C]" />
             )}
             <h2 className="mt-4 text-2xl sm:text-3xl font-heading font-black text-[#FF496C] uppercase tracking-wide">
-              {alert.disqualified ? 'Bạn đã bị loại' : `Cảnh báo lần ${alert.count}`}
+              {alert.disqualified
+                ? 'Bạn đã bị loại'
+                : alert.penalty > 0
+                ? `Bị trừ ${alert.penalty} điểm`
+                : `Cảnh cáo lần ${alert.count}/${FREE_WARNINGS}`}
             </h2>
             <p className="mt-3 text-[#F8FAFC] text-sm sm:text-base leading-relaxed">
               {alert.disqualified
-                ? 'Bạn đã rời khỏi tab trò chơi lần thứ hai trong lúc thi. Bạn bị loại khỏi trận đấu và chỉ có thể tiếp tục theo dõi.'
+                ? `Bạn đã rời khỏi tab trò chơi ${alert.count} lần trong lúc thi. Bạn bị loại khỏi trận đấu và chỉ có thể tiếp tục theo dõi.`
+                : alert.penalty > 0
+                ? `Bạn đã rời khỏi tab trò chơi lần thứ ${alert.count} trong lúc thi nên bị trừ ${alert.penalty} điểm. Cả phòng đã được thông báo.`
                 : 'Hệ thống phát hiện bạn vừa rời khỏi tab trò chơi trong lúc thi. Cả phòng đã được thông báo.'}
             </p>
             {!alert.disqualified && (
               <p className="mt-3 text-[#FFD43B] font-bold text-sm sm:text-base">
-                Nếu tái phạm, bạn sẽ bị LOẠI khỏi trận.
+                {alert.penalty > 0
+                  ? `Mỗi lần rời tab tiếp theo sẽ bị trừ thêm ${cfg.PENALTY_POINTS} điểm.`
+                  : alert.count >= FREE_WARNINGS
+                  ? `Lần rời tab tiếp theo sẽ bị trừ ${cfg.PENALTY_POINTS} điểm.`
+                  : `Từ lần thứ ${cfg.PENALTY_FROM_VIOLATION}, mỗi lần rời tab bị trừ ${cfg.PENALTY_POINTS} điểm.`}
               </p>
             )}
             <button

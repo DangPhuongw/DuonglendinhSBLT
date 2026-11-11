@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { GAME_CONFIG } from '@olympia/shared';
+import { ANTI_CHEAT_RULE } from '../utils/antiCheatRules';
 import {
+  ShieldAlert,
   Users,
   Upload,
   Play,
@@ -258,6 +260,20 @@ export const Lobby: React.FC = () => {
           <button onClick={() => setSeatNotice('')} className="text-[#FF496C] hover:text-white">
             <X size={15} />
           </button>
+        </div>
+      )}
+
+      {/* Luật chống gian lận: nhắc trước khi trận đấu bắt đầu */}
+      {GAME_CONFIG.ANTI_CHEAT.ENABLED && (
+        <div
+          role="note"
+          className="w-full my-1.5 px-3 py-2 bg-[#FF496C]/10 border border-[#FF496C]/40 rounded-xl text-[#FFB4C2] text-xs sm:text-sm font-bold flex items-start gap-2 shrink-0"
+        >
+          <ShieldAlert size={16} className="text-[#FF496C] shrink-0 mt-0.5" />
+          <span>
+            <span className="text-[#FF496C] uppercase tracking-wide">Luật chống gian lận: </span>
+            {ANTI_CHEAT_RULE} Cả phòng sẽ được thông báo mỗi lần vi phạm.
+          </span>
         </div>
       )}
 

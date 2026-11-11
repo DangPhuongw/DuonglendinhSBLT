@@ -1,5 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { GAME_CONFIG } from '@olympia/shared';
 import { RoomStateMachine, StateMachineCallbacks } from '../src/game/RoomStateMachine.js';
+
+// Các test dưới đây kiểm tra cơ chế tự loại khỏi trận, nên bật lại tùy chọn đó (mặc định đang tắt)
+const DEFAULT_DISQUALIFY_AT = GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION;
+beforeEach(() => {
+  GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION = 2;
+});
+afterEach(() => {
+  GAME_CONFIG.ANTI_CHEAT.DISQUALIFY_AT_VIOLATION = DEFAULT_DISQUALIFY_AT;
+});
+
 
 function createMockCallbacks(): StateMachineCallbacks {
   return {
@@ -20,7 +31,7 @@ function setup(code: string, count: number) {
   return { machine, players: machine.room.players };
 }
 
-/** Rời tab 2 lần -> bị loại (MAX_WARNINGS = 1). */
+/** Rời tab 2 lần -> bị loại (DISQUALIFY_AT_VIOLATION = 2 trong file test này). */
 function cheatTwice(machine: RoomStateMachine, playerId: string) {
   machine.reportTabLeave(playerId, 'hidden');
   (machine as any).lastTabLeaveAt.clear();
