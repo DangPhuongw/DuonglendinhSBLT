@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: olympia-noi-bo
+    name: olympiavn
     runtime: node
     plan: free
     region: singapore

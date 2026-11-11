@@ -8,5 +8,7 @@ snapshots/
 *.log
 .DS_Store
 .claude/
+scratch/
+server/scratch/
 
 cloudflared.exe
