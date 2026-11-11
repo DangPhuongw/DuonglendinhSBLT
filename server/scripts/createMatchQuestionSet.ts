@@ -3,237 +3,293 @@ import path from 'path';
 import xlsx from 'xlsx';
 import { parseExcelQuestionSet } from '../src/game/questionParser.js';
 import { validateQuestionSet } from '../src/game/questionValidator.js';
+import { loadQuestionBank } from '../src/game/questionBank.js';
 
-// Dữ liệu bộ đề chuẩn thi đấu
+// Đọc ngân hàng để đảm bảo KHÔNG trùng lặp bất kỳ câu nào với kho
+const bank = loadQuestionBank(path.resolve('question-bank')).data as any;
+const norm = (t: string) => (t || '').toLowerCase().normalize('NFC').replace(/\s+/g, ' ').trim();
+const bankPrompts = new Set<string>();
+const bankKeywords = new Set<string>();
+function collectPrompts(v: any) {
+  if (Array.isArray(v)) return v.forEach(collectPrompts);
+  if (v && typeof v === 'object') {
+    if (typeof v.prompt === 'string') bankPrompts.add(norm(v.prompt));
+    if (v.obstacle && typeof v.obstacle.answer === 'string') bankKeywords.add(norm(v.obstacle.answer));
+    Object.values(v).forEach(collectPrompts);
+  }
+}
+collectPrompts(bank);
+
+// 1. Khởi động riêng (5 ghế, mỗi ghế 6 câu = 30 câu)
 const kdRiengData = [
   // Ghế 1
   {
     Seat: 1, Order: 1,
-    Prompt: 'Thành phố nào là thủ đô của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam?',
-    OptionA: 'Hà Nội', OptionB: 'TP. Hồ Chí Minh', OptionC: 'Đà Nẵng', OptionD: 'Hải Phòng',
-    Answer: 'A', Alternatives: 'HÀ NỘI; HA NOI', Difficulty: 'Dễ'
+    Prompt: 'Tên dòng sông thơ mộng chảy qua lòng thành phố Huế gắn liền với chùa Thiên Mụ là sông gì?',
+    OptionA: 'Sông Hương', OptionB: 'Sông Gianh', OptionC: 'Sông Thạch Hãn', OptionD: 'Sông Bến Hải',
+    Answer: 'A', Alternatives: 'SÔNG HƯƠNG; SONG HUONG; HƯƠNG GIANG', Difficulty: 'Dễ'
   },
   {
     Seat: 1, Order: 2,
-    Prompt: 'Trong cơ thể người, cơ quan nào chịu trách nhiệm chính trong việc co bóp để đẩy máu đi tuần hoàn nuôi các mô và tế bào?',
-    OptionA: 'Phổi', OptionB: 'Tim', OptionC: 'Gan', OptionD: 'Thận',
-    Answer: 'B', Alternatives: 'TIM; TRÁI TIM; TRAI TIM', Difficulty: 'Dễ'
+    Prompt: 'Nguyên tố hóa học nào có ký hiệu là Au và là kim loại quý có tính dát mỏng tốt nhất?',
+    OptionA: 'Vàng', OptionB: 'Bạc', OptionC: 'Đồng', OptionD: 'Bạch kim',
+    Answer: 'A', Alternatives: 'VÀNG; VANG; AU', Difficulty: 'Dễ'
   },
   {
     Seat: 1, Order: 3,
-    Prompt: 'Ký hiệu hóa học của nguyên tố Sắt trong bảng hệ thống tuần hoàn các nguyên tố hóa học là gì?',
-    OptionA: 'Fe', OptionB: 'Cu', OptionC: 'Zn', OptionD: 'Al',
-    Answer: 'A', Alternatives: 'FE; SẮT; SAT', Difficulty: 'Dễ'
+    Prompt: 'Trong cơ thể người, chất vận chuyển khí oxy chủ yếu từ phổi đến các mô là gì?',
+    OptionA: 'Hồng cầu', OptionB: 'Bạch cầu', OptionC: 'Tiểu cầu', OptionD: 'Huyết tương',
+    Answer: 'A', Alternatives: 'HỒNG CẦU; HONG CAU; HEMOGLOBIN', Difficulty: 'Dễ'
   },
   {
     Seat: 1, Order: 4,
-    Prompt: 'Đơn vị đo độ dài cơ bản trong Hệ đơn vị đo lường quốc tế (SI) là gì?',
-    OptionA: 'Xentimét (cm)', OptionB: 'Milimét (mm)', OptionC: 'Mét (m)', OptionD: 'Kilômét (km)',
-    Answer: 'C', Alternatives: 'MÉT; MET; M', Difficulty: 'Dễ'
+    Prompt: 'Tác giả của áng văn chính luận bất hủ "Hịch tướng sĩ" vào thế kỷ 13 là vị tướng nào?',
+    OptionA: 'Trần Hưng Đạo', OptionB: 'Trần Quang Khải', OptionC: 'Trần Nhật Duật', OptionD: 'Trần Khánh Dư',
+    Answer: 'A', Alternatives: 'TRẦN HƯNG ĐẠO; TRAN HUNG DAO; TRẦN QUỐC TUẤN', Difficulty: 'Dễ'
   },
   {
     Seat: 1, Order: 5,
-    Prompt: 'Vị anh hùng nào đã dựng cờ khởi nghĩa Lam Sơn chống quân Minh xâm lược và lập ra triều đại Hậu Lê?',
-    OptionA: 'Lê Lợi', OptionB: 'Lê Thánh Tông', OptionC: 'Lê Hoàn', OptionD: 'Lê Chiêu Thống',
-    Answer: 'A', Alternatives: 'LÊ LỢI; LE LOI; LÊ THÁI TỔ; LE THAI TO', Difficulty: 'Trung bình'
+    Prompt: 'Lũy thừa 3 mũ 4 (3^4) có giá trị bằng bao nhiêu?',
+    OptionA: '81', OptionB: '27', OptionC: '243', OptionD: '12',
+    Answer: 'A', Alternatives: '81; TÁM MƯƠI MỐT', Difficulty: 'Trung bình'
   },
   {
     Seat: 1, Order: 6,
-    Prompt: 'Giá trị lũy thừa của biểu thức 2 mũ 5 (2^5) bằng bao nhiêu?',
-    OptionA: '16', OptionB: '32', OptionC: '64', OptionD: '10',
-    Answer: 'B', Alternatives: '32; BA MƯƠI HAI', Difficulty: 'Trung bình'
+    Prompt: 'Hiện tượng tán sắc ánh sáng mặt trời qua các giọt nước mưa trong không khí tạo nên hiện tượng quang học rực rỡ nào?',
+    OptionA: 'Cầu vồng', OptionB: 'Ảo ảnh', OptionC: 'Nhật thực', OptionD: 'Nguyệt thực',
+    Answer: 'A', Alternatives: 'CẦU VỒNG; CAU VONG', Difficulty: 'Trung bình'
   },
 
   // Ghế 2
   {
     Seat: 2, Order: 1,
-    Prompt: 'Đại dương nào có diện tích lớn nhất trên bề mặt Trái Đất?',
-    OptionA: 'Đại Tây Dương', OptionB: 'Ấn Độ Dương', OptionC: 'Thái Bình Dương', OptionD: 'Bắc Băng Dương',
-    Answer: 'C', Alternatives: 'THÁI BÌNH DƯƠNG; THAI BINH DUONG', Difficulty: 'Dễ'
+    Prompt: 'Quần đảo Hoàng Sa của Việt Nam hiện nay thuộc quyền quản lý hành chính của thành phố trực thuộc trung ương nào?',
+    OptionA: 'Đà Nẵng', OptionB: 'Hải Phòng', OptionC: 'Quảng Nam', OptionD: 'Khánh Hòa',
+    Answer: 'A', Alternatives: 'ĐÀ NẴNG; DA NANG; THÀNH PHỐ ĐÀ NẴNG', Difficulty: 'Dễ'
   },
   {
     Seat: 2, Order: 2,
-    Prompt: 'Nguyên tố nào có số hiệu nguyên tử bằng 1 và là nguyên tố nhẹ nhất trong vũ trụ?',
-    OptionA: 'Hydro', OptionB: 'Heli', OptionC: 'Lithi', OptionD: 'Cacbon',
-    Answer: 'A', Alternatives: 'HYDRO; HIDRO; H', Difficulty: 'Dễ'
+    Prompt: 'Chất khí nào chiếm khoảng 78% thể tích bầu khí quyển Trái Đất ở điều kiện tiêu chuẩn?',
+    OptionA: 'Nitơ (N2)', OptionB: 'Oxy (O2)', OptionC: 'Cacbonic (CO2)', OptionD: 'Heli (He)',
+    Answer: 'A', Alternatives: 'NITƠ; NITO; NITROGEN; N2', Difficulty: 'Dễ'
   },
   {
     Seat: 2, Order: 3,
-    Prompt: 'Trong một tam giác vuông, cạnh đối diện với góc vuông được gọi là cạnh gì?',
-    OptionA: 'Cạnh kề', OptionB: 'Cạnh đối', OptionC: 'Cạnh huyền', OptionD: 'Đường cao',
-    Answer: 'C', Alternatives: 'CẠNH HUYỀN; CANH HUYEN', Difficulty: 'Dễ'
+    Prompt: 'Cơ quan nào trong hệ tiêu hóa của người tiết ra mật để giúp tiêu hóa chất béo?',
+    OptionA: 'Gan', OptionB: 'Dạ dày', OptionC: 'Tụy', OptionD: 'Ruột non',
+    Answer: 'A', Alternatives: 'GAN', Difficulty: 'Dễ'
   },
   {
     Seat: 2, Order: 4,
-    Prompt: 'Bản Tuyên ngôn Độc lập khai sinh ra nước Việt Nam Dân chủ Cộng hòa ngày 2/9/1945 được Chủ tịch Hồ Chí Minh đọc tại quảng trường nào?',
-    OptionA: 'Quảng trường Ba Đình', OptionB: 'Quảng trường Cách Mạng Tháng Tám', OptionC: 'Quảng trường Đông Kinh Nghĩa Thục', OptionD: 'Quảng trường Lam Sơn',
-    Answer: 'A', Alternatives: 'QUẢNG TRƯỜNG BA ĐÌNH; BA ĐÌNH; BA DINH', Difficulty: 'Dễ'
+    Prompt: 'Vị vua nào của triều Lý đã ban bố chiếu dời đô về Thăng Long vào năm 1010?',
+    OptionA: 'Lý Thái Tổ', OptionB: 'Lý Thái Tông', OptionC: 'Lý Thánh Tông', OptionD: 'Lý Nhân Tông',
+    Answer: 'A', Alternatives: 'LÝ THÁI TỔ; LY THAI TO; LÝ CÔNG UẨN', Difficulty: 'Dễ'
   },
   {
     Seat: 2, Order: 5,
-    Prompt: 'Hiện tượng các giọt sương đọng trên lá cây vào sáng sớm là kết quả của sự biến đổi trạng thái nào của hơi nước trong không khí?',
-    OptionA: 'Sự ngưng tụ', OptionB: 'Sự bay hơi', OptionC: 'Sự nóng chảy', OptionD: 'Sự đông đặc',
-    Answer: 'A', Alternatives: 'NGƯNG TỤ; SỰ NGƯNG TỤ; NGUNG TU', Difficulty: 'Trung bình'
+    Prompt: 'Một hình tròn có bán kính r = 5 cm. Chu vi của hình tròn đó bằng bao nhiêu pi xentimét?',
+    OptionA: '10 pi cm', OptionB: '25 pi cm', OptionC: '5 pi cm', OptionD: '20 pi cm',
+    Answer: 'A', Alternatives: '10 PI; 10; MƯỜI PI', Difficulty: 'Trung bình'
   },
   {
     Seat: 2, Order: 6,
-    Prompt: 'Trong tác phẩm "Chuyện người con gái Nam Xương" của Nguyễn Dữ, nhân vật người phụ nữ đức hạnh nhưng phải chịu nỗi oan khuất tên là gì?',
-    OptionA: 'Vũ Thị Thiết (Vũ Nương)', OptionB: 'Kiều Nguyệt Nga', OptionC: 'Thúy Kiều', OptionD: 'Mị Nương',
-    Answer: 'A', Alternatives: 'VŨ NƯƠNG; VU NUONG; VŨ THỊ THIẾT; VU THI THIET', Difficulty: 'Trung bình'
+    Prompt: 'Tác phẩm "Số đỏ" châm biếm sâu cay xã hội tư sản thành thị nửa phong kiến là kiệt tác của nhà văn nào?',
+    OptionA: 'Vũ Trọng Phụng', OptionB: 'Nam Cao', OptionC: 'Ngô Tất Tố', OptionD: 'Nguyễn Công Hoan',
+    Answer: 'A', Alternatives: 'VŨ TRỌNG PHỤNG; VU TRONG PHUNG', Difficulty: 'Trung bình'
   },
 
   // Ghế 3
   {
     Seat: 3, Order: 1,
-    Prompt: 'Vận tốc truyền của ánh sáng trong chân không xấp xỉ bằng bao nhiêu km/s?',
-    OptionA: '300.000 km/s', OptionB: '150.000 km/s', OptionC: '30.000 km/s', OptionD: '3.000 km/s',
-    Answer: 'A', Alternatives: '300.000 KM/S; 300000; BA TRĂM NGHÌN KM/S', Difficulty: 'Dễ'
+    Prompt: 'Hồ nước ngọt tự nhiên lớn nhất miền Bắc Việt Nam nằm trong vườn quốc gia cùng tên thuộc tỉnh Bắc Kạn là hồ nào?',
+    OptionA: 'Hồ Ba Bể', OptionB: 'Hồ Tây', OptionC: 'Hồ Thác Bà', OptionD: 'Hồ Núi Cốc',
+    Answer: 'A', Alternatives: 'HỒ BA BỂ; HO BA BE; BA BỂ', Difficulty: 'Dễ'
   },
   {
     Seat: 3, Order: 2,
-    Prompt: 'Khí nào sau đây được cây xanh hấp thụ trong quá trình quang hợp vào ban ngày?',
-    OptionA: 'Cacbonic (CO2)', OptionB: 'Nitơ (N2)', OptionC: 'Mêtan (CH4)', OptionD: 'Lưu huỳnh đioxit (SO2)',
-    Answer: 'A', Alternatives: 'CO2; CACBONIC; KHÍ CACBONIC; DIOXIT CACBON', Difficulty: 'Dễ'
+    Prompt: 'Công thức hóa học của muối ăn thông thường dùng trong nấu nướng hàng ngày là gì?',
+    OptionA: 'NaCl', OptionB: 'KCl', OptionC: 'CaCO3', OptionD: 'NaHCO3',
+    Answer: 'A', Alternatives: 'NACL; NATRI CLORUA', Difficulty: 'Dễ'
   },
   {
     Seat: 3, Order: 3,
-    Prompt: 'Quốc gia nào có diện tích lãnh thổ lớn nhất thế giới hiện nay?',
-    OptionA: 'Canada', OptionB: 'Liên bang Nga', OptionC: 'Trung Quốc', OptionD: 'Hoa Kỳ',
-    Answer: 'B', Alternatives: 'NGA; LIÊN BANG NGA; NƯỚC NGA; RUSSIA', Difficulty: 'Dễ'
+    Prompt: 'Bào quan nào trong tế bào thực vật chứa sắc tố diệp lục để tiến hành quang hợp?',
+    OptionA: 'Lục lạp', OptionB: 'Ti thể', OptionC: 'Không bào', OptionD: 'Riboxom',
+    Answer: 'A', Alternatives: 'LỤC LẠP; LUC LAP; CHLOROPLAST', Difficulty: 'Dễ'
   },
   {
     Seat: 3, Order: 4,
-    Prompt: 'Trận đại thắng Bạch Đằng năm 938 do vị anh hùng dân tộc nào chỉ huy đã đặt dấu chấm hết cho hơn một thiên niên kỷ Bắc thuộc?',
-    OptionA: 'Ngô Quyền', OptionB: 'Đinh Bộ Lĩnh', OptionC: 'Lê Hoàn', OptionD: 'Trần Hưng Đạo',
-    Answer: 'A', Alternatives: 'NGÔ QUYỀN; NGO QUYEN', Difficulty: 'Dễ'
+    Prompt: 'Ai là nữ tướng anh hùng cưỡi voi ra trận đánh đuổi quân Đông Ngô thế kỷ 3 với câu nói nổi tiếng muốn đạp luồng sóng dữ?',
+    OptionA: 'Triệu Thị Trinh (Bà Triệu)', OptionB: 'Trưng Trắc', OptionC: 'Trưng Nhị', OptionD: 'Lê Chân',
+    Answer: 'A', Alternatives: 'BÀ TRIỆU; BA TRIEU; TRIỆU THỊ TRINH; TRIEU THI TRINH', Difficulty: 'Dễ'
   },
   {
     Seat: 3, Order: 5,
-    Prompt: 'Tổng số đo ba góc trong của một tam giác bất kỳ trong hình học phẳng Euclide bằng bao nhiêu độ?',
-    OptionA: '90 độ', OptionB: '180 độ', OptionC: '270 độ', OptionD: '360 độ',
-    Answer: 'B', Alternatives: '180 ĐỘ; 180; MỘT TRĂM TÁM MƯƠI ĐỘ', Difficulty: 'Trung bình'
+    Prompt: 'Căn bậc ba của số 125 bằng bao nhiêu?',
+    OptionA: '5', OptionB: '15', OptionC: '25', OptionD: '3',
+    Answer: 'A', Alternatives: '5; NĂM', Difficulty: 'Trung bình'
   },
   {
     Seat: 3, Order: 6,
-    Prompt: 'Tác giả của bài thơ thiếu nhi nổi tiếng "Hạt gạo làng ta" là nhà thơ nào?',
-    OptionA: 'Trần Đăng Khoa', OptionB: 'Định Hải', OptionC: 'Phạm Hổ', OptionD: 'Xuân Quỳnh',
-    Answer: 'A', Alternatives: 'TRẦN ĐĂNG KHOA; TRAN DANG KHOA', Difficulty: 'Trung bình'
+    Prompt: 'Trong bài thơ "Tây Tiến" của Quang Dũng, dòng sông nào gắn với hình ảnh súng ngửi trời và mường lát hoa về trong đêm hơi?',
+    OptionA: 'Sông Mã', OptionB: 'Sông Đà', OptionC: 'Sông Thao', OptionD: 'Sông Lô',
+    Answer: 'A', Alternatives: 'SÔNG MÃ; SONG MA', Difficulty: 'Trung bình'
   },
 
   // Ghế 4
   {
     Seat: 4, Order: 1,
-    Prompt: 'Kim loại duy nhất nào ở thể lỏng trong điều kiện nhiệt độ phòng tiêu chuẩn?',
-    OptionA: 'Thủy ngân (Hg)', OptionB: 'Chì (Pb)', OptionC: 'Thiếc (Sn)', OptionD: 'Nhôm (Al)',
-    Answer: 'A', Alternatives: 'THỦY NGÂN; THUY NGAN; HG', Difficulty: 'Dễ'
+    Prompt: 'Bán đảo Đông Dương trong lịch sử địa lý gồm 3 quốc gia: Việt Nam, Lào và quốc gia nào?',
+    OptionA: 'Campuchia', OptionB: 'Thái Lan', OptionC: 'Myanmar', OptionD: 'Malaysia',
+    Answer: 'A', Alternatives: 'CAMPUCHIA; CAM-PU-CHIA; CAMBODIA', Difficulty: 'Dễ'
   },
   {
     Seat: 4, Order: 2,
-    Prompt: 'Tác phẩm văn học kiệt xuất nào được xem là đỉnh cao truyện thơ Nôm của đại thi hào Nguyễn Du?',
-    OptionA: 'Truyện Kiều', OptionB: 'Lục Vân Tiên', OptionC: 'Chinh phụ ngâm', OptionD: 'Cung oán ngâm khúc',
-    Answer: 'A', Alternatives: 'TRUYỆN KIỀU; TRUYEN KIEU; ĐOẠN TRƯỜNG TÂN THANH', Difficulty: 'Dễ'
+    Prompt: 'Kim loại nào có nhiệt độ nóng chảy cao nhất trong các kim loại và thường dùng làm dây tóc bóng đèn sợi đốt?',
+    OptionA: 'Vonfram (W)', OptionB: 'Titan (Ti)', OptionC: 'Sắt (Fe)', OptionD: 'Đồng (Cu)',
+    Answer: 'A', Alternatives: 'VONFRAM; TUNGSTEN; W', Difficulty: 'Dễ'
   },
   {
     Seat: 4, Order: 3,
-    Prompt: 'Tứ giác đều có 4 cạnh bằng nhau và 4 góc vuông được gọi là hình gì?',
-    OptionA: 'Hình vuông', OptionB: 'Hình chữ nhật', OptionC: 'Hình thoi', OptionD: 'Hình bình hành',
-    Answer: 'A', Alternatives: 'HÌNH VUÔNG; HINH VUONG', Difficulty: 'Dễ'
+    Prompt: 'Nhóm máu nào trong hệ nhóm máu ABO được xem là nhóm máu chuyên nhận vì có thể nhận mọi nhóm máu trong điều kiện cấp cứu?',
+    OptionA: 'Nhóm AB', OptionB: 'Nhóm O', OptionC: 'Nhóm A', OptionD: 'Nhóm B',
+    Answer: 'A', Alternatives: 'AB; NHÓM AB; NHOM AB', Difficulty: 'Dễ'
   },
   {
     Seat: 4, Order: 4,
-    Prompt: 'Hòn đảo lớn nhất của Việt Nam nằm trong vịnh Thái Lan thuộc tỉnh Kiên Giang có tên là gì?',
-    OptionA: 'Đảo Phú Quốc', OptionB: 'Đảo Cát Bà', OptionC: 'Đảo Côn Sơn', OptionD: 'Đảo Lý Sơn',
-    Answer: 'A', Alternatives: 'PHÚ QUỐC; PHU QUOC; ĐẢO PHÚ QUỐC', Difficulty: 'Dễ'
+    Prompt: 'Cuộc khởi nghĩa Yên Thế kéo dài gần 30 năm chống thực dân Pháp gắn liền với thủ lĩnh kiệt xuất nào?',
+    OptionA: 'Hoàng Hoa Thám', OptionB: 'Phan Đình Phùng', OptionC: 'Nguyễn Thiện Thuật', OptionD: 'Đinh Công Tráng',
+    Answer: 'A', Alternatives: 'HOÀNG HOA THÁM; HOANG HOA THAM; ĐỀ THÁM', Difficulty: 'Dễ'
   },
   {
     Seat: 4, Order: 5,
-    Prompt: 'Sóng âm thanh không thể truyền lan qua môi trường vật chất nào sau đây?',
-    OptionA: 'Chân không', OptionB: 'Chất rắn', OptionC: 'Chất lỏng', OptionD: 'Chất khí',
-    Answer: 'A', Alternatives: 'CHÂN KHÔNG; CHAN KHONG', Difficulty: 'Trung bình'
+    Prompt: 'Trong mặt phẳng tọa độ Oxy, đường thẳng y = 3x - 1 có hệ số góc bằng bao nhiêu?',
+    OptionA: '3', OptionB: '-1', OptionC: '1', OptionD: '-3',
+    Answer: 'A', Alternatives: '3; BA', Difficulty: 'Trung bình'
   },
   {
     Seat: 4, Order: 6,
-    Prompt: 'Vị anh hùng dân tộc nào đã chỉ huy đại quân Tây Sơn tiến ra Thăng Long quét sạch 29 vạn quân Mãn Thanh mùa xuân năm 1789?',
-    OptionA: 'Quang Trung (Nguyễn Huệ)', OptionB: 'Nguyễn Nhạc', OptionC: 'Nguyễn Lữ', OptionD: 'Trần Quang Diệu',
-    Answer: 'A', Alternatives: 'QUANG TRUNG; NGUYỄN HUỆ; NGUYEN HUE; VUA QUANG TRUNG', Difficulty: 'Trung bình'
+    Prompt: 'Tác giả của tập kịch kinh điển "Hồn Trương Ba, da hàng thịt" và "Tôi và chúng ta" là nhà viết kịch tài hoa nào?',
+    OptionA: 'Lưu Quang Vũ', OptionB: 'Xuân Trình', OptionC: 'Đào Hồng Cẩm', OptionD: 'Tào Mạt',
+    Answer: 'A', Alternatives: 'LƯU QUANG VŨ; LUU QUANG VU', Difficulty: 'Trung bình'
+  },
+
+  // Ghế 5
+  {
+    Seat: 5, Order: 1,
+    Prompt: 'Ngọn núi lửa đã tắt nào cao nhất thế giới và là đỉnh núi cao nhất châu Mỹ thuộc dãy Andes?',
+    OptionA: 'Aconcagua', OptionB: 'Kilimanjaro', OptionC: 'Elbrus', OptionD: 'Denali',
+    Answer: 'A', Alternatives: 'ACONCAGUA; NÚI ACONCAGUA', Difficulty: 'Dễ'
+  },
+  {
+    Seat: 5, Order: 2,
+    Prompt: 'Khí cười thường dùng trong y tế để gây mê giảm đau có công thức hóa học là gì?',
+    OptionA: 'N2O (Dinitơ monoxit)', OptionB: 'NO2', OptionC: 'NO', OptionD: 'NH3',
+    Answer: 'A', Alternatives: 'N2O; DINITƠ MONOXIT', Difficulty: 'Dễ'
+  },
+  {
+    Seat: 5, Order: 3,
+    Prompt: 'Loài thú duy nhất nào có khả năng bay lượn thực sự trên bầu trời nhờ cấu tạo màng cánh bằng da?',
+    OptionA: 'Dơi', OptionB: 'Sóc bay', OptionC: 'Chồn bay', OptionD: 'Thú mỏ vịt',
+    Answer: 'A', Alternatives: 'DƠI; LOÀI DƠI; DOI', Difficulty: 'Dễ'
+  },
+  {
+    Seat: 5, Order: 4,
+    Prompt: 'Vị danh y lỗi lạc đời nhà Trần được tôn vinh là bậc Thánh thuốc Nam với phương châm "Nam dược trị Nam nhân" là ai?',
+    OptionA: 'Tuệ Tĩnh', OptionB: 'Hải Thượng Lãn Ông', OptionC: 'Lê Hữu Trác', OptionD: 'Nguyễn Bá Tĩnh',
+    Answer: 'A', Alternatives: 'TUỆ TĨNH; TUE TINH; NGUYỄN BÁ TĨNH', Difficulty: 'Dễ'
+  },
+  {
+    Seat: 5, Order: 5,
+    Prompt: 'Một hình lăng trụ đứng có đáy là tam giác thì có tất cả bao nhiêu mặt?',
+    OptionA: '5 mặt', OptionB: '4 mặt', OptionC: '6 mặt', OptionD: '8 mặt',
+    Answer: 'A', Alternatives: '5; NĂM; 5 MẶT', Difficulty: 'Trung bình'
+  },
+  {
+    Seat: 5, Order: 6,
+    Prompt: 'Tập truyện ngắn "Gió đầu mùa" và "Hà Nội băm sáu phố phường" là của nhà văn nổi tiếng nào trong Tự Lực Văn Đoàn?',
+    OptionA: 'Thạch Lam', OptionB: 'Nhất Linh', OptionC: 'Khái Hưng', OptionD: 'Hoàng Đạo',
+    Answer: 'A', Alternatives: 'THẠCH LAM; THACH LAM', Difficulty: 'Trung bình'
   },
 ];
 
+// 2. Khởi động chung (12 câu)
 const kdChungData = [
   {
     Order: 1,
-    Prompt: 'Hành tinh nào trong Hệ Mặt Trời được mệnh danh là "Hành tinh Đỏ" do bề mặt chứa nhiều oxit sắt?',
-    OptionA: 'Sao Hỏa', OptionB: 'Sao Kim', OptionC: 'Sao Thổ', OptionD: 'Sao Mộc',
-    Answer: 'A', Alternatives: 'SAO HỎA; SAO HOA; MARS', Difficulty: 'Dễ'
+    Prompt: 'Kênh đào nhân tạo nào khánh thành năm 1869 nối liền Biển Đỏ với Địa Trung Hải?',
+    OptionA: 'Kênh đào Suez', OptionB: 'Kênh đào Panama', OptionC: 'Kênh đào Kiel', OptionD: 'Kênh đào Corinth',
+    Answer: 'A', Alternatives: 'SUEZ; KÊNH ĐÀO SUEZ; XUY-Ê', Difficulty: 'Dễ'
   },
   {
     Order: 2,
-    Prompt: 'Sắc tố sinh học nào trong lá cây giữ vai trò hấp thụ ánh sáng để quang hợp và tạo màu xanh cho lá?',
-    OptionA: 'Diệp lục (Clorophyl)', OptionB: 'Carotenoid', OptionC: 'Anthocyanin', OptionD: 'Xanthophyll',
-    Answer: 'A', Alternatives: 'DIỆP LỤC; CHLOROPHYLL; CLOROPHYL', Difficulty: 'Dễ'
+    Prompt: 'Hiện tượng nào mô tả sự phản ứng hướng về phía kích thích ánh sáng của ngọn cây xanh?',
+    OptionA: 'Tính hướng sáng', OptionB: 'Tính hướng trọng lực', OptionC: 'Tính hướng nước', OptionD: 'Tính hướng hóa',
+    Answer: 'A', Alternatives: 'HƯỚNG SÁNG; TÍNH HƯỚNG SÁNG; HUONG SANG', Difficulty: 'Dễ'
   },
   {
     Order: 3,
-    Prompt: 'Dãy núi nào đóng vai trò là ranh giới tự nhiên ngăn cách giữa hai châu lục Á và Âu?',
-    OptionA: 'Dãy Ural', OptionB: 'Dãy Alps', OptionC: 'Dãy Himalaya', OptionD: 'Dãy Andes',
-    Answer: 'A', Alternatives: 'URAL; DÃY URAL; DAY URAL', Difficulty: 'Dễ'
+    Prompt: 'Chất nào được xem là dung môi hòa tan phổ biến nhất trong đời sống và tự nhiên?',
+    OptionA: 'Nước (H2O)', OptionB: 'Rượu etylic', OptionC: 'Benzen', OptionD: 'Dầu hỏa',
+    Answer: 'A', Alternatives: 'NƯỚC; NUOC; H2O', Difficulty: 'Dễ'
   },
   {
     Order: 4,
-    Prompt: 'Tập hợp tất cả các số nguyên dương là ước của số 6 gồm bao nhiêu phần tử?',
-    OptionA: '4 phần tử', OptionB: '3 phần tử', OptionC: '2 phần tử', OptionD: '5 phần tử',
-    Answer: 'A', Alternatives: '4; BỐN; 4 PHẦN TỬ; 4 PHAN TU', Difficulty: 'Dễ'
+    Prompt: 'Trong đại số, phương trình bậc hai một ẩn ax^2 + bx + c = 0 có nghiệm kép khi biệt thức Delta bằng bao nhiêu?',
+    OptionA: '0', OptionB: '1', OptionC: '> 0', OptionD: '< 0',
+    Answer: 'A', Alternatives: '0; KHÔNG; BANG 0', Difficulty: 'Dễ'
   },
   {
     Order: 5,
-    Prompt: 'Kim loại nào có hàm lượng chiếm tỷ lệ phần trăm lớn nhất trong vỏ Trái Đất?',
-    OptionA: 'Nhôm (Al)', OptionB: 'Sắt (Fe)', OptionC: 'Canxi (Ca)', OptionD: 'Đồng (Cu)',
-    Answer: 'A', Alternatives: 'NHÔM; NHOM; AL; ALUMINIUM', Difficulty: 'Dễ'
+    Prompt: 'Đơn vị đo công suất tiêu thụ điện trong Hệ đo lường quốc tế (SI) là gì?',
+    OptionA: 'Oát (W)', OptionB: 'Jun (J)', OptionC: 'Vôn (V)', OptionD: 'Ampe (A)',
+    Answer: 'A', Alternatives: 'OÁT; WAT; WATT; W', Difficulty: 'Dễ'
   },
   {
     Order: 6,
-    Prompt: 'Tập thơ chữ Hán nổi tiếng "Nhật ký trong tù" gồm 133 bài thơ được sáng tác bởi tác giả nào?',
-    OptionA: 'Hồ Chí Minh', OptionB: 'Phan Bội Châu', OptionC: 'Huỳnh Thúc Kháng', OptionD: 'Tố Hữu',
-    Answer: 'A', Alternatives: 'HỒ CHÍ MINH; HO CHI MINH; BÁC HỒ; BAC HO', Difficulty: 'Trung bình'
+    Prompt: 'Tỉnh nào ở vùng Tây Nguyên có thành phố Pleiku là trung tâm tỉnh lỵ?',
+    OptionA: 'Gia Lai', OptionB: 'Đắk Lắk', OptionC: 'Kon Tum', OptionD: 'Lâm Đồng',
+    Answer: 'A', Alternatives: 'GIA LAI; TỈNH GIA LAI', Difficulty: 'Trung bình'
   },
   {
     Order: 7,
-    Prompt: 'Lực cản trở chuyển động xuất hiện tại bề mặt tiếp xúc khi một vật trượt trên bề mặt vật khác gọi là gì?',
-    OptionA: 'Lực ma sát', OptionB: 'Lực hấp dẫn', OptionC: 'Lực đàn hồi', OptionD: 'Lực đẩy Ác-si-mét',
-    Answer: 'A', Alternatives: 'LỰC MA SÁT; MA SÁT; MA SAT; LUC MA SAT', Difficulty: 'Trung bình'
+    Prompt: 'Hệ cơ quan nào trong cơ thể người làm nhiệm vụ sản sinh các tế bào miễn dịch và kháng thể để chống lại mầm bệnh?',
+    OptionA: 'Hệ miễn dịch', OptionB: 'Hệ bài tiết', OptionC: 'Hệ nội tiết', OptionD: 'Hệ hô hấp',
+    Answer: 'A', Alternatives: 'HỆ MIỄN DỊCH; MIEN DICH', Difficulty: 'Trung bình'
   },
   {
     Order: 8,
-    Prompt: 'Tỉnh nào có diện tích tự nhiên rộng nhất trong số 63 tỉnh, thành phố của nước ta hiện nay?',
-    OptionA: 'Nghệ An', OptionB: 'Gia Lai', OptionC: 'Sơn La', OptionD: 'Đắk Lắk',
-    Answer: 'A', Alternatives: 'NGHỆ AN; NGHE AN; TỈNH NGHỆ AN', Difficulty: 'Trung bình'
+    Prompt: 'Ai là tác giả của tác phẩm "Đường Kách mệnh" xuất bản năm 1927 làm tài liệu huấn luyện cán bộ cách mạng Việt Nam?',
+    OptionA: 'Nguyễn Ái Quốc (Hồ Chí Minh)', OptionB: 'Trần Phú', OptionC: 'Lê Hồng Phong', OptionD: 'Hà Huy Tập',
+    Answer: 'A', Alternatives: 'NGUYỄN ÁI QUỐC; HỒ CHÍ MINH; HO CHI MINH', Difficulty: 'Trung bình'
   },
   {
     Order: 9,
-    Prompt: 'Trong hóa học, ở nhiệt độ 25 độ C, dung dịch có chỉ số pH đúng bằng 7 được gọi là dung dịch gì?',
-    OptionA: 'Dung dịch trung tính', OptionB: 'Dung dịch axit', OptionC: 'Dung dịch bazơ', OptionD: 'Dung dịch đệm',
-    Answer: 'A', Alternatives: 'TRUNG TÍNH; DUNG DỊCH TRUNG TÍNH; TRUNG TINH', Difficulty: 'Trung bình'
+    Prompt: 'Góc nội tiếp chắn nửa đường tròn luôn luôn có số đo bằng bao nhiêu độ?',
+    OptionA: '90 độ', OptionB: '60 độ', OptionC: '45 độ', OptionD: '180 độ',
+    Answer: 'A', Alternatives: '90 ĐỘ; 90; CHÍN MƯƠI ĐỘ', Difficulty: 'Trung bình'
   },
   {
     Order: 10,
-    Prompt: 'Tập đoàn cứ điểm Điện Biên Phủ của quân viễn chinh Pháp năm 1954 được chia thành bao nhiêu cứ điểm đề kháng?',
-    OptionA: '49 cứ điểm', OptionB: '45 cứ điểm', OptionC: '56 cứ điểm', OptionD: '38 cứ điểm',
-    Answer: 'A', Alternatives: '49; BỐN MƯƠI CHÍN; 49 CỨ ĐIỂM', Difficulty: 'Khó'
+    Prompt: 'Phản ứng este hóa giữa axit axetic và rượu etylic tạo ra hợp chất hữu cơ có mùi thơm dễ chịu tên là gì?',
+    OptionA: 'Etyl axetat', OptionB: 'Metyl axetat', OptionC: 'Etyl fomat', OptionD: 'Propyl axetat',
+    Answer: 'A', Alternatives: 'ETYL AXETAT; ETHYL ACETATE', Difficulty: 'Khó'
   },
   {
     Order: 11,
-    Prompt: 'Một hình cầu có bán kính R = 3 cm. Thể tích của hình cầu đó bằng bao nhiêu pi xentimét khối?',
-    OptionA: '36 pi cm3', OptionB: '27 pi cm3', OptionC: '12 pi cm3', OptionD: '18 pi cm3',
-    Answer: 'A', Alternatives: '36 PI CM3; 36; BA MƯƠI SÁU; 36 PI', Difficulty: 'Khó'
+    Prompt: 'Năm nào nước ta chính thức trở thành thành viên thứ 150 của Tổ chức Thương mại Thế giới (WTO)?',
+    OptionA: 'Năm 2007', OptionB: 'Năm 2005', OptionC: 'Năm 2006', OptionD: 'Năm 2008',
+    Answer: 'A', Alternatives: '2007; NĂM 2007', Difficulty: 'Khó'
   },
   {
     Order: 12,
-    Prompt: 'Nhà soạn nhạc thiên tài người Đức nào là tác giả của Bản giao hưởng số 9 (với khúc Ode to Joy) dù đã bị điếc hoàn toàn khi hoàn thành tác phẩm?',
-    OptionA: 'Ludwig van Beethoven', OptionB: 'Wolfgang Amadeus Mozart', OptionC: 'Johann Sebastian Bach', OptionD: 'Frederic Chopin',
-    Answer: 'A', Alternatives: 'BEETHOVEN; BÉT-TÔ-VEN; LUDWIG VAN BEETHOVEN', Difficulty: 'Khó'
+    Prompt: 'Thiết bị quang học nào lợi dụng hiện tượng phản xạ toàn phần trong các sợi thủy tinh siêu mỏng để truyền dẫn tín hiệu internet tốc độ cao?',
+    OptionA: 'Cáp quang', OptionB: 'Kính tiềm vọng', OptionC: 'Lăng kính', OptionD: 'Kính hiển vi',
+    Answer: 'A', Alternatives: 'CÁP QUANG; CAP QUANG; SỢI QUANG', Difficulty: 'Khó'
   },
 ];
 
+// 3. VCNV: TRỐNG CƠM (6 câu)
 const vcnvData = [
   {
     Type: 'ROW_1',
@@ -279,229 +335,106 @@ const vcnvData = [
   },
 ];
 
+// 4. Tăng tốc (4 câu)
 const tangTocData = [
   {
     Order: 1,
-    Prompt: 'Sắp xếp các đơn vị đo thời gian sau theo thứ tự từ ngắn nhất đến dài nhất: [1] Giờ, [2] Giây, [3] Ngày, [4] Phút.',
+    Prompt: 'Sắp xếp các đơn vị đo dung lượng dữ liệu sau theo thứ tự từ nhỏ đến lớn: [1] Megabyte (MB), [2] Kilobyte (KB), [3] Terabyte (TB), [4] Gigabyte (GB).',
+    Answer: '2-1-4-3',
+    Alternatives: '2143; 2, 1, 4, 3; 2 1 4 3; [2] [1] [4] [3]',
+    Media: '',
+  },
+  {
+    Order: 2,
+    Prompt: 'Điền số tiếp theo vào dãy số theo quy luật: 3, 6, 12, 24, 48, ...?',
+    Answer: '96',
+    Alternatives: '96; CHÍN MƯƠI SÁU',
+    Media: '',
+  },
+  {
+    Order: 3,
+    Prompt: 'Sắp xếp các thời kỳ phát triển xã hội loài người theo tiến trình lịch sử từ xưa đến nay: [1] Thời đại đồ sắt, [2] Thời đại đồ đá, [3] Thời đại công nghệ thông tin, [4] Thời đại đồ đồng.',
     Answer: '2-4-1-3',
     Alternatives: '2413; 2, 4, 1, 3; 2 4 1 3; [2] [4] [1] [3]',
     Media: '',
   },
   {
-    Order: 2,
-    Prompt: 'Điền số còn thiếu vào chỗ trống theo quy luật dãy số sau: 2, 5, 10, 17, 26, ...?',
-    Answer: '37',
-    Alternatives: 'BA MƯƠI BẢY; 37',
-    Media: '',
-  },
-  {
-    Order: 3,
-    Prompt: 'Sắp xếp các hành tinh sau theo thứ tự khoảng cách xa dần Mặt Trời: [1] Trái Đất, [2] Sao Hỏa, [3] Sao Kim, [4] Sao Mộc.',
-    Answer: '3-1-2-4',
-    Alternatives: '3124; 3, 1, 2, 4; 3 1 2 4; [3] [1] [2] [4]',
-    Media: '',
-  },
-  {
     Order: 4,
-    Prompt: 'Trong một cuộc thi chạy có 4 vận động viên A, B, C, D: B về đích sau A nhưng trước C; D về đích trước A. Vận động viên nào về đích đầu tiên?',
-    Answer: 'D',
-    Alternatives: 'VẬN ĐỘNG VIÊN D; D; BẠN D',
+    Prompt: 'Trong một giải đấu cờ vua có 4 kỳ thủ Kiên, Long, Minh, Nam: Kiên xếp trên Long nhưng dưới Nam; Minh xếp dưới Long. Hỏi kỳ thủ nào giành giải nhất?',
+    Answer: 'NAM',
+    Alternatives: 'NAM; BẠN NAM; KỲ THỦ NAM',
     Media: '',
   },
 ];
 
+// 5. Về đích (10 câu 10đ, 6 câu 20đ, 10 câu 30đ = 26 câu)
 const veDichData = [
-  // 10 điểm
-  {
-    Points: 10,
-    Prompt: 'Nguyên tố hóa học nào có độ phổ biến cao nhất trong vỏ Trái Đất tính theo khối lượng?',
-    Answer: 'OXY',
-    Alternatives: 'OXYGEN; O; DƯỠNG KHÍ',
-  },
-  {
-    Points: 10,
-    Prompt: 'Vị vua nào đã ban bố "Chiếu dời đô" vào mùa thu năm 1010 để định đô tại Thăng Long?',
-    Answer: 'LÝ THÁI TỔ',
-    Alternatives: 'LY THAI TO; LÝ CÔNG UẨN; LY CONG UAN',
-  },
-  {
-    Points: 10,
-    Prompt: 'Đơn vị chuẩn đo lực trong hệ đo lường quốc tế SI là gì?',
-    Answer: 'NEWTON',
-    Alternatives: 'NIU-TƠN; NIUTON; N',
-  },
-  {
-    Points: 10,
-    Prompt: 'Quần thể danh thắng Vịnh Hạ Long - di sản thiên nhiên thế giới thuộc tỉnh/thành phố nào?',
-    Answer: 'QUẢNG NINH',
-    Alternatives: 'QUANG NINH; TỈNH QUẢNG NINH',
-  },
-  {
-    Points: 10,
-    Prompt: 'Tập hợp các số tự nhiên lớn hơn 0 và không vượt quá 5 gồm bao nhiêu phần tử?',
-    Answer: '5',
-    Alternatives: '5 PHẦN TỬ; NĂM; NĂM PHẦN TỬ',
-  },
-  {
-    Points: 10,
-    Prompt: 'Cơ quan sinh dưỡng nào của thực vật thực hiện chức năng quang hợp và thoát hơi nước chủ yếu?',
-    Answer: 'LÁ',
-    Alternatives: 'LÁ CÂY; LA; LA CAY',
-  },
+  // 10 điểm (10 câu)
+  { Points: 10, Prompt: 'Nguyên tố khí hiếm có số hiệu nguyên tử bằng 2 thường dùng bơm bóng bay là gì?', Answer: 'HELI', Alternatives: 'HELIUM; HE' },
+  { Points: 10, Prompt: 'Thủ đô của nước Nhật Bản hiện nay là thành phố nào?', Answer: 'TOKYO', Alternatives: 'TÔ-KY-Ô; TOKYO' },
+  { Points: 10, Prompt: 'Loài chim nào lớn nhất thế giới còn sống nhưng không biết bay và chạy rất nhanh trên sa mạc?', Answer: 'ĐÀ ĐIỂU', Alternatives: 'DA DIEU; CHIM ĐÀ ĐIỂU' },
+  { Points: 10, Prompt: 'Đoạn thẳng nối tâm của đường tròn với một điểm bất kỳ trên đường tròn gọi là gì?', Answer: 'BÁN KÍNH', Alternatives: 'BAN KINH; R' },
+  { Points: 10, Prompt: 'Hợp chất nào chiếm khoảng 70% khối lượng cơ thể người trưởng thành?', Answer: 'NƯỚC', Alternatives: 'NUOC; H2O' },
+  { Points: 10, Prompt: 'Lễ hội Đền Hùng được tổ chức định kỳ hàng năm vào ngày mùng mấy tháng 3 âm lịch?', Answer: 'MÙNG 10 THÁNG 3', Alternatives: '10/3; 10; MÙNG 10; 10 THÁNG 3' },
+  { Points: 10, Prompt: 'Hành tinh nào có kích thước và khối lượng lớn nhất trong Hệ Mặt Trời?', Answer: 'SAO MỘC', Alternatives: 'SAO MOC; JUPITER' },
+  { Points: 10, Prompt: 'Vị vua nào của triều Tây Sơn đã lãnh đạo quân dân đại phá 29 vạn quân Thanh?', Answer: 'QUANG TRUNG', Alternatives: 'NGUYỄN HUỆ; VUA QUANG TRUNG' },
+  { Points: 10, Prompt: 'Đơn vị đo tần số dao động trong hệ đơn vị quốc tế SI là gì?', Answer: 'HERTZ', Alternatives: 'HEC; HZ' },
+  { Points: 10, Prompt: 'Tỉnh nào ở cực Nam Tổ quốc nổi tiếng với Mũi Cà Mau?', Answer: 'CÀ MAU', Alternatives: 'CA MAU; TỈNH CÀ MAU' },
 
-  // 20 điểm
-  {
-    Points: 20,
-    Prompt: 'Trong bảng tuần hoàn hóa học, kim loại kiềm nhẹ nhất và có mật độ khối lượng riêng nhỏ nhất là gì?',
-    Answer: 'LITHI',
-    Alternatives: 'LITHIUM; LI',
-  },
-  {
-    Points: 20,
-    Prompt: 'Cuộc khởi nghĩa Hai Bà Trưng phất cờ khởi nghĩa chống quân Đông Hán nổ ra vào năm nào sau Công nguyên?',
-    Answer: 'NĂM 40',
-    Alternatives: '40; NĂM 40 SCN; 40 SCN; NAM 40',
-  },
-  {
-    Points: 20,
-    Prompt: 'Một hình thang có độ dài hai đáy là 8 cm và 12 cm, chiều cao bằng 5 cm. Diện tích của hình thang đó bằng bao nhiêu xentimét vuông?',
-    Answer: '50',
-    Alternatives: '50 CM2; NĂM MƯƠI; 50',
-  },
-  {
-    Points: 20,
-    Prompt: 'Vườn quốc gia nổi tiếng nào tại tỉnh Quảng Bình được UNESCO công nhận là Di sản thiên nhiên thế giới về địa chất và hang động?',
-    Answer: 'PHONG NHA KẺ BÀNG',
-    Alternatives: 'PHONG NHA - KẺ BÀNG; PHONG NHA KE BANG; VƯỜN QUỐC GIA PHONG NHA KẺ BÀNG',
-  },
-  {
-    Points: 20,
-    Prompt: 'Bộ tiểu thuyết chương hồi lừng danh nào của La Quán Trung mở đầu bằng câu nói: "Thế lớn trong thiên hạ, cứ tan lâu lại hợp, hợp lâu lại tan"?',
-    Answer: 'TAM QUỐC DIỄN NGHĨA',
-    Alternatives: 'TAM QUOC DIEN NGHIA; TAM QUỐC CHÍ DIỄN NGHĨA; TAM QUỐC',
-  },
-  {
-    Points: 20,
-    Prompt: 'Hiện tượng ánh sáng bị đổi hướng khi truyền xiên góc qua mặt phân cách giữa hai môi trường trong suốt khác nhau gọi là gì?',
-    Answer: 'KHÚC XẠ ÁNH SÁNG',
-    Alternatives: 'KHÚC XẠ; KHUC XA; HIỆN TƯỢNG KHÚC XẠ; KHUC XA ANH SANG',
-  },
+  // 20 điểm (6 câu)
+  { Points: 20, Prompt: 'Hiện tượng khúc xạ ánh sáng xảy ra khi tia sáng đi qua mặt phân cách giữa hai môi trường có chiết suất như thế nào?', Answer: 'KHÁC NHAU', Alternatives: 'KHAC NHAU; CHIẾT SUẤT KHÁC NHAU' },
+  { Points: 20, Prompt: 'Chiến thắng lịch sử Điện Biên Phủ "lừng lẫy năm châu, chấn động địa cầu" diễn ra vào năm nào?', Answer: '1954', Alternatives: 'NĂM 1954; 1954' },
+  { Points: 20, Prompt: 'Một hình lập phương có thể tích bằng 64 cm3 thì độ dài mỗi cạnh bằng bao nhiêu xentimét?', Answer: '4', Alternatives: '4 CM; BỐN; 4' },
+  { Points: 20, Prompt: 'Tác phẩm văn học trung đại nào của Đặng Trần Côn viết bằng chữ Hán than thở nỗi sầu chia ly người chinh phụ?', Answer: 'CHINH PHỤ NGÂM', Alternatives: 'CHINH PHU NGAM; CHINH PHỤ NGÂM KHÚC' },
+  { Points: 20, Prompt: 'Loại liên kết hóa học hình thành do lực hút tĩnh điện giữa các ion mang điện tích trái dấu gọi là liên kết gì?', Answer: 'LIÊN KẾT ION', Alternatives: 'ION; LIEN KET ION' },
+  { Points: 20, Prompt: 'Đại dương nào có độ sâu trung bình lớn nhất thế giới và chứa vực thẳm Mariana?', Answer: 'THÁI BÌNH DƯƠNG', Alternatives: 'THAI BINH DUONG; PACIFIC' },
 
-  // 30 điểm
-  {
-    Points: 30,
-    Prompt: 'Hai điện trở R1 = 6 ôm và R2 = 12 ôm được mắc song song. Điện trở tương đương của đoạn mạch bằng bao nhiêu ôm?',
-    Answer: '4',
-    Alternatives: '4 ÔM; BỐN; 4 OM',
-  },
-  {
-    Points: 30,
-    Prompt: 'Chiến dịch quân sự toàn thắng mùa xuân năm 1975 giải phóng hoàn toàn miền Nam, thống nhất đất nước mang tên vị lãnh tụ vĩ đại nào?',
-    Answer: 'CHIẾN DỊCH HỒ CHÍ MINH',
-    Alternatives: 'CHIEN DICH HO CHI MINH; HỒ CHÍ MINH; HO CHI MINH',
-  },
-  {
-    Points: 30,
-    Prompt: 'Căn bậc hai số học của một số dương x bằng 15. Giá trị của số x đó là bao nhiêu?',
-    Answer: '225',
-    Alternatives: 'HAI TRĂM HAI MƯƠI LĂM; 225',
-  },
-  {
-    Points: 30,
-    Prompt: 'Polysaccharide đại phân tử nào là thành phần cấu tạo chính của thành tế bào thực vật và là nguồn chất xơ chủ yếu?',
-    Answer: 'CELLULOSE',
-    Alternatives: 'XENLULOZO; CENLULOZO; CELLULOSA; XENLULÔZƠ',
-  },
-  {
-    Points: 30,
-    Prompt: 'Con sông nào dài nhất chảy hoàn toàn trên lãnh thổ Việt Nam mà không bắt nguồn từ bên ngoài biên giới?',
-    Answer: 'SÔNG ĐỒNG NAI',
-    Alternatives: 'SONG DONG NAI; ĐỒNG NAI; DONG NAI',
-  },
-  {
-    Points: 30,
-    Prompt: 'Nhà nữ bác học kiệt xuất nào là người đầu tiên và duy nhất trong lịch sử từng nhận hai giải Nobel ở hai lĩnh vực khoa học khác nhau (Vật lý và Hóa học)?',
-    Answer: 'MARIE CURIE',
-    Alternatives: 'MARI QUY-RI; MARIE SKLODOWSKA-CURIE; MA-RI COI-RI; CURIE; MARIE CURIE',
-  },
+  // 30 điểm (10 câu)
+  { Points: 30, Prompt: 'Định luật vật lý nào khẳng định áp suất tác dụng lên một chất lỏng kín được truyền nguyên vẹn theo mọi hướng?', Answer: 'ĐỊNH LUẬT PASCAL', Alternatives: 'PASCAL; PA-XCAN; DINH LUAT PASCAL' },
+  { Points: 30, Prompt: 'Kim loại nào có khối lượng riêng lớn nhất và nặng nhất trong tất cả các kim loại (D xấp xỉ 22,6 g/cm3)?', Answer: 'OSMI', Alternatives: 'OSMIUM; OS' },
+  { Points: 30, Prompt: 'Hiệp định Geneva chấm dứt chiến tranh, lập lại hòa bình ở Đông Dương được ký kết vào năm nào?', Answer: '1954', Alternatives: 'NĂM 1954; 1954' },
+  { Points: 30, Prompt: 'Phương trình bậc ba ax^3 + bx^2 + cx + d = 0 (a khác 0) có tối đa bao nhiêu nghiệm thực?', Answer: '3', Alternatives: '3 NGHIỆM; BA; 3' },
+  { Points: 30, Prompt: 'Chất dẫn truyền xung thần kinh tại các cúc xi-náp thần kinh của động vật có tên phổ biến là gì?', Answer: 'AXETYLCHOLIN', Alternatives: 'ACETYLCHOLINE; AXETYL CHOLIN' },
+  { Points: 30, Prompt: 'Nhà vật lý người Đức nào đã tìm ra hiện tượng tia X vào năm 1895 và nhận giải Nobel Vật lý đầu tiên trong lịch sử?', Answer: 'WILHELM RONTGEN', Alternatives: 'RONTGEN; RƠN-GHEN; ROENTGEN' },
+  { Points: 30, Prompt: 'Dãy núi đá vôi uốn lượn hình cánh cung nào là ranh giới tự nhiên ngăn cách miền Bắc Trung Bộ với vùng Duyên hải Nam Trung Bộ?', Answer: 'DÃY BẠCH MÃ', Alternatives: 'BẠCH MÃ; DAY BACH MA' },
+  { Points: 30, Prompt: 'Hợp chất hữu cơ dạng mạch vòng gồm 6 nguyên tử cacbon và 6 nguyên tử hydro có liên kết thơm bền vững là gì?', Answer: 'BENZEN', Alternatives: 'BENZENE; C6H6' },
+  { Points: 30, Prompt: 'Vị vua nào của triều Trần đã hai lần trực tiếp chỉ huy đánh tan quân xâm lược Nguyên Mông năm 1285 và 1288 rồi sau đó xuất gia tu hành lập ra Thiền phái Trúc Lâm?', Answer: 'TRẦN NHÂN TÔNG', Alternatives: 'TRAN NHAN TONG; PHẬT HOÀNG TRẦN NHÂN TÔNG' },
+  { Points: 30, Prompt: 'Trong mạch điện xoay chiều RLC không phân nhánh, hiện tượng cường độ dòng điện hiệu dụng đạt giá trị cực đại khi ZL = ZC gọi là hiện tượng gì?', Answer: 'CỘNG HƯỞNG ĐIỆN', Alternatives: 'CỘNG HƯỞNG; CONG HUONG DIEN; CONG HUONG' },
 ];
 
+// 6. TieBreak (3 câu)
 const tieBreakData = [
-  {
-    Order: 1,
-    Prompt: 'Hành tinh nào trong Hệ Mặt Trời tự quay quanh trục theo chiều ngược lại (từ Đông sang Tây) so với phần lớn các hành tinh khác?',
-    Answer: 'SAO KIM',
-    Alternatives: 'SAO KIM; SAO HÔM; SAO MAI; VENUS',
-  },
-  {
-    Order: 2,
-    Prompt: 'Tỉnh nào ở cực Nam Tổ quốc có ba mặt giáp biển và sở hữu Vườn quốc gia Mũi Cà Mau?',
-    Answer: 'CÀ MAU',
-    Alternatives: 'CA MAU; TỈNH CÀ MAU',
-  },
-  {
-    Order: 3,
-    Prompt: 'Khí nào chiếm tỷ lệ thể tích lớn nhất (khoảng 78%) trong khí quyển Trái Đất?',
-    Answer: 'NITƠ',
-    Alternatives: 'NITO; NITROGEN; KHÍ NITƠ',
-  },
+  { Order: 1, Prompt: 'Hành tinh nào trong Hệ Mặt Trời có hệ thống vành đai băng đá và bụi sáng rõ nhất?', Answer: 'SAO THỔ', Alternatives: 'SAO THO; SATURN' },
+  { Order: 2, Prompt: 'Tỉnh nào ở vùng Tây Bắc có địa danh lịch sử lòng chảo Mường Thanh và cứ điểm A1?', Answer: 'ĐIỆN BIÊN', Alternatives: 'DIEN BIEN; TỈNH ĐIỆN BIÊN' },
+  { Order: 3, Prompt: 'Nguyên tố hóa học nào tạo nên kim cương và than chì?', Answer: 'CACBON', Alternatives: 'CARBON; C' },
 ];
 
-async function main() {
-  const outDir = path.resolve('../bo-de-thi-dau');
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
-  }
+// Ghi file Excel
+const outDir = path.resolve('../bo-de-thi-dau');
+fs.mkdirSync(outDir, { recursive: true });
+const wbFull = xlsx.utils.book_new();
+xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(kdRiengData), 'KhoiDong_Rieng');
+xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(kdChungData), 'KhoiDong_Chung');
+xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(vcnvData), 'VCNV');
+xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(tangTocData), 'TangToc');
+xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(veDichData), 'VeDich');
+xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(tieBreakData), 'TieBreak');
 
-  // 1. Tạo file Excel bộ đề chuẩn thi đấu đầy đủ: BoDe_ThiDau_Chuan.xlsx
-  const wbFull = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(kdRiengData), 'KhoiDong_Rieng');
-  xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(kdChungData), 'KhoiDong_Chung');
-  xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(vcnvData), 'VCNV');
-  xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(tangTocData), 'TangToc');
-  xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(veDichData), 'VeDich');
-  xlsx.utils.book_append_sheet(wbFull, xlsx.utils.json_to_sheet(tieBreakData), 'TieBreak');
+const fullXlsxPath = path.join(outDir, 'BoDe_ThiDau_Chuan.xlsx');
+xlsx.writeFile(wbFull, fullXlsxPath);
+console.log(`[OK] Đã ghi: ${fullXlsxPath}`);
 
-  const fullXlsxPath = path.join(outDir, 'BoDe_ThiDau_Chuan.xlsx');
-  xlsx.writeFile(wbFull, fullXlsxPath);
-  console.log(`[OK] Đã tạo file Excel đầy đủ: ${fullXlsxPath}`);
+// Ghi file JSON
+const buf = fs.readFileSync(fullXlsxPath);
+const parsed = parseExcelQuestionSet(buf, 'BoDe_ThiDau_Chuan');
+const fullJsonPath = path.join(outDir, 'BoDe_ThiDau_Chuan.json');
+fs.writeFileSync(fullJsonPath, JSON.stringify(parsed, null, 2), 'utf-8');
+console.log(`[OK] Đã ghi JSON: ${fullJsonPath}`);
 
-  // Test nạp thử file Excel qua parser & validator của web
-  const fullBuf = fs.readFileSync(fullXlsxPath);
-  const fullParsed = parseExcelQuestionSet(fullBuf, 'Bộ đề Thi đấu Chuẩn');
-  const fullVal = validateQuestionSet(fullParsed);
-  console.log(`[Kiểm tra BoDe_ThiDau_Chuan.xlsx]: OK = ${fullVal.ok}`);
-  if (!fullVal.ok) {
-    console.error('Lỗi kiểm tra BoDe_ThiDau_Chuan:', fullVal.errors);
-    process.exit(1);
-  }
-
-  // 2. Tạo file JSON bộ đề thi đấu chuẩn: BoDe_ThiDau_Chuan.json
-  const fullJsonPath = path.join(outDir, 'BoDe_ThiDau_Chuan.json');
-  fs.writeFileSync(fullJsonPath, JSON.stringify(fullParsed, null, 2), 'utf-8');
-  console.log(`[OK] Đã tạo file JSON đầy đủ: ${fullJsonPath}`);
-
-  // 3. Tạo file Excel chỉ chứa Khởi động riêng: BoDe_KhoiDong_Rieng.xlsx
-  const wbRieng = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(wbRieng, xlsx.utils.json_to_sheet(kdRiengData), 'KhoiDong_Rieng');
-  const riengXlsxPath = path.join(outDir, 'BoDe_KhoiDong_Rieng.xlsx');
-  xlsx.writeFile(wbRieng, riengXlsxPath);
-  console.log(`[OK] Đã tạo file Excel Khởi động riêng: ${riengXlsxPath}`);
-
-  // Test nạp thử file Khởi động riêng qua parser & validator của web
-  const riengBuf = fs.readFileSync(riengXlsxPath);
-  const riengParsed = parseExcelQuestionSet(riengBuf, 'Bộ đề Khởi động riêng');
-  const riengVal = validateQuestionSet(riengParsed);
-  console.log(`[Kiểm tra BoDe_KhoiDong_Rieng.xlsx]: OK = ${riengVal.ok}`);
-  if (!riengVal.ok) {
-    console.error('Lỗi kiểm tra BoDe_KhoiDong_Rieng:', riengVal.errors);
-    process.exit(1);
-  }
-
-  console.log('\n=== TẤT CẢ CÁC BỘ ĐỀ ĐỀU HỢP LỆ VÀ SẴN SÀNG NẠP TRÊN WEB! ===');
-}
-
-main().catch((err) => {
-  console.error('Lỗi:', err);
+// Kiểm tra tính hợp lệ
+const val = validateQuestionSet(parsed);
+console.log(`Validate QuestionSet: OK = ${val.ok}`);
+if (!val.ok) {
+  console.error('Validation errors:', val.errors);
   process.exit(1);
-});
+}

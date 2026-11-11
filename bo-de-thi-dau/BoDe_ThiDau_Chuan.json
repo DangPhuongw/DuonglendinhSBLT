@@ -1,114 +1,113 @@
 {
-  "id": "qs-1794399515504",
-  "title": "Bộ đề Thi đấu Chuẩn",
+  "id": "qs-1794401839532",
+  "title": "BoDe_ThiDau_Chuan",
   "khoiDong": {
     "rieng": [
       [
         {
           "id": "kdr-1-1",
           "type": "mcq",
-          "prompt": "Thành phố nào là thủ đô của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam?",
+          "prompt": "Tên dòng sông thơ mộng chảy qua lòng thành phố Huế gắn liền với chùa Thiên Mụ là sông gì?",
           "options": [
-            "Hà Nội",
-            "TP. Hồ Chí Minh",
-            "Đà Nẵng",
-            "Hải Phòng"
+            "Sông Hương",
+            "Sông Gianh",
+            "Sông Thạch Hãn",
+            "Sông Bến Hải"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "HÀ NỘI",
-            "HA NOI"
+            "SÔNG HƯƠNG",
+            "SONG HUONG",
+            "HƯƠNG GIANG"
           ]
         },
         {
           "id": "kdr-1-2",
           "type": "mcq",
-          "prompt": "Trong cơ thể người, cơ quan nào chịu trách nhiệm chính trong việc co bóp để đẩy máu đi tuần hoàn nuôi các mô và tế bào?",
+          "prompt": "Nguyên tố hóa học nào có ký hiệu là Au và là kim loại quý có tính dát mỏng tốt nhất?",
           "options": [
-            "Phổi",
-            "Tim",
-            "Gan",
-            "Thận"
+            "Vàng",
+            "Bạc",
+            "Đồng",
+            "Bạch kim"
           ],
-          "answer": "B",
+          "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "TIM",
-            "TRÁI TIM",
-            "TRAI TIM"
+            "VÀNG",
+            "VANG",
+            "AU"
           ]
         },
         {
           "id": "kdr-1-3",
           "type": "mcq",
-          "prompt": "Ký hiệu hóa học của nguyên tố Sắt trong bảng hệ thống tuần hoàn các nguyên tố hóa học là gì?",
+          "prompt": "Trong cơ thể người, chất vận chuyển khí oxy chủ yếu từ phổi đến các mô là gì?",
           "options": [
-            "Fe",
-            "Cu",
-            "Zn",
-            "Al"
+            "Hồng cầu",
+            "Bạch cầu",
+            "Tiểu cầu",
+            "Huyết tương"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "FE",
-            "SẮT",
-            "SAT"
+            "HỒNG CẦU",
+            "HONG CAU",
+            "HEMOGLOBIN"
           ]
         },
         {
           "id": "kdr-1-4",
           "type": "mcq",
-          "prompt": "Đơn vị đo độ dài cơ bản trong Hệ đơn vị đo lường quốc tế (SI) là gì?",
+          "prompt": "Tác giả của áng văn chính luận bất hủ \"Hịch tướng sĩ\" vào thế kỷ 13 là vị tướng nào?",
           "options": [
-            "Xentimét (cm)",
-            "Milimét (mm)",
-            "Mét (m)",
-            "Kilômét (km)"
+            "Trần Hưng Đạo",
+            "Trần Quang Khải",
+            "Trần Nhật Duật",
+            "Trần Khánh Dư"
           ],
-          "answer": "C",
+          "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "MÉT",
-            "MET",
-            "M"
+            "TRẦN HƯNG ĐẠO",
+            "TRAN HUNG DAO",
+            "TRẦN QUỐC TUẤN"
           ]
         },
         {
           "id": "kdr-1-5",
           "type": "mcq",
-          "prompt": "Vị anh hùng nào đã dựng cờ khởi nghĩa Lam Sơn chống quân Minh xâm lược và lập ra triều đại Hậu Lê?",
+          "prompt": "Lũy thừa 3 mũ 4 (3^4) có giá trị bằng bao nhiêu?",
           "options": [
-            "Lê Lợi",
-            "Lê Thánh Tông",
-            "Lê Hoàn",
-            "Lê Chiêu Thống"
+            "81",
+            "27",
+            "243",
+            "12"
           ],
           "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "LÊ LỢI",
-            "LE LOI",
-            "LÊ THÁI TỔ",
-            "LE THAI TO"
+            "81",
+            "TÁM MƯƠI MỐT"
           ]
         },
         {
           "id": "kdr-1-6",
           "type": "mcq",
-          "prompt": "Giá trị lũy thừa của biểu thức 2 mũ 5 (2^5) bằng bao nhiêu?",
+          "prompt": "Hiện tượng tán sắc ánh sáng mặt trời qua các giọt nước mưa trong không khí tạo nên hiện tượng quang học rực rỡ nào?",
           "options": [
-            "16",
-            "32",
-            "64",
-            "10"
+            "Cầu vồng",
+            "Ảo ảnh",
+            "Nhật thực",
+            "Nguyệt thực"
           ],
-          "answer": "B",
+          "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "32",
-            "BA MƯƠI HAI"
+            "CẦU VỒNG",
+            "CAU VONG"
           ]
         }
       ],
@@ -116,108 +115,107 @@
         {
           "id": "kdr-2-1",
           "type": "mcq",
-          "prompt": "Đại dương nào có diện tích lớn nhất trên bề mặt Trái Đất?",
+          "prompt": "Quần đảo Hoàng Sa của Việt Nam hiện nay thuộc quyền quản lý hành chính của thành phố trực thuộc trung ương nào?",
           "options": [
-            "Đại Tây Dương",
-            "Ấn Độ Dương",
-            "Thái Bình Dương",
-            "Bắc Băng Dương"
+            "Đà Nẵng",
+            "Hải Phòng",
+            "Quảng Nam",
+            "Khánh Hòa"
           ],
-          "answer": "C",
+          "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "THÁI BÌNH DƯƠNG",
-            "THAI BINH DUONG"
+            "ĐÀ NẴNG",
+            "DA NANG",
+            "THÀNH PHỐ ĐÀ NẴNG"
           ]
         },
         {
           "id": "kdr-2-2",
           "type": "mcq",
-          "prompt": "Nguyên tố nào có số hiệu nguyên tử bằng 1 và là nguyên tố nhẹ nhất trong vũ trụ?",
+          "prompt": "Chất khí nào chiếm khoảng 78% thể tích bầu khí quyển Trái Đất ở điều kiện tiêu chuẩn?",
           "options": [
-            "Hydro",
-            "Heli",
-            "Lithi",
-            "Cacbon"
+            "Nitơ (N2)",
+            "Oxy (O2)",
+            "Cacbonic (CO2)",
+            "Heli (He)"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "HYDRO",
-            "HIDRO",
-            "H"
+            "NITƠ",
+            "NITO",
+            "NITROGEN",
+            "N2"
           ]
         },
         {
           "id": "kdr-2-3",
           "type": "mcq",
-          "prompt": "Trong một tam giác vuông, cạnh đối diện với góc vuông được gọi là cạnh gì?",
+          "prompt": "Cơ quan nào trong hệ tiêu hóa của người tiết ra mật để giúp tiêu hóa chất béo?",
           "options": [
-            "Cạnh kề",
-            "Cạnh đối",
-            "Cạnh huyền",
-            "Đường cao"
+            "Gan",
+            "Dạ dày",
+            "Tụy",
+            "Ruột non"
           ],
-          "answer": "C",
+          "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "CẠNH HUYỀN",
-            "CANH HUYEN"
+            "GAN"
           ]
         },
         {
           "id": "kdr-2-4",
           "type": "mcq",
-          "prompt": "Bản Tuyên ngôn Độc lập khai sinh ra nước Việt Nam Dân chủ Cộng hòa ngày 2/9/1945 được Chủ tịch Hồ Chí Minh đọc tại quảng trường nào?",
+          "prompt": "Vị vua nào của triều Lý đã ban bố chiếu dời đô về Thăng Long vào năm 1010?",
           "options": [
-            "Quảng trường Ba Đình",
-            "Quảng trường Cách Mạng Tháng Tám",
-            "Quảng trường Đông Kinh Nghĩa Thục",
-            "Quảng trường Lam Sơn"
+            "Lý Thái Tổ",
+            "Lý Thái Tông",
+            "Lý Thánh Tông",
+            "Lý Nhân Tông"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "QUẢNG TRƯỜNG BA ĐÌNH",
-            "BA ĐÌNH",
-            "BA DINH"
+            "LÝ THÁI TỔ",
+            "LY THAI TO",
+            "LÝ CÔNG UẨN"
           ]
         },
         {
           "id": "kdr-2-5",
           "type": "mcq",
-          "prompt": "Hiện tượng các giọt sương đọng trên lá cây vào sáng sớm là kết quả của sự biến đổi trạng thái nào của hơi nước trong không khí?",
+          "prompt": "Một hình tròn có bán kính r = 5 cm. Chu vi của hình tròn đó bằng bao nhiêu pi xentimét?",
           "options": [
-            "Sự ngưng tụ",
-            "Sự bay hơi",
-            "Sự nóng chảy",
-            "Sự đông đặc"
+            "10 pi cm",
+            "25 pi cm",
+            "5 pi cm",
+            "20 pi cm"
           ],
           "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "NGƯNG TỤ",
-            "SỰ NGƯNG TỤ",
-            "NGUNG TU"
+            "10 PI",
+            "10",
+            "MƯỜI PI"
           ]
         },
         {
           "id": "kdr-2-6",
           "type": "mcq",
-          "prompt": "Trong tác phẩm \"Chuyện người con gái Nam Xương\" của Nguyễn Dữ, nhân vật người phụ nữ đức hạnh nhưng phải chịu nỗi oan khuất tên là gì?",
+          "prompt": "Tác phẩm \"Số đỏ\" châm biếm sâu cay xã hội tư sản thành thị nửa phong kiến là kiệt tác của nhà văn nào?",
           "options": [
-            "Vũ Thị Thiết (Vũ Nương)",
-            "Kiều Nguyệt Nga",
-            "Thúy Kiều",
-            "Mị Nương"
+            "Vũ Trọng Phụng",
+            "Nam Cao",
+            "Ngô Tất Tố",
+            "Nguyễn Công Hoan"
           ],
           "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "VŨ NƯƠNG",
-            "VU NUONG",
-            "VŨ THỊ THIẾT",
-            "VU THI THIET"
+            "VŨ TRỌNG PHỤNG",
+            "VU TRONG PHUNG"
           ]
         }
       ],
@@ -225,109 +223,107 @@
         {
           "id": "kdr-3-1",
           "type": "mcq",
-          "prompt": "Vận tốc truyền của ánh sáng trong chân không xấp xỉ bằng bao nhiêu km/s?",
+          "prompt": "Hồ nước ngọt tự nhiên lớn nhất miền Bắc Việt Nam nằm trong vườn quốc gia cùng tên thuộc tỉnh Bắc Kạn là hồ nào?",
           "options": [
-            "300.000 km/s",
-            "150.000 km/s",
-            "30.000 km/s",
-            "3.000 km/s"
+            "Hồ Ba Bể",
+            "Hồ Tây",
+            "Hồ Thác Bà",
+            "Hồ Núi Cốc"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "300.000 KM/S",
-            "300000",
-            "BA TRĂM NGHÌN KM/S"
+            "HỒ BA BỂ",
+            "HO BA BE",
+            "BA BỂ"
           ]
         },
         {
           "id": "kdr-3-2",
           "type": "mcq",
-          "prompt": "Khí nào sau đây được cây xanh hấp thụ trong quá trình quang hợp vào ban ngày?",
+          "prompt": "Công thức hóa học của muối ăn thông thường dùng trong nấu nướng hàng ngày là gì?",
           "options": [
-            "Cacbonic (CO2)",
-            "Nitơ (N2)",
-            "Mêtan (CH4)",
-            "Lưu huỳnh đioxit (SO2)"
+            "NaCl",
+            "KCl",
+            "CaCO3",
+            "NaHCO3"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "CO2",
-            "CACBONIC",
-            "KHÍ CACBONIC",
-            "DIOXIT CACBON"
+            "NACL",
+            "NATRI CLORUA"
           ]
         },
         {
           "id": "kdr-3-3",
           "type": "mcq",
-          "prompt": "Quốc gia nào có diện tích lãnh thổ lớn nhất thế giới hiện nay?",
+          "prompt": "Bào quan nào trong tế bào thực vật chứa sắc tố diệp lục để tiến hành quang hợp?",
           "options": [
-            "Canada",
-            "Liên bang Nga",
-            "Trung Quốc",
-            "Hoa Kỳ"
+            "Lục lạp",
+            "Ti thể",
+            "Không bào",
+            "Riboxom"
           ],
-          "answer": "B",
+          "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "NGA",
-            "LIÊN BANG NGA",
-            "NƯỚC NGA",
-            "RUSSIA"
+            "LỤC LẠP",
+            "LUC LAP",
+            "CHLOROPLAST"
           ]
         },
         {
           "id": "kdr-3-4",
           "type": "mcq",
-          "prompt": "Trận đại thắng Bạch Đằng năm 938 do vị anh hùng dân tộc nào chỉ huy đã đặt dấu chấm hết cho hơn một thiên niên kỷ Bắc thuộc?",
+          "prompt": "Ai là nữ tướng anh hùng cưỡi voi ra trận đánh đuổi quân Đông Ngô thế kỷ 3 với câu nói nổi tiếng muốn đạp luồng sóng dữ?",
           "options": [
-            "Ngô Quyền",
-            "Đinh Bộ Lĩnh",
-            "Lê Hoàn",
-            "Trần Hưng Đạo"
+            "Triệu Thị Trinh (Bà Triệu)",
+            "Trưng Trắc",
+            "Trưng Nhị",
+            "Lê Chân"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "NGÔ QUYỀN",
-            "NGO QUYEN"
+            "BÀ TRIỆU",
+            "BA TRIEU",
+            "TRIỆU THỊ TRINH",
+            "TRIEU THI TRINH"
           ]
         },
         {
           "id": "kdr-3-5",
           "type": "mcq",
-          "prompt": "Tổng số đo ba góc trong của một tam giác bất kỳ trong hình học phẳng Euclide bằng bao nhiêu độ?",
+          "prompt": "Căn bậc ba của số 125 bằng bao nhiêu?",
           "options": [
-            "90 độ",
-            "180 độ",
-            "270 độ",
-            "360 độ"
+            "5",
+            "15",
+            "25",
+            "3"
           ],
-          "answer": "B",
+          "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "180 ĐỘ",
-            "180",
-            "MỘT TRĂM TÁM MƯƠI ĐỘ"
+            "5",
+            "NĂM"
           ]
         },
         {
           "id": "kdr-3-6",
           "type": "mcq",
-          "prompt": "Tác giả của bài thơ thiếu nhi nổi tiếng \"Hạt gạo làng ta\" là nhà thơ nào?",
+          "prompt": "Trong bài thơ \"Tây Tiến\" của Quang Dũng, dòng sông nào gắn với hình ảnh súng ngửi trời và mường lát hoa về trong đêm hơi?",
           "options": [
-            "Trần Đăng Khoa",
-            "Định Hải",
-            "Phạm Hổ",
-            "Xuân Quỳnh"
+            "Sông Mã",
+            "Sông Đà",
+            "Sông Thao",
+            "Sông Lô"
           ],
           "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "TRẦN ĐĂNG KHOA",
-            "TRAN DANG KHOA"
+            "SÔNG MÃ",
+            "SONG MA"
           ]
         }
       ],
@@ -335,333 +331,430 @@
         {
           "id": "kdr-4-1",
           "type": "mcq",
-          "prompt": "Kim loại duy nhất nào ở thể lỏng trong điều kiện nhiệt độ phòng tiêu chuẩn?",
+          "prompt": "Bán đảo Đông Dương trong lịch sử địa lý gồm 3 quốc gia: Việt Nam, Lào và quốc gia nào?",
           "options": [
-            "Thủy ngân (Hg)",
-            "Chì (Pb)",
-            "Thiếc (Sn)",
-            "Nhôm (Al)"
+            "Campuchia",
+            "Thái Lan",
+            "Myanmar",
+            "Malaysia"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "THỦY NGÂN",
-            "THUY NGAN",
-            "HG"
+            "CAMPUCHIA",
+            "CAM-PU-CHIA",
+            "CAMBODIA"
           ]
         },
         {
           "id": "kdr-4-2",
           "type": "mcq",
-          "prompt": "Tác phẩm văn học kiệt xuất nào được xem là đỉnh cao truyện thơ Nôm của đại thi hào Nguyễn Du?",
+          "prompt": "Kim loại nào có nhiệt độ nóng chảy cao nhất trong các kim loại và thường dùng làm dây tóc bóng đèn sợi đốt?",
           "options": [
-            "Truyện Kiều",
-            "Lục Vân Tiên",
-            "Chinh phụ ngâm",
-            "Cung oán ngâm khúc"
+            "Vonfram (W)",
+            "Titan (Ti)",
+            "Sắt (Fe)",
+            "Đồng (Cu)"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "TRUYỆN KIỀU",
-            "TRUYEN KIEU",
-            "ĐOẠN TRƯỜNG TÂN THANH"
+            "VONFRAM",
+            "TUNGSTEN",
+            "W"
           ]
         },
         {
           "id": "kdr-4-3",
           "type": "mcq",
-          "prompt": "Tứ giác đều có 4 cạnh bằng nhau và 4 góc vuông được gọi là hình gì?",
+          "prompt": "Nhóm máu nào trong hệ nhóm máu ABO được xem là nhóm máu chuyên nhận vì có thể nhận mọi nhóm máu trong điều kiện cấp cứu?",
           "options": [
-            "Hình vuông",
-            "Hình chữ nhật",
-            "Hình thoi",
-            "Hình bình hành"
+            "Nhóm AB",
+            "Nhóm O",
+            "Nhóm A",
+            "Nhóm B"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "HÌNH VUÔNG",
-            "HINH VUONG"
+            "AB",
+            "NHÓM AB",
+            "NHOM AB"
           ]
         },
         {
           "id": "kdr-4-4",
           "type": "mcq",
-          "prompt": "Hòn đảo lớn nhất của Việt Nam nằm trong vịnh Thái Lan thuộc tỉnh Kiên Giang có tên là gì?",
+          "prompt": "Cuộc khởi nghĩa Yên Thế kéo dài gần 30 năm chống thực dân Pháp gắn liền với thủ lĩnh kiệt xuất nào?",
           "options": [
-            "Đảo Phú Quốc",
-            "Đảo Cát Bà",
-            "Đảo Côn Sơn",
-            "Đảo Lý Sơn"
+            "Hoàng Hoa Thám",
+            "Phan Đình Phùng",
+            "Nguyễn Thiện Thuật",
+            "Đinh Công Tráng"
           ],
           "answer": "A",
           "difficulty": "easy",
           "alternatives": [
-            "PHÚ QUỐC",
-            "PHU QUOC",
-            "ĐẢO PHÚ QUỐC"
+            "HOÀNG HOA THÁM",
+            "HOANG HOA THAM",
+            "ĐỀ THÁM"
           ]
         },
         {
           "id": "kdr-4-5",
           "type": "mcq",
-          "prompt": "Sóng âm thanh không thể truyền lan qua môi trường vật chất nào sau đây?",
+          "prompt": "Trong mặt phẳng tọa độ Oxy, đường thẳng y = 3x - 1 có hệ số góc bằng bao nhiêu?",
           "options": [
-            "Chân không",
-            "Chất rắn",
-            "Chất lỏng",
-            "Chất khí"
+            "3",
+            "-1",
+            "1",
+            "-3"
           ],
           "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "CHÂN KHÔNG",
-            "CHAN KHONG"
+            "3",
+            "BA"
           ]
         },
         {
           "id": "kdr-4-6",
           "type": "mcq",
-          "prompt": "Vị anh hùng dân tộc nào đã chỉ huy đại quân Tây Sơn tiến ra Thăng Long quét sạch 29 vạn quân Mãn Thanh mùa xuân năm 1789?",
+          "prompt": "Tác giả của tập kịch kinh điển \"Hồn Trương Ba, da hàng thịt\" và \"Tôi và chúng ta\" là nhà viết kịch tài hoa nào?",
           "options": [
-            "Quang Trung (Nguyễn Huệ)",
-            "Nguyễn Nhạc",
-            "Nguyễn Lữ",
-            "Trần Quang Diệu"
+            "Lưu Quang Vũ",
+            "Xuân Trình",
+            "Đào Hồng Cẩm",
+            "Tào Mạt"
           ],
           "answer": "A",
           "difficulty": "medium",
           "alternatives": [
-            "QUANG TRUNG",
-            "NGUYỄN HUỆ",
-            "NGUYEN HUE",
-            "VUA QUANG TRUNG"
+            "LƯU QUANG VŨ",
+            "LUU QUANG VU"
           ]
         }
       ],
-      []
+      [
+        {
+          "id": "kdr-5-1",
+          "type": "mcq",
+          "prompt": "Ngọn núi lửa đã tắt nào cao nhất thế giới và là đỉnh núi cao nhất châu Mỹ thuộc dãy Andes?",
+          "options": [
+            "Aconcagua",
+            "Kilimanjaro",
+            "Elbrus",
+            "Denali"
+          ],
+          "answer": "A",
+          "difficulty": "easy",
+          "alternatives": [
+            "ACONCAGUA",
+            "NÚI ACONCAGUA"
+          ]
+        },
+        {
+          "id": "kdr-5-2",
+          "type": "mcq",
+          "prompt": "Khí cười thường dùng trong y tế để gây mê giảm đau có công thức hóa học là gì?",
+          "options": [
+            "N2O (Dinitơ monoxit)",
+            "NO2",
+            "NO",
+            "NH3"
+          ],
+          "answer": "A",
+          "difficulty": "easy",
+          "alternatives": [
+            "N2O",
+            "DINITƠ MONOXIT"
+          ]
+        },
+        {
+          "id": "kdr-5-3",
+          "type": "mcq",
+          "prompt": "Loài thú duy nhất nào có khả năng bay lượn thực sự trên bầu trời nhờ cấu tạo màng cánh bằng da?",
+          "options": [
+            "Dơi",
+            "Sóc bay",
+            "Chồn bay",
+            "Thú mỏ vịt"
+          ],
+          "answer": "A",
+          "difficulty": "easy",
+          "alternatives": [
+            "DƠI",
+            "LOÀI DƠI",
+            "DOI"
+          ]
+        },
+        {
+          "id": "kdr-5-4",
+          "type": "mcq",
+          "prompt": "Vị danh y lỗi lạc đời nhà Trần được tôn vinh là bậc Thánh thuốc Nam với phương châm \"Nam dược trị Nam nhân\" là ai?",
+          "options": [
+            "Tuệ Tĩnh",
+            "Hải Thượng Lãn Ông",
+            "Lê Hữu Trác",
+            "Nguyễn Bá Tĩnh"
+          ],
+          "answer": "A",
+          "difficulty": "easy",
+          "alternatives": [
+            "TUỆ TĨNH",
+            "TUE TINH",
+            "NGUYỄN BÁ TĨNH"
+          ]
+        },
+        {
+          "id": "kdr-5-5",
+          "type": "mcq",
+          "prompt": "Một hình lăng trụ đứng có đáy là tam giác thì có tất cả bao nhiêu mặt?",
+          "options": [
+            "5 mặt",
+            "4 mặt",
+            "6 mặt",
+            "8 mặt"
+          ],
+          "answer": "A",
+          "difficulty": "medium",
+          "alternatives": [
+            "5",
+            "NĂM",
+            "5 MẶT"
+          ]
+        },
+        {
+          "id": "kdr-5-6",
+          "type": "mcq",
+          "prompt": "Tập truyện ngắn \"Gió đầu mùa\" và \"Hà Nội băm sáu phố phường\" là của nhà văn nổi tiếng nào trong Tự Lực Văn Đoàn?",
+          "options": [
+            "Thạch Lam",
+            "Nhất Linh",
+            "Khái Hưng",
+            "Hoàng Đạo"
+          ],
+          "answer": "A",
+          "difficulty": "medium",
+          "alternatives": [
+            "THẠCH LAM",
+            "THACH LAM"
+          ]
+        }
+      ]
     ],
     "chung": [
       {
         "id": "kdc-1",
         "type": "mcq",
-        "prompt": "Hành tinh nào trong Hệ Mặt Trời được mệnh danh là \"Hành tinh Đỏ\" do bề mặt chứa nhiều oxit sắt?",
+        "prompt": "Kênh đào nhân tạo nào khánh thành năm 1869 nối liền Biển Đỏ với Địa Trung Hải?",
         "options": [
-          "Sao Hỏa",
-          "Sao Kim",
-          "Sao Thổ",
-          "Sao Mộc"
+          "Kênh đào Suez",
+          "Kênh đào Panama",
+          "Kênh đào Kiel",
+          "Kênh đào Corinth"
         ],
         "answer": "A",
         "difficulty": "easy",
         "alternatives": [
-          "SAO HỎA",
-          "SAO HOA",
-          "MARS"
+          "SUEZ",
+          "KÊNH ĐÀO SUEZ",
+          "XUY-Ê"
         ]
       },
       {
         "id": "kdc-2",
         "type": "mcq",
-        "prompt": "Sắc tố sinh học nào trong lá cây giữ vai trò hấp thụ ánh sáng để quang hợp và tạo màu xanh cho lá?",
+        "prompt": "Hiện tượng nào mô tả sự phản ứng hướng về phía kích thích ánh sáng của ngọn cây xanh?",
         "options": [
-          "Diệp lục (Clorophyl)",
-          "Carotenoid",
-          "Anthocyanin",
-          "Xanthophyll"
+          "Tính hướng sáng",
+          "Tính hướng trọng lực",
+          "Tính hướng nước",
+          "Tính hướng hóa"
         ],
         "answer": "A",
         "difficulty": "easy",
         "alternatives": [
-          "DIỆP LỤC",
-          "CHLOROPHYLL",
-          "CLOROPHYL"
+          "HƯỚNG SÁNG",
+          "TÍNH HƯỚNG SÁNG",
+          "HUONG SANG"
         ]
       },
       {
         "id": "kdc-3",
         "type": "mcq",
-        "prompt": "Dãy núi nào đóng vai trò là ranh giới tự nhiên ngăn cách giữa hai châu lục Á và Âu?",
+        "prompt": "Chất nào được xem là dung môi hòa tan phổ biến nhất trong đời sống và tự nhiên?",
         "options": [
-          "Dãy Ural",
-          "Dãy Alps",
-          "Dãy Himalaya",
-          "Dãy Andes"
+          "Nước (H2O)",
+          "Rượu etylic",
+          "Benzen",
+          "Dầu hỏa"
         ],
         "answer": "A",
         "difficulty": "easy",
         "alternatives": [
-          "URAL",
-          "DÃY URAL",
-          "DAY URAL"
+          "NƯỚC",
+          "NUOC",
+          "H2O"
         ]
       },
       {
         "id": "kdc-4",
         "type": "mcq",
-        "prompt": "Tập hợp tất cả các số nguyên dương là ước của số 6 gồm bao nhiêu phần tử?",
+        "prompt": "Trong đại số, phương trình bậc hai một ẩn ax^2 + bx + c = 0 có nghiệm kép khi biệt thức Delta bằng bao nhiêu?",
         "options": [
-          "4 phần tử",
-          "3 phần tử",
-          "2 phần tử",
-          "5 phần tử"
+          "0",
+          "1",
+          "> 0",
+          "< 0"
         ],
         "answer": "A",
         "difficulty": "easy",
         "alternatives": [
-          "4",
-          "BỐN",
-          "4 PHẦN TỬ",
-          "4 PHAN TU"
+          "0",
+          "KHÔNG",
+          "BANG 0"
         ]
       },
       {
         "id": "kdc-5",
         "type": "mcq",
-        "prompt": "Kim loại nào có hàm lượng chiếm tỷ lệ phần trăm lớn nhất trong vỏ Trái Đất?",
+        "prompt": "Đơn vị đo công suất tiêu thụ điện trong Hệ đo lường quốc tế (SI) là gì?",
         "options": [
-          "Nhôm (Al)",
-          "Sắt (Fe)",
-          "Canxi (Ca)",
-          "Đồng (Cu)"
+          "Oát (W)",
+          "Jun (J)",
+          "Vôn (V)",
+          "Ampe (A)"
         ],
         "answer": "A",
         "difficulty": "easy",
         "alternatives": [
-          "NHÔM",
-          "NHOM",
-          "AL",
-          "ALUMINIUM"
+          "OÁT",
+          "WAT",
+          "WATT",
+          "W"
         ]
       },
       {
         "id": "kdc-6",
         "type": "mcq",
-        "prompt": "Tập thơ chữ Hán nổi tiếng \"Nhật ký trong tù\" gồm 133 bài thơ được sáng tác bởi tác giả nào?",
+        "prompt": "Tỉnh nào ở vùng Tây Nguyên có thành phố Pleiku là trung tâm tỉnh lỵ?",
         "options": [
-          "Hồ Chí Minh",
-          "Phan Bội Châu",
-          "Huỳnh Thúc Kháng",
-          "Tố Hữu"
+          "Gia Lai",
+          "Đắk Lắk",
+          "Kon Tum",
+          "Lâm Đồng"
         ],
         "answer": "A",
         "difficulty": "medium",
         "alternatives": [
-          "HỒ CHÍ MINH",
-          "HO CHI MINH",
-          "BÁC HỒ",
-          "BAC HO"
+          "GIA LAI",
+          "TỈNH GIA LAI"
         ]
       },
       {
         "id": "kdc-7",
         "type": "mcq",
-        "prompt": "Lực cản trở chuyển động xuất hiện tại bề mặt tiếp xúc khi một vật trượt trên bề mặt vật khác gọi là gì?",
+        "prompt": "Hệ cơ quan nào trong cơ thể người làm nhiệm vụ sản sinh các tế bào miễn dịch và kháng thể để chống lại mầm bệnh?",
         "options": [
-          "Lực ma sát",
-          "Lực hấp dẫn",
-          "Lực đàn hồi",
-          "Lực đẩy Ác-si-mét"
+          "Hệ miễn dịch",
+          "Hệ bài tiết",
+          "Hệ nội tiết",
+          "Hệ hô hấp"
         ],
         "answer": "A",
         "difficulty": "medium",
         "alternatives": [
-          "LỰC MA SÁT",
-          "MA SÁT",
-          "MA SAT",
-          "LUC MA SAT"
+          "HỆ MIỄN DỊCH",
+          "MIEN DICH"
         ]
       },
       {
         "id": "kdc-8",
         "type": "mcq",
-        "prompt": "Tỉnh nào có diện tích tự nhiên rộng nhất trong số 63 tỉnh, thành phố của nước ta hiện nay?",
+        "prompt": "Ai là tác giả của tác phẩm \"Đường Kách mệnh\" xuất bản năm 1927 làm tài liệu huấn luyện cán bộ cách mạng Việt Nam?",
         "options": [
-          "Nghệ An",
-          "Gia Lai",
-          "Sơn La",
-          "Đắk Lắk"
+          "Nguyễn Ái Quốc (Hồ Chí Minh)",
+          "Trần Phú",
+          "Lê Hồng Phong",
+          "Hà Huy Tập"
         ],
         "answer": "A",
         "difficulty": "medium",
         "alternatives": [
-          "NGHỆ AN",
-          "NGHE AN",
-          "TỈNH NGHỆ AN"
+          "NGUYỄN ÁI QUỐC",
+          "HỒ CHÍ MINH",
+          "HO CHI MINH"
         ]
       },
       {
         "id": "kdc-9",
         "type": "mcq",
-        "prompt": "Trong hóa học, ở nhiệt độ 25 độ C, dung dịch có chỉ số pH đúng bằng 7 được gọi là dung dịch gì?",
+        "prompt": "Góc nội tiếp chắn nửa đường tròn luôn luôn có số đo bằng bao nhiêu độ?",
         "options": [
-          "Dung dịch trung tính",
-          "Dung dịch axit",
-          "Dung dịch bazơ",
-          "Dung dịch đệm"
+          "90 độ",
+          "60 độ",
+          "45 độ",
+          "180 độ"
         ],
         "answer": "A",
         "difficulty": "medium",
         "alternatives": [
-          "TRUNG TÍNH",
-          "DUNG DỊCH TRUNG TÍNH",
-          "TRUNG TINH"
+          "90 ĐỘ",
+          "90",
+          "CHÍN MƯƠI ĐỘ"
         ]
       },
       {
         "id": "kdc-10",
         "type": "mcq",
-        "prompt": "Tập đoàn cứ điểm Điện Biên Phủ của quân viễn chinh Pháp năm 1954 được chia thành bao nhiêu cứ điểm đề kháng?",
+        "prompt": "Phản ứng este hóa giữa axit axetic và rượu etylic tạo ra hợp chất hữu cơ có mùi thơm dễ chịu tên là gì?",
         "options": [
-          "49 cứ điểm",
-          "45 cứ điểm",
-          "56 cứ điểm",
-          "38 cứ điểm"
+          "Etyl axetat",
+          "Metyl axetat",
+          "Etyl fomat",
+          "Propyl axetat"
         ],
         "answer": "A",
         "difficulty": "hard",
         "alternatives": [
-          "49",
-          "BỐN MƯƠI CHÍN",
-          "49 CỨ ĐIỂM"
+          "ETYL AXETAT",
+          "ETHYL ACETATE"
         ]
       },
       {
         "id": "kdc-11",
         "type": "mcq",
-        "prompt": "Một hình cầu có bán kính R = 3 cm. Thể tích của hình cầu đó bằng bao nhiêu pi xentimét khối?",
+        "prompt": "Năm nào nước ta chính thức trở thành thành viên thứ 150 của Tổ chức Thương mại Thế giới (WTO)?",
         "options": [
-          "36 pi cm3",
-          "27 pi cm3",
-          "12 pi cm3",
-          "18 pi cm3"
+          "Năm 2007",
+          "Năm 2005",
+          "Năm 2006",
+          "Năm 2008"
         ],
         "answer": "A",
         "difficulty": "hard",
         "alternatives": [
-          "36 PI CM3",
-          "36",
-          "BA MƯƠI SÁU",
-          "36 PI"
+          "2007",
+          "NĂM 2007"
         ]
       },
       {
         "id": "kdc-12",
         "type": "mcq",
-        "prompt": "Nhà soạn nhạc thiên tài người Đức nào là tác giả của Bản giao hưởng số 9 (với khúc Ode to Joy) dù đã bị điếc hoàn toàn khi hoàn thành tác phẩm?",
+        "prompt": "Thiết bị quang học nào lợi dụng hiện tượng phản xạ toàn phần trong các sợi thủy tinh siêu mỏng để truyền dẫn tín hiệu internet tốc độ cao?",
         "options": [
-          "Ludwig van Beethoven",
-          "Wolfgang Amadeus Mozart",
-          "Johann Sebastian Bach",
-          "Frederic Chopin"
+          "Cáp quang",
+          "Kính tiềm vọng",
+          "Lăng kính",
+          "Kính hiển vi"
         ],
         "answer": "A",
         "difficulty": "hard",
         "alternatives": [
-          "BEETHOVEN",
-          "BÉT-TÔ-VEN",
-          "LUDWIG VAN BEETHOVEN"
+          "CÁP QUANG",
+          "CAP QUANG",
+          "SỢI QUANG"
         ]
       }
     ]
@@ -741,14 +834,37 @@
         "TRONG COM"
       ],
       "ignoreDiacritics": true
-    },
-    "image": ""
+    }
   },
   "tangToc": [
     {
       "id": "tt-1",
       "type": "text",
-      "prompt": "Sắp xếp các đơn vị đo thời gian sau theo thứ tự từ ngắn nhất đến dài nhất: [1] Giờ, [2] Giây, [3] Ngày, [4] Phút.",
+      "prompt": "Sắp xếp các đơn vị đo dung lượng dữ liệu sau theo thứ tự từ nhỏ đến lớn: [1] Megabyte (MB), [2] Kilobyte (KB), [3] Terabyte (TB), [4] Gigabyte (GB).",
+      "answer": "2-1-4-3",
+      "alternatives": [
+        "2143",
+        "2, 1, 4, 3",
+        "2 1 4 3",
+        "[2] [1] [4] [3]"
+      ],
+      "ignoreDiacritics": true
+    },
+    {
+      "id": "tt-2",
+      "type": "text",
+      "prompt": "Điền số tiếp theo vào dãy số theo quy luật: 3, 6, 12, 24, 48, ...?",
+      "answer": "96",
+      "alternatives": [
+        "96",
+        "CHÍN MƯƠI SÁU"
+      ],
+      "ignoreDiacritics": true
+    },
+    {
+      "id": "tt-3",
+      "type": "text",
+      "prompt": "Sắp xếp các thời kỳ phát triển xã hội loài người theo tiến trình lịch sử từ xưa đến nay: [1] Thời đại đồ sắt, [2] Thời đại đồ đá, [3] Thời đại công nghệ thông tin, [4] Thời đại đồ đồng.",
       "answer": "2-4-1-3",
       "alternatives": [
         "2413",
@@ -759,38 +875,14 @@
       "ignoreDiacritics": true
     },
     {
-      "id": "tt-2",
-      "type": "text",
-      "prompt": "Điền số còn thiếu vào chỗ trống theo quy luật dãy số sau: 2, 5, 10, 17, 26, ...?",
-      "answer": "37",
-      "alternatives": [
-        "BA MƯƠI BẢY",
-        "37"
-      ],
-      "ignoreDiacritics": true
-    },
-    {
-      "id": "tt-3",
-      "type": "text",
-      "prompt": "Sắp xếp các hành tinh sau theo thứ tự khoảng cách xa dần Mặt Trời: [1] Trái Đất, [2] Sao Hỏa, [3] Sao Kim, [4] Sao Mộc.",
-      "answer": "3-1-2-4",
-      "alternatives": [
-        "3124",
-        "3, 1, 2, 4",
-        "3 1 2 4",
-        "[3] [1] [2] [4]"
-      ],
-      "ignoreDiacritics": true
-    },
-    {
       "id": "tt-4",
       "type": "text",
-      "prompt": "Trong một cuộc thi chạy có 4 vận động viên A, B, C, D: B về đích sau A nhưng trước C; D về đích trước A. Vận động viên nào về đích đầu tiên?",
-      "answer": "D",
+      "prompt": "Trong một giải đấu cờ vua có 4 kỳ thủ Kiên, Long, Minh, Nam: Kiên xếp trên Long nhưng dưới Nam; Minh xếp dưới Long. Hỏi kỳ thủ nào giành giải nhất?",
+      "answer": "NAM",
       "alternatives": [
-        "VẬN ĐỘNG VIÊN D",
-        "D",
-        "BẠN D"
+        "NAM",
+        "BẠN NAM",
+        "KỲ THỦ NAM"
       ],
       "ignoreDiacritics": true
     }
@@ -800,12 +892,11 @@
       {
         "id": "vd-10-1",
         "type": "text",
-        "prompt": "Nguyên tố hóa học nào có độ phổ biến cao nhất trong vỏ Trái Đất tính theo khối lượng?",
-        "answer": "OXY",
+        "prompt": "Nguyên tố khí hiếm có số hiệu nguyên tử bằng 2 thường dùng bơm bóng bay là gì?",
+        "answer": "HELI",
         "alternatives": [
-          "OXYGEN",
-          "O",
-          "DƯỠNG KHÍ"
+          "HELIUM",
+          "HE"
         ],
         "points": 10,
         "difficulty": "easy",
@@ -815,12 +906,11 @@
       {
         "id": "vd-10-2",
         "type": "text",
-        "prompt": "Vị vua nào đã ban bố \"Chiếu dời đô\" vào mùa thu năm 1010 để định đô tại Thăng Long?",
-        "answer": "LÝ THÁI TỔ",
+        "prompt": "Thủ đô của nước Nhật Bản hiện nay là thành phố nào?",
+        "answer": "TOKYO",
         "alternatives": [
-          "LY THAI TO",
-          "LÝ CÔNG UẨN",
-          "LY CONG UAN"
+          "TÔ-KY-Ô",
+          "TOKYO"
         ],
         "points": 10,
         "difficulty": "easy",
@@ -830,12 +920,11 @@
       {
         "id": "vd-10-3",
         "type": "text",
-        "prompt": "Đơn vị chuẩn đo lực trong hệ đo lường quốc tế SI là gì?",
-        "answer": "NEWTON",
+        "prompt": "Loài chim nào lớn nhất thế giới còn sống nhưng không biết bay và chạy rất nhanh trên sa mạc?",
+        "answer": "ĐÀ ĐIỂU",
         "alternatives": [
-          "NIU-TƠN",
-          "NIUTON",
-          "N"
+          "DA DIEU",
+          "CHIM ĐÀ ĐIỂU"
         ],
         "points": 10,
         "difficulty": "easy",
@@ -845,11 +934,11 @@
       {
         "id": "vd-10-4",
         "type": "text",
-        "prompt": "Quần thể danh thắng Vịnh Hạ Long - di sản thiên nhiên thế giới thuộc tỉnh/thành phố nào?",
-        "answer": "QUẢNG NINH",
+        "prompt": "Đoạn thẳng nối tâm của đường tròn với một điểm bất kỳ trên đường tròn gọi là gì?",
+        "answer": "BÁN KÍNH",
         "alternatives": [
-          "QUANG NINH",
-          "TỈNH QUẢNG NINH"
+          "BAN KINH",
+          "R"
         ],
         "points": 10,
         "difficulty": "easy",
@@ -859,12 +948,11 @@
       {
         "id": "vd-10-5",
         "type": "text",
-        "prompt": "Tập hợp các số tự nhiên lớn hơn 0 và không vượt quá 5 gồm bao nhiêu phần tử?",
-        "answer": "5",
+        "prompt": "Hợp chất nào chiếm khoảng 70% khối lượng cơ thể người trưởng thành?",
+        "answer": "NƯỚC",
         "alternatives": [
-          "5 PHẦN TỬ",
-          "NĂM",
-          "NĂM PHẦN TỬ"
+          "NUOC",
+          "H2O"
         ],
         "points": 10,
         "difficulty": "easy",
@@ -874,12 +962,69 @@
       {
         "id": "vd-10-6",
         "type": "text",
-        "prompt": "Cơ quan sinh dưỡng nào của thực vật thực hiện chức năng quang hợp và thoát hơi nước chủ yếu?",
-        "answer": "LÁ",
+        "prompt": "Lễ hội Đền Hùng được tổ chức định kỳ hàng năm vào ngày mùng mấy tháng 3 âm lịch?",
+        "answer": "MÙNG 10 THÁNG 3",
         "alternatives": [
-          "LÁ CÂY",
-          "LA",
-          "LA CAY"
+          "10/3",
+          "10",
+          "MÙNG 10",
+          "10 THÁNG 3"
+        ],
+        "points": 10,
+        "difficulty": "easy",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-10-7",
+        "type": "text",
+        "prompt": "Hành tinh nào có kích thước và khối lượng lớn nhất trong Hệ Mặt Trời?",
+        "answer": "SAO MỘC",
+        "alternatives": [
+          "SAO MOC",
+          "JUPITER"
+        ],
+        "points": 10,
+        "difficulty": "easy",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-10-8",
+        "type": "text",
+        "prompt": "Vị vua nào của triều Tây Sơn đã lãnh đạo quân dân đại phá 29 vạn quân Thanh?",
+        "answer": "QUANG TRUNG",
+        "alternatives": [
+          "NGUYỄN HUỆ",
+          "VUA QUANG TRUNG"
+        ],
+        "points": 10,
+        "difficulty": "easy",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-10-9",
+        "type": "text",
+        "prompt": "Đơn vị đo tần số dao động trong hệ đơn vị quốc tế SI là gì?",
+        "answer": "HERTZ",
+        "alternatives": [
+          "HEC",
+          "HZ"
+        ],
+        "points": 10,
+        "difficulty": "easy",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-10-10",
+        "type": "text",
+        "prompt": "Tỉnh nào ở cực Nam Tổ quốc nổi tiếng với Mũi Cà Mau?",
+        "answer": "CÀ MAU",
+        "alternatives": [
+          "CA MAU",
+          "TỈNH CÀ MAU"
         ],
         "points": 10,
         "difficulty": "easy",
@@ -889,74 +1034,13 @@
     ],
     "pool20": [
       {
-        "id": "vd-20-7",
-        "type": "text",
-        "prompt": "Trong bảng tuần hoàn hóa học, kim loại kiềm nhẹ nhất và có mật độ khối lượng riêng nhỏ nhất là gì?",
-        "answer": "LITHI",
-        "alternatives": [
-          "LITHIUM",
-          "LI"
-        ],
-        "points": 20,
-        "difficulty": "medium",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
-        "id": "vd-20-8",
-        "type": "text",
-        "prompt": "Cuộc khởi nghĩa Hai Bà Trưng phất cờ khởi nghĩa chống quân Đông Hán nổ ra vào năm nào sau Công nguyên?",
-        "answer": "NĂM 40",
-        "alternatives": [
-          "40",
-          "NĂM 40 SCN",
-          "40 SCN",
-          "NAM 40"
-        ],
-        "points": 20,
-        "difficulty": "medium",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
-        "id": "vd-20-9",
-        "type": "text",
-        "prompt": "Một hình thang có độ dài hai đáy là 8 cm và 12 cm, chiều cao bằng 5 cm. Diện tích của hình thang đó bằng bao nhiêu xentimét vuông?",
-        "answer": "50",
-        "alternatives": [
-          "50 CM2",
-          "NĂM MƯƠI",
-          "50"
-        ],
-        "points": 20,
-        "difficulty": "medium",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
-        "id": "vd-20-10",
-        "type": "text",
-        "prompt": "Vườn quốc gia nổi tiếng nào tại tỉnh Quảng Bình được UNESCO công nhận là Di sản thiên nhiên thế giới về địa chất và hang động?",
-        "answer": "PHONG NHA KẺ BÀNG",
-        "alternatives": [
-          "PHONG NHA - KẺ BÀNG",
-          "PHONG NHA KE BANG",
-          "VƯỜN QUỐC GIA PHONG NHA KẺ BÀNG"
-        ],
-        "points": 20,
-        "difficulty": "medium",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
         "id": "vd-20-11",
         "type": "text",
-        "prompt": "Bộ tiểu thuyết chương hồi lừng danh nào của La Quán Trung mở đầu bằng câu nói: \"Thế lớn trong thiên hạ, cứ tan lâu lại hợp, hợp lâu lại tan\"?",
-        "answer": "TAM QUỐC DIỄN NGHĨA",
+        "prompt": "Hiện tượng khúc xạ ánh sáng xảy ra khi tia sáng đi qua mặt phân cách giữa hai môi trường có chiết suất như thế nào?",
+        "answer": "KHÁC NHAU",
         "alternatives": [
-          "TAM QUOC DIEN NGHIA",
-          "TAM QUỐC CHÍ DIỄN NGHĨA",
-          "TAM QUỐC"
+          "KHAC NHAU",
+          "CHIẾT SUẤT KHÁC NHAU"
         ],
         "points": 20,
         "difficulty": "medium",
@@ -966,13 +1050,68 @@
       {
         "id": "vd-20-12",
         "type": "text",
-        "prompt": "Hiện tượng ánh sáng bị đổi hướng khi truyền xiên góc qua mặt phân cách giữa hai môi trường trong suốt khác nhau gọi là gì?",
-        "answer": "KHÚC XẠ ÁNH SÁNG",
+        "prompt": "Chiến thắng lịch sử Điện Biên Phủ \"lừng lẫy năm châu, chấn động địa cầu\" diễn ra vào năm nào?",
+        "answer": "1954",
         "alternatives": [
-          "KHÚC XẠ",
-          "KHUC XA",
-          "HIỆN TƯỢNG KHÚC XẠ",
-          "KHUC XA ANH SANG"
+          "NĂM 1954",
+          "1954"
+        ],
+        "points": 20,
+        "difficulty": "medium",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-20-13",
+        "type": "text",
+        "prompt": "Một hình lập phương có thể tích bằng 64 cm3 thì độ dài mỗi cạnh bằng bao nhiêu xentimét?",
+        "answer": "4",
+        "alternatives": [
+          "4 CM",
+          "BỐN",
+          "4"
+        ],
+        "points": 20,
+        "difficulty": "medium",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-20-14",
+        "type": "text",
+        "prompt": "Tác phẩm văn học trung đại nào của Đặng Trần Côn viết bằng chữ Hán than thở nỗi sầu chia ly người chinh phụ?",
+        "answer": "CHINH PHỤ NGÂM",
+        "alternatives": [
+          "CHINH PHU NGAM",
+          "CHINH PHỤ NGÂM KHÚC"
+        ],
+        "points": 20,
+        "difficulty": "medium",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-20-15",
+        "type": "text",
+        "prompt": "Loại liên kết hóa học hình thành do lực hút tĩnh điện giữa các ion mang điện tích trái dấu gọi là liên kết gì?",
+        "answer": "LIÊN KẾT ION",
+        "alternatives": [
+          "ION",
+          "LIEN KET ION"
+        ],
+        "points": 20,
+        "difficulty": "medium",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-20-16",
+        "type": "text",
+        "prompt": "Đại dương nào có độ sâu trung bình lớn nhất thế giới và chứa vực thẳm Mariana?",
+        "answer": "THÁI BÌNH DƯƠNG",
+        "alternatives": [
+          "THAI BINH DUONG",
+          "PACIFIC"
         ],
         "points": 20,
         "difficulty": "medium",
@@ -982,74 +1121,14 @@
     ],
     "pool30": [
       {
-        "id": "vd-30-13",
-        "type": "text",
-        "prompt": "Hai điện trở R1 = 6 ôm và R2 = 12 ôm được mắc song song. Điện trở tương đương của đoạn mạch bằng bao nhiêu ôm?",
-        "answer": "4",
-        "alternatives": [
-          "4 ÔM",
-          "BỐN",
-          "4 OM"
-        ],
-        "points": 30,
-        "difficulty": "hard",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
-        "id": "vd-30-14",
-        "type": "text",
-        "prompt": "Chiến dịch quân sự toàn thắng mùa xuân năm 1975 giải phóng hoàn toàn miền Nam, thống nhất đất nước mang tên vị lãnh tụ vĩ đại nào?",
-        "answer": "CHIẾN DỊCH HỒ CHÍ MINH",
-        "alternatives": [
-          "CHIEN DICH HO CHI MINH",
-          "HỒ CHÍ MINH",
-          "HO CHI MINH"
-        ],
-        "points": 30,
-        "difficulty": "hard",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
-        "id": "vd-30-15",
-        "type": "text",
-        "prompt": "Căn bậc hai số học của một số dương x bằng 15. Giá trị của số x đó là bao nhiêu?",
-        "answer": "225",
-        "alternatives": [
-          "HAI TRĂM HAI MƯƠI LĂM",
-          "225"
-        ],
-        "points": 30,
-        "difficulty": "hard",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
-        "id": "vd-30-16",
-        "type": "text",
-        "prompt": "Polysaccharide đại phân tử nào là thành phần cấu tạo chính của thành tế bào thực vật và là nguồn chất xơ chủ yếu?",
-        "answer": "CELLULOSE",
-        "alternatives": [
-          "XENLULOZO",
-          "CENLULOZO",
-          "CELLULOSA",
-          "XENLULÔZƠ"
-        ],
-        "points": 30,
-        "difficulty": "hard",
-        "timeLimit": 20,
-        "ignoreDiacritics": true
-      },
-      {
         "id": "vd-30-17",
         "type": "text",
-        "prompt": "Con sông nào dài nhất chảy hoàn toàn trên lãnh thổ Việt Nam mà không bắt nguồn từ bên ngoài biên giới?",
-        "answer": "SÔNG ĐỒNG NAI",
+        "prompt": "Định luật vật lý nào khẳng định áp suất tác dụng lên một chất lỏng kín được truyền nguyên vẹn theo mọi hướng?",
+        "answer": "ĐỊNH LUẬT PASCAL",
         "alternatives": [
-          "SONG DONG NAI",
-          "ĐỒNG NAI",
-          "DONG NAI"
+          "PASCAL",
+          "PA-XCAN",
+          "DINH LUAT PASCAL"
         ],
         "points": 30,
         "difficulty": "hard",
@@ -1059,14 +1138,126 @@
       {
         "id": "vd-30-18",
         "type": "text",
-        "prompt": "Nhà nữ bác học kiệt xuất nào là người đầu tiên và duy nhất trong lịch sử từng nhận hai giải Nobel ở hai lĩnh vực khoa học khác nhau (Vật lý và Hóa học)?",
-        "answer": "MARIE CURIE",
+        "prompt": "Kim loại nào có khối lượng riêng lớn nhất và nặng nhất trong tất cả các kim loại (D xấp xỉ 22,6 g/cm3)?",
+        "answer": "OSMI",
         "alternatives": [
-          "MARI QUY-RI",
-          "MARIE SKLODOWSKA-CURIE",
-          "MA-RI COI-RI",
-          "CURIE",
-          "MARIE CURIE"
+          "OSMIUM",
+          "OS"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-19",
+        "type": "text",
+        "prompt": "Hiệp định Geneva chấm dứt chiến tranh, lập lại hòa bình ở Đông Dương được ký kết vào năm nào?",
+        "answer": "1954",
+        "alternatives": [
+          "NĂM 1954",
+          "1954"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-20",
+        "type": "text",
+        "prompt": "Phương trình bậc ba ax^3 + bx^2 + cx + d = 0 (a khác 0) có tối đa bao nhiêu nghiệm thực?",
+        "answer": "3",
+        "alternatives": [
+          "3 NGHIỆM",
+          "BA",
+          "3"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-21",
+        "type": "text",
+        "prompt": "Chất dẫn truyền xung thần kinh tại các cúc xi-náp thần kinh của động vật có tên phổ biến là gì?",
+        "answer": "AXETYLCHOLIN",
+        "alternatives": [
+          "ACETYLCHOLINE",
+          "AXETYL CHOLIN"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-22",
+        "type": "text",
+        "prompt": "Nhà vật lý người Đức nào đã tìm ra hiện tượng tia X vào năm 1895 và nhận giải Nobel Vật lý đầu tiên trong lịch sử?",
+        "answer": "WILHELM RONTGEN",
+        "alternatives": [
+          "RONTGEN",
+          "RƠN-GHEN",
+          "ROENTGEN"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-23",
+        "type": "text",
+        "prompt": "Dãy núi đá vôi uốn lượn hình cánh cung nào là ranh giới tự nhiên ngăn cách miền Bắc Trung Bộ với vùng Duyên hải Nam Trung Bộ?",
+        "answer": "DÃY BẠCH MÃ",
+        "alternatives": [
+          "BẠCH MÃ",
+          "DAY BACH MA"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-24",
+        "type": "text",
+        "prompt": "Hợp chất hữu cơ dạng mạch vòng gồm 6 nguyên tử cacbon và 6 nguyên tử hydro có liên kết thơm bền vững là gì?",
+        "answer": "BENZEN",
+        "alternatives": [
+          "BENZENE",
+          "C6H6"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-25",
+        "type": "text",
+        "prompt": "Vị vua nào của triều Trần đã hai lần trực tiếp chỉ huy đánh tan quân xâm lược Nguyên Mông năm 1285 và 1288 rồi sau đó xuất gia tu hành lập ra Thiền phái Trúc Lâm?",
+        "answer": "TRẦN NHÂN TÔNG",
+        "alternatives": [
+          "TRAN NHAN TONG",
+          "PHẬT HOÀNG TRẦN NHÂN TÔNG"
+        ],
+        "points": 30,
+        "difficulty": "hard",
+        "timeLimit": 20,
+        "ignoreDiacritics": true
+      },
+      {
+        "id": "vd-30-26",
+        "type": "text",
+        "prompt": "Trong mạch điện xoay chiều RLC không phân nhánh, hiện tượng cường độ dòng điện hiệu dụng đạt giá trị cực đại khi ZL = ZC gọi là hiện tượng gì?",
+        "answer": "CỘNG HƯỞNG ĐIỆN",
+        "alternatives": [
+          "CỘNG HƯỞNG",
+          "CONG HUONG DIEN",
+          "CONG HUONG"
         ],
         "points": 30,
         "difficulty": "hard",
@@ -1079,36 +1270,33 @@
     {
       "id": "tb-1",
       "type": "text",
-      "prompt": "Hành tinh nào trong Hệ Mặt Trời tự quay quanh trục theo chiều ngược lại (từ Đông sang Tây) so với phần lớn các hành tinh khác?",
-      "answer": "SAO KIM",
+      "prompt": "Hành tinh nào trong Hệ Mặt Trời có hệ thống vành đai băng đá và bụi sáng rõ nhất?",
+      "answer": "SAO THỔ",
       "alternatives": [
-        "SAO KIM",
-        "SAO HÔM",
-        "SAO MAI",
-        "VENUS"
+        "SAO THO",
+        "SATURN"
       ],
       "ignoreDiacritics": true
     },
     {
       "id": "tb-2",
       "type": "text",
-      "prompt": "Tỉnh nào ở cực Nam Tổ quốc có ba mặt giáp biển và sở hữu Vườn quốc gia Mũi Cà Mau?",
-      "answer": "CÀ MAU",
+      "prompt": "Tỉnh nào ở vùng Tây Bắc có địa danh lịch sử lòng chảo Mường Thanh và cứ điểm A1?",
+      "answer": "ĐIỆN BIÊN",
       "alternatives": [
-        "CA MAU",
-        "TỈNH CÀ MAU"
+        "DIEN BIEN",
+        "TỈNH ĐIỆN BIÊN"
       ],
       "ignoreDiacritics": true
     },
     {
       "id": "tb-3",
       "type": "text",
-      "prompt": "Khí nào chiếm tỷ lệ thể tích lớn nhất (khoảng 78%) trong khí quyển Trái Đất?",
-      "answer": "NITƠ",
+      "prompt": "Nguyên tố hóa học nào tạo nên kim cương và than chì?",
+      "answer": "CACBON",
       "alternatives": [
-        "NITO",
-        "NITROGEN",
-        "KHÍ NITƠ"
+        "CARBON",
+        "C"
       ],
       "ignoreDiacritics": true
     }
