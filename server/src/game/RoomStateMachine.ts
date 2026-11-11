@@ -63,6 +63,8 @@ export class RoomStateMachine {
   private lastRevealRound: RoundType | null = null;
   /** VCNV: thời gian còn lại của 15s đoán cuối khi có người bấm chuông (để chạy tiếp, không đếm lại từ đầu). */
   private vcnvFinalGuessRemainingMs: number | null = null;
+  /** VCNV: câu hàng ngang / ô trung tâm đang chạy bị chuông ngắt. Trả lời CNV sai thì chạy lại từ đầu. */
+  private vcnvInterrupted: { kind: 'ROW' | 'CENTER'; rowIndex: number; stepIndex: number } | null = null;
   private lastTabLeaveAt: Map<string, number> = new Map();
   /** true nếu chủ phòng tự tải bộ đề lên: khi bắt đầu trận sẽ giữ nguyên, không ghép đề ngẫu nhiên từ kho. */
   public customQuestionSet = false;
@@ -75,7 +77,6 @@ export class RoomStateMachine {
   private disqualifiedBuzzers: Set<string> = new Set();
   private buzzedPlayerId: string | null = null;
   private buzzerOpenTime: number = 0;
-  private pendingCnvBuzzerId: string | null = null;
   private veDichPlayerQueue: string[] = [];
   private veDichCompletedPlayerIds: Set<string> = new Set();
   private veDichUsedQuestionIds: Set<string> = new Set();
@@ -849,7 +850,6 @@ export class RoomStateMachine {
     this.clearTimer();
     this.answersMap.clear();
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.eventQueue.enqueue(async () => {
       let nextRound: RoundType = 'VCNV';
       const normalized = (targetRound || '').toUpperCase();
@@ -946,7 +946,6 @@ export class RoomStateMachine {
     if (targetRound !== 'VCNV') this.clearVcnvElimination();
     this.clearTimer();
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.room.status = 'READY';
     this.room.state = {
       round: 'READY',
@@ -975,7 +974,6 @@ export class RoomStateMachine {
     if (finishedRound === 'VCNV') this.clearVcnvElimination();
     this.clearTimer();
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.answersMap.clear();
 
     const roundKey: Partial<Record<RoundType, keyof Player['roundScores']>> = {
@@ -1569,23 +1567,20 @@ export class RoomStateMachine {
         return false;
       }
 
-      // G7: đang có câu hàng ngang / ô trung tâm -> chỉ ghi nhận chuông. Câu hỏi vẫn chạy tiếp cho mọi
-      // người (không xóa đáp án đã nộp); người bấm được trả lời CNV ngay sau khi công bố câu đó.
-      if (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') {
-        this.buzzedPlayerId = playerId;
-        this.pendingCnvBuzzerId = playerId;
-        this.room.state.buzzerLockedBy = playerId;
-        this.callbacks.broadcastBuzzWon({
-          winnerId: playerId,
-          winnerName: player.name,
-          diffMs: now - this.buzzerOpenTime,
-        });
-        this.persistSnapshot();
-        this.syncRoom();
-        return true;
+      // Đang có câu hàng ngang / ô trung tâm: dừng câu hỏi và hiện màn nhập từ khóa ngay.
+      // Trả lời sai thì câu hỏi này chạy lại từ đầu (xem evaluateCnvGuess); trả lời đúng thì kết thúc vòng.
+      this.vcnvInterrupted = null;
+      if (subPhase === 'ROW_QUESTION') {
+        this.vcnvInterrupted = {
+          kind: 'ROW',
+          rowIndex: this.room.state.activeRowIndex ?? this.vcnvCurrentRowIndex,
+          stepIndex: this.room.state.stepIndex ?? 0,
+        };
+      } else if (subPhase === 'CENTER_QUESTION') {
+        this.vcnvInterrupted = { kind: 'CENTER', rowIndex: -1, stepIndex: this.room.state.stepIndex ?? 0 };
       }
 
-      // Các pha khác (chọn hàng, công bố, đoán cuối): trả lời CNV ngay
+      // Các pha khác (chọn hàng, công bố, đoán cuối): cũng trả lời CNV ngay
       const isFinalGuess = subPhase === 'FINAL_GUESS';
       if (isFinalGuess) {
         // Tạm dừng 15s đoán cuối, lưu thời gian còn lại để chạy tiếp nếu người này trả lời sai
@@ -1593,7 +1588,6 @@ export class RoomStateMachine {
       }
       this.clearTimer();
       this.buzzedPlayerId = playerId;
-      this.pendingCnvBuzzerId = null;
       this.answersMap.clear();
 
       this.room.state = {
@@ -1787,10 +1781,10 @@ export class RoomStateMachine {
   private async startVcnv(): Promise<void> {
     this.room.status = 'VCNV';
     this.vcnvRowsAskedCount = 0;
+    this.vcnvInterrupted = null;
     this.vcnvQuestionsAppearedCount = 0;
     this.vcnvCurrentRowIndex = 0;
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
 
     // Reset VCNV state
     for (const p of this.room.players) {
@@ -1868,7 +1862,6 @@ export class RoomStateMachine {
     const chooserId = activeQueue[chooserIdx];
 
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.answersMap.clear();
 
     this.room.state = {
@@ -1920,7 +1913,6 @@ export class RoomStateMachine {
 
     this.answersMap.clear();
     this.buzzerOpenTime = Date.now();
-    this.pendingCnvBuzzerId = null;
     this.buzzedPlayerId = null;
 
     this.room.state = {
@@ -2007,38 +1999,12 @@ export class RoomStateMachine {
       rowsRevealed,
       rowAnswersRevealed,
       activeRowIndex: rowIndex,
-      buzzerLockedBy: this.pendingCnvBuzzerId || null,
+      buzzerLockedBy: null,
       vcnvQuestionsAppearedCount: this.vcnvQuestionsAppearedCount,
     };
 
     // 6 seconds display for ROW_REVEAL so players have time to see answers and picture
     this.setDeadline(6000, async () => {
-      // If someone buzzed for CNV during the row, give them 15s to answer CNV now (G7)
-      this.dropIneligiblePendingCnvBuzzer();
-      if (this.pendingCnvBuzzerId) {
-        const buzzerId = this.pendingCnvBuzzerId;
-        this.pendingCnvBuzzerId = null;
-        this.answersMap.clear();
-
-        this.room.state = {
-          ...this.room.state,
-          round: 'VCNV',
-          subPhase: 'CNV_ANSWERING',
-          activePlayerId: buzzerId,
-          buzzerLockedBy: buzzerId,
-          currentQuestion: this.questionSet.vcnv.obstacle,
-          deadline: null,
-        };
-
-        this.setDeadline(GAME_CONFIG.VCNV.CNV_ANSWER_SECONDS * 1000, async () => {
-          await this.evaluateCnvGuess(buzzerId, '');
-        });
-
-        this.persistSnapshot();
-        this.syncRoom();
-        return;
-      }
-
       // Next row prompt
       await this.promptVcnvPickRow(this.vcnvRowsAskedCount);
     });
@@ -2057,6 +2023,7 @@ export class RoomStateMachine {
     const isFinalGuess = this.room.state.subPhase === 'FINAL_GUESS_ANSWERING';
 
     if (isCorrect) {
+      this.vcnvInterrupted = null; // Trả lời đúng: vòng kết thúc, không còn câu nào để chạy lại
       // Thang điểm trả lời đúng Chướng ngại vật:
       // 60đ: Bấm chuông trả lời đúng sau khi câu hỏi hàng ngang 1 xuất hiện (trước khi câu 2 xuất hiện)
       // 50đ: Bấm chuông trả lời đúng sau khi câu hỏi hàng ngang 2 xuất hiện (trước khi câu 3 xuất hiện)
@@ -2118,7 +2085,6 @@ export class RoomStateMachine {
     }
 
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.room.state.buzzerLockedBy = null;
     this.room.state.activePlayerId = undefined;
 
@@ -2148,6 +2114,18 @@ export class RoomStateMachine {
       this.setDeadline(4000, async () => {
         this.showRoundResults('VCNV', 'TANG_TOC');
       });
+      return;
+    }
+
+    // Chuông đã ngắt một câu đang chạy: chạy lại câu đó từ đầu (đồng hồ đầy, mọi người trả lời lại)
+    const interrupted = this.vcnvInterrupted;
+    this.vcnvInterrupted = null;
+    if (interrupted) {
+      if (interrupted.kind === 'ROW') {
+        await this.presentVcnvRow(interrupted.rowIndex, interrupted.stepIndex);
+      } else {
+        await this.presentVcnvCenter();
+      }
       return;
     }
 
@@ -2223,32 +2201,6 @@ export class RoomStateMachine {
     };
 
     this.setDeadline(5000, async () => {
-      this.dropIneligiblePendingCnvBuzzer();
-      if (this.pendingCnvBuzzerId) {
-        const buzzerId = this.pendingCnvBuzzerId;
-        this.pendingCnvBuzzerId = null;
-        this.answersMap.clear();
-
-        this.room.state = {
-          ...this.room.state,
-          round: 'VCNV',
-          subPhase: 'CNV_ANSWERING',
-          activePlayerId: buzzerId,
-          buzzerLockedBy: buzzerId,
-          currentQuestion: this.questionSet.vcnv.obstacle,
-          deadline: null,
-          vcnvQuestionsAppearedCount: 5,
-        };
-
-        this.setDeadline(GAME_CONFIG.VCNV.CNV_ANSWER_SECONDS * 1000, async () => {
-          await this.evaluateCnvGuess(buzzerId, '');
-        });
-
-        this.persistSnapshot();
-        this.syncRoom();
-        return;
-      }
-
       await this.presentVcnvFinalGuess();
     });
 
@@ -2264,17 +2216,6 @@ export class RoomStateMachine {
     );
   }
 
-  /** Người bấm chuông chờ (G7) bị loại / mất kết nối trước khi tới lượt -> bỏ lượt chờ đó. */
-  private dropIneligiblePendingCnvBuzzer(): void {
-    const id = this.pendingCnvBuzzerId;
-    if (!id) return;
-    if (!this.getActiveVcnvContestants().some((p) => p.id === id)) {
-      this.pendingCnvBuzzerId = null;
-      this.buzzedPlayerId = null;
-      this.room.state.buzzerLockedBy = null;
-    }
-  }
-
   private async presentVcnvFinalGuess(durationOverrideMs?: number): Promise<void> {
     const nonEliminated = this.getActiveVcnvContestants();
     if (nonEliminated.length === 0) {
@@ -2284,7 +2225,6 @@ export class RoomStateMachine {
     }
 
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.buzzerOpenTime = Date.now();
     this.vcnvQuestionsAppearedCount = 5;
     this.room.state = {
@@ -3049,7 +2989,6 @@ export class RoomStateMachine {
   ): Promise<void> {
     this.clearTimer();
     this.buzzedPlayerId = null;
-    this.pendingCnvBuzzerId = null;
     this.room.status = 'FINISHED';
     const sorted = [...this.room.players]
       .filter((p) => p.role !== 'viewer' && !p.disqualified)

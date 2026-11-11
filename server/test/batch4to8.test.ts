@@ -73,29 +73,6 @@ describe('Đợt 4: đồng hồ', () => {
 
 // ---------------- Đợt 5 ----------------
 describe('Đợt 5: chuông VCNV', () => {
-  it('bấm chuông giữa câu hàng ngang không xóa đáp án của người khác; trả lời CNV sau khi công bố hàng', async () => {
-    vi.useFakeTimers();
-    const { machine, p2, p3 } = setup('B5V001');
-    await (machine as any).startVcnv();
-    await (machine as any).presentVcnvRow(0, 0);
-    const rowQ = (machine as any).questionSet.vcnv.rows[0];
-
-    expect(machine.submitAnswer(p2.id, rowQ.id, rowQ.answer)).toBe(true);
-    expect(machine.handleBuzzer(p3.id)).toBe(true);
-    expect(machine.room.state.subPhase).toBe('ROW_QUESTION');
-    expect(machine.room.state.buzzerLockedBy).toBe(p3.id);
-
-    // Hết giờ hàng ngang -> p2 vẫn được chấm đúng
-    await vi.advanceTimersByTimeAsync(GAME_CONFIG.VCNV.ROW_TIME_SECONDS * 1000 + GRACE + 50);
-    expect(machine.room.state.subPhase).toBe('ROW_REVEAL');
-    expect(p2.roundScores.vcnv).toBe(GAME_CONFIG.VCNV.ROW_CORRECT_POINTS);
-
-    // Hết 6s công bố -> p3 trả lời CNV
-    await vi.advanceTimersByTimeAsync(6000 + GRACE + 50);
-    expect(machine.room.state.subPhase).toBe('CNV_ANSWERING');
-    expect(machine.room.state.activePlayerId).toBe(p3.id);
-  });
-
   it('trả lời sai lúc đoán cuối thì chạy tiếp thời gian còn lại, không đếm lại 15s', async () => {
     vi.useFakeTimers();
     const { machine, p2 } = setup('B5V002');
