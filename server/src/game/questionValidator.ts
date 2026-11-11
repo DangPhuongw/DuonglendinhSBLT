@@ -26,7 +26,7 @@ export function validateQuestionSet(input: unknown): QuestionSetValidation {
     if (errors.length < MAX_ERRORS) errors.push(msg);
   };
 
-  const checkQuestion = (q: unknown, where: string): Question | null => {
+  const checkQuestion = (q: unknown, where: string, options: { answerOptional?: boolean } = {}): Question | null => {
     if (!isObject(q)) {
       addError(`${where}: không phải câu hỏi hợp lệ.`);
       return null;
@@ -36,11 +36,12 @@ export function validateQuestionSet(input: unknown): QuestionSetValidation {
     else seenIds.add(q.id);
 
     if (!isNonEmptyString(q.prompt)) addError(`${where}: thiếu nội dung câu hỏi.`);
-    if (!isNonEmptyString(q.answer)) addError(`${where}: thiếu đáp án.`);
+    if (!isNonEmptyString(q.answer) && !options.answerOptional) addError(`${where}: thiếu đáp án.`);
 
     const hasOptions = Array.isArray(q.options) && q.options.length === 4;
     return {
       ...(q as Question),
+      answer: typeof q.answer === 'string' ? q.answer : '',
       type: q.type === 'mcq' || q.type === 'text' ? q.type : hasOptions ? 'mcq' : 'text',
       options: hasOptions ? (q.options.map((o: unknown) => String(o ?? '')) as Question['options']) : undefined,
       difficulty: ['easy', 'medium', 'hard'].includes(q.difficulty) ? q.difficulty : undefined,
@@ -78,7 +79,8 @@ export function validateQuestionSet(input: unknown): QuestionSetValidation {
   if (!isObject(input.vcnv)) addError('Thiếu phần Vượt chướng ngại vật.');
   const rows = checkList(vcnvRaw.rows, 'VCNV hàng ngang', 4);
   if (Array.isArray(vcnvRaw.rows) && vcnvRaw.rows.length > 4) addError('VCNV hàng ngang: chỉ được có đúng 4 hàng.');
-  const center = checkQuestion(vcnvRaw.center, 'VCNV ô trung tâm');
+  // Câu ô trung tâm chỉ là gợi ý: cần nội dung câu hỏi, không cần đáp án
+  const center = checkQuestion(vcnvRaw.center, 'VCNV ô trung tâm', { answerOptional: true });
   const obstacle = checkQuestion(vcnvRaw.obstacle, 'VCNV chướng ngại vật');
 
   const tangToc = checkList(input.tangToc, 'Tăng tốc', 1);

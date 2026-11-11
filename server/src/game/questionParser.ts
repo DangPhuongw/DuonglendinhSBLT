@@ -1,6 +1,7 @@
 import xlsx from 'xlsx';
 import { GAME_CONFIG, Question, QuestionSet } from '@olympia/shared';
 import { parseDifficulty } from './questionBank.js';
+import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
 
 /** Cột độ khó (tùy chọn) của file đề tải lên: Dễ / Trung bình / Khó. */
 const readDifficulty = (row: any) =>
@@ -184,26 +185,52 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
     });
   }
 
+  // Dự phòng an toàn: Nếu người dùng nạp file chỉ có một số vòng (vd: chỉ nạp Khởi động riêng),
+  // hoặc VCNV có nhiều hơn 4 hàng, tự động chuẩn hóa và lấy phần mặc định bù vào các vòng còn thiếu
+  // để trận đấu không bao giờ bị lỗi giữa chừng và luôn nạp thành công 100%.
+  const hasKdRieng = kdRieng.some((pkg) => pkg.length > 0);
+  const finalKdRieng = hasKdRieng ? kdRieng : DEFAULT_QUESTION_SET.khoiDong.rieng;
+  const finalKdChung = kdChung.length > 0 ? kdChung : DEFAULT_QUESTION_SET.khoiDong.chung;
+
+  let finalVcnvRows = vcnvRows;
+  if (finalVcnvRows.length > 4) {
+    finalVcnvRows = finalVcnvRows.slice(0, 4);
+  }
+  let finalCenterQ = centerQ;
+  let finalObsQ = obsQ;
+  let finalVcnvImage = vcnvImage || DEFAULT_QUESTION_SET.vcnv.image;
+  if (finalVcnvRows.length < 4 || !finalCenterQ.prompt || !finalObsQ.prompt) {
+    if (finalVcnvRows.length < 4) finalVcnvRows = DEFAULT_QUESTION_SET.vcnv.rows;
+    if (!finalCenterQ.prompt) finalCenterQ = DEFAULT_QUESTION_SET.vcnv.center;
+    if (!finalObsQ.prompt) finalObsQ = DEFAULT_QUESTION_SET.vcnv.obstacle;
+  }
+
+  const finalTangToc = tangToc.length > 0 ? tangToc : DEFAULT_QUESTION_SET.tangToc;
+  const finalPool10 = pool10.length > 0 ? pool10 : DEFAULT_QUESTION_SET.veDich.pool10;
+  const finalPool20 = pool20.length > 0 ? pool20 : DEFAULT_QUESTION_SET.veDich.pool20;
+  const finalPool30 = pool30.length > 0 ? pool30 : DEFAULT_QUESTION_SET.veDich.pool30;
+  const finalTieBreak = tieBreak.length > 0 ? tieBreak : DEFAULT_QUESTION_SET.tieBreak;
+
   return {
     id: `qs-${Date.now()}`,
     title,
     khoiDong: {
-      rieng: kdRieng,
-      chung: kdChung,
+      rieng: finalKdRieng,
+      chung: finalKdChung,
     },
     vcnv: {
-      rows: vcnvRows,
-      center: centerQ,
-      obstacle: obsQ,
-      image: vcnvImage,
+      rows: finalVcnvRows,
+      center: finalCenterQ,
+      obstacle: finalObsQ,
+      image: finalVcnvImage,
     },
-    tangToc,
+    tangToc: finalTangToc,
     veDich: {
-      pool10,
-      pool20,
-      pool30,
+      pool10: finalPool10,
+      pool20: finalPool20,
+      pool30: finalPool30,
     },
-    tieBreak,
+    tieBreak: finalTieBreak,
   };
 }
 
@@ -282,9 +309,9 @@ export function generateExcelTemplate(): Buffer {
     },
     {
       Type: 'CENTER',
-      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý cho ô trung tâm?',
-      Answer: 'TRUNG TÂM',
-      Alternatives: 'TRUNG TAM',
+      Prompt: '[Câu hỏi mẫu] Câu hỏi gợi ý hiển thị cho cả phòng để đoán từ khóa (không cần đáp án)',
+      Answer: '',
+      Alternatives: '',
       Image: '',
     },
     {

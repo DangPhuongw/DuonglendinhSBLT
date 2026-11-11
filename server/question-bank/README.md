@@ -34,9 +34,17 @@ Tên cột không phân biệt hoa thường, có dấu hay không (`Prompt` = `
 
 ### Sheet VCNV
 
-Mỗi cụm gồm đúng 6 dòng có cùng mã `Cluster`: 4 dòng `Type = ROW` (hàng ngang), 1 dòng `CENTER`
-(ô trung tâm), 1 dòng `OBSTACLE` (từ khóa chướng ngại vật, `Prompt` có thể để trống). Cụm thiếu hoặc
-thừa dòng sẽ bị bỏ qua cả cụm.
+Mỗi cụm gồm đúng 6 dòng có cùng mã `Cluster`:
+
+| Type | Vai trò | Cần `Prompt` | Cần `Answer` |
+|---|---|---|---|
+| `ROW` × 4 | 4 hàng ngang, người chơi nhập đáp án, mở chữ của hàng | Có | Có |
+| `CENTER` × 1 | Câu hỏi thứ 5: **chỉ là gợi ý**, hiện 30 giây cho cả phòng nhìn để đoán từ khóa. Không ai nhập đáp án, không tính điểm | Có | **Không** (để trống cũng được) |
+| `OBSTACLE` × 1 | Từ khóa chướng ngại vật | Không | Có (chính là từ khóa) |
+
+Cụm thiếu hoặc thừa dòng sẽ bị bỏ qua cả cụm. Chữ trong đáp án hàng ngang và từ khóa được đếm theo số ký tự
+không tính dấu cách; **dấu gạch nối vẫn tính là một ô chữ** (nên viết "ĐÔN KI HÔ TÊ" thay vì "ĐÔN KI-HÔ-TÊ", hoặc
+thêm cách viết còn lại vào cột `Alternatives`).
 
 ## Độ khó
 

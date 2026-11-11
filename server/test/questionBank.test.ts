@@ -172,6 +172,31 @@ describe('Đọc kho từ Excel', () => {
     expect(issues.map((i) => i.message).join(' ')).toContain('Cụm "Cum-2": cần đúng 4 hàng ngang (đang có 3)');
   });
 
+  it('cụm VCNV: dòng CENTER (câu gợi ý) không cần đáp án, nhưng vẫn cần nội dung', () => {
+    const rows = vcnvRows(2).map((r) => (r.Cluster === 'Cum-1' && r.Type === 'CENTER' ? { ...r, Answer: '' } : r));
+    // Cụm 2: câu gợi ý có đáp án lạc nhưng thiếu nội dung -> bỏ cả cụm
+    const broken = rows.map((r) => (r.Cluster === 'Cum-2' && r.Type === 'CENTER' ? { ...r, Prompt: '', Answer: 'x' } : r));
+    const { data, issues } = loadFromSheets({ VCNV: broken });
+    expect(data.vcnv).toHaveLength(1);
+    expect(data.vcnv[0].center.answer).toBe('');
+    expect(data.vcnv[0].center.prompt).toContain('trung tâm');
+    expect(issues.map((i) => i.message).join(' ')).toContain('Cụm "Cum-2": thiếu nội dung câu hỏi');
+    // Dòng ROW / OBSTACLE vẫn bắt buộc có đáp án
+    const noAnswer = vcnvRows(1).map((r) => (r.Type === 'ROW' && r.Prompt.endsWith('hàng 1?') ? { ...r, Answer: '' } : r));
+    expect(loadFromSheets({ VCNV: noAnswer }).data.vcnv).toHaveLength(0);
+  });
+
+  it('bộ đề (tải lên / ghép ra) hợp lệ khi câu gợi ý không có đáp án', () => {
+    const set = JSON.parse(JSON.stringify(DEFAULT_QUESTION_SET));
+    set.vcnv.center.answer = '';
+    expect(validateQuestionSet(set).ok).toBe(true);
+    set.vcnv.center.prompt = '';
+    expect(validateQuestionSet(set).ok).toBe(false);
+    const noKeyword = JSON.parse(JSON.stringify(DEFAULT_QUESTION_SET));
+    noKeyword.vcnv.obstacle.answer = '';
+    expect(validateQuestionSet(noKeyword).ok).toBe(false);
+  });
+
   it('thư mục không tồn tại hoặc file Excel hỏng không làm sập', () => {
     expect(loadQuestionBank(path.join(os.tmpdir(), 'khong-ton-tai-xyz')).issues).toHaveLength(1);
     const dir = tmpDir();

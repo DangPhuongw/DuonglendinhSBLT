@@ -41,7 +41,7 @@ add(
     { 'Hướng dẫn': 'Về đích: độ khó theo điểm (10 = Dễ, 20 = Trung bình, 30 = Khó), không cần cột Difficulty.' },
     { 'Hướng dẫn': 'Alternatives: các cách viết tương đương, cách nhau bằng dấu ; (không cần thêm bản không dấu).' },
     { 'Hướng dẫn': 'Khởi động riêng / chung: trắc nghiệm, Answer là một chữ cái A, B, C hoặc D.' },
-    { 'Hướng dẫn': 'VCNV: mỗi cụm gồm 6 dòng cùng mã Cluster: 4 dòng Type=ROW, 1 dòng CENTER, 1 dòng OBSTACLE.' },
+    { 'Hướng dẫn': 'VCNV: mỗi cụm gồm 6 dòng cùng mã Cluster: 4 dòng Type=ROW, 1 dòng CENTER, 1 dòng OBSTACLE. Dòng CENTER là câu gợi ý hiện 30 giây để đoán từ khóa, không cần cột Answer.' },
     { 'Hướng dẫn': 'Về đích: cột Points là 10, 20 hoặc 30.' },
     { 'Hướng dẫn': 'Sửa xong lưu file, trận kế tiếp dùng luôn. Kiểm tra kho: npm run bank:check --workspace=server' },
   ],

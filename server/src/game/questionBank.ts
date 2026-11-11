@@ -311,14 +311,15 @@ function parseVcnvSheet(
       const type = normalizeKey(get(row, 'type'));
       const prompt = get(row, 'prompt');
       const answer = get(row, 'answer');
-      if (!answer) {
+      const isCenter = type.includes('center') || type.includes('trung');
+      const isObstacle = type.includes('obs') || type.includes('cnv') || type.includes('chuong') || type.includes('tukhoa');
+      const role = isCenter ? 'center' : isObstacle ? 'obstacle' : 'row';
+      // Câu ô trung tâm chỉ là gợi ý (không ai trả lời, không chấm điểm) nên không cần đáp án
+      if (!answer && role !== 'center') {
         report(excelRow, `Cụm "${cluster}": thiếu đáp án. Cả cụm đã bị bỏ qua.`);
         broken = true;
         continue;
       }
-      const isCenter = type.includes('center') || type.includes('trung');
-      const isObstacle = type.includes('obs') || type.includes('cnv') || type.includes('chuong') || type.includes('tukhoa');
-      const role = isCenter ? 'center' : isObstacle ? 'obstacle' : 'row';
       if (role !== 'obstacle' && !prompt) {
         report(excelRow, `Cụm "${cluster}": thiếu nội dung câu hỏi. Cả cụm đã bị bỏ qua.`);
         broken = true;
