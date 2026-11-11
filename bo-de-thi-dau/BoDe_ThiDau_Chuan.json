@@ -1,5 +1,5 @@
 {
-  "id": "qs-1794402560202",
+  "id": "qs-1794402804957",
   "title": "BoDe_ThiDau_Chuan.xlsx",
   "khoiDong": {
     "rieng": [
@@ -886,12 +886,13 @@
     {
       "id": "tt-4",
       "type": "text",
-      "prompt": "Trong một giải đấu cờ vua có 4 kỳ thủ Kiên, Long, Minh, Nam: Kiên xếp trên Long nhưng dưới Nam; Minh xếp dưới Long. Hỏi kỳ thủ nào giành giải nhất?",
-      "answer": "NAM",
+      "prompt": "Trong một cuộc thi có 4 bạn An, Bình, Cường, Dũng đạt 4 vị trí nhất, nhì, ba, tư. Biết: An không phải nhất; Bình về ngay trước An; Dũng không về cuối cùng; Cường về nhì. Hỏi ai là người đạt giải nhất?",
+      "answer": "DŨNG",
       "alternatives": [
-        "NAM",
-        "BẠN NAM",
-        "KỲ THỦ NAM"
+        "DŨNG",
+        "DUNG",
+        "BẠN DŨNG",
+        "BAN DUNG"
       ],
       "ignoreDiacritics": true
     }
