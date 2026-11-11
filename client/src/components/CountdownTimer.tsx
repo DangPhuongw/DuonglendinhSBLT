@@ -7,6 +7,11 @@ interface CountdownTimerProps {
   className?: string;
   showSeconds?: boolean;
   label?: string;
+  /**
+   * Luôn chiếm đúng chỗ của đồng hồ (ẩn đi khi chưa có / đã hết giờ) thay vì biến mất.
+   * Dùng ở nơi đồng hồ nằm trong khung cố định, tránh cả giao diện bị nhảy mỗi khi đổi pha.
+   */
+  reserveSpace?: boolean;
 }
 
 export const CountdownTimer: React.FC<CountdownTimerProps> = ({
@@ -15,19 +20,19 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   className = '',
   showSeconds = true,
   label = 'Thời gian còn lại',
+  reserveSpace = false,
 }) => {
   const serverOffset = useGameStore((s) => s.serverOffset);
-  const [remainingMs, setRemainingMs] = useState<number>(0);
+  const computeRemaining = () => (deadline ? Math.max(0, deadline - (Date.now() + serverOffset)) : 0);
+  const [remainingMs, setRemainingMs] = useState<number>(computeRemaining);
 
   useEffect(() => {
-    if (!deadline) {
-      setRemainingMs(0);
-      return;
-    }
+    // Tính ngay khi đổi mốc thời gian (không đợi tick đầu tiên 100ms): tránh chớp / biến mất giữa 2 pha
+    setRemainingMs(computeRemaining());
+    if (!deadline) return;
 
     const interval = setInterval(() => {
-      const nowSynced = Date.now() + serverOffset;
-      const rem = Math.max(0, deadline - nowSynced);
+      const rem = computeRemaining();
       setRemainingMs(rem);
       if (rem <= 0) {
         clearInterval(interval);
@@ -35,13 +40,15 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     }, 100);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deadline, serverOffset]);
 
-  if (!deadline || remainingMs <= 0) {
+  const inactive = !deadline || remainingMs <= 0;
+  if (inactive && !reserveSpace) {
     return null;
   }
 
-  const seconds = (remainingMs / 1000).toFixed(1);
+  const seconds = inactive ? '0.0' : (remainingMs / 1000).toFixed(1);
   const totalMs = totalDurationSeconds * 1000;
   const percent = Math.min(100, Math.max(0, (remainingMs / totalMs) * 100));
   const isWarning = remainingMs <= 6000 && remainingMs > 3000;
@@ -62,15 +69,18 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     : 'bg-[#FFD43B] shadow-[0_0_12px_#FFD43B]';
 
   return (
-    <div className={`w-full max-w-xl mx-auto flex flex-col items-center gap-1.5 ${className}`}>
+    <div
+      className={`w-full max-w-xl mx-auto flex flex-col items-center gap-1.5 ${inactive ? 'invisible' : ''} ${className}`}
+      aria-hidden={inactive || undefined}
+    >
       <div className={`flex ${showSeconds ? 'justify-between' : 'justify-center'} items-center w-full px-1`}>
         <span className="text-xs uppercase tracking-wider font-heading font-bold text-[#94A3B8]">
           {label}
         </span>
         {showSeconds && (
           <span
-            className={`font-digital text-2xl sm:text-3xl font-bold tracking-wider tabular-nums px-3 py-0.5 rounded-lg border transition-all ${timerColor} ${
-              isPulsing ? 'animate-pulse scale-105' : ''
+            className={`inline-block min-w-[5.2ch] text-right font-digital text-2xl sm:text-3xl font-bold tracking-wider tabular-nums px-3 py-0.5 rounded-lg border transition-colors ${timerColor} ${
+              isPulsing ? 'animate-pulse' : ''
             }`}
           >
             {seconds}s

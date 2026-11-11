@@ -74,12 +74,12 @@ export const VcnvRound: React.FC = () => {
   useEffect(() => {
     if (isMyTurnToAnswerCnv) {
       const timer = setTimeout(() => {
-        modalInputRef.current?.focus();
+        modalInputRef.current?.focus({ preventScroll: true });
       }, 100);
       return () => clearTimeout(timer);
     } else if (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') {
       const timer = setTimeout(() => {
-        inputRef.current?.focus();
+        inputRef.current?.focus({ preventScroll: true });
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -142,8 +142,10 @@ export const VcnvRound: React.FC = () => {
     }
   };
 
+  // Khung dùng flex-1 + min-h-0: luôn chiếm đủ chiều cao và neo ở trên, không bị căn giữa theo chiều dọc.
+  // Nếu không, mỗi lần nội dung phía dưới đổi chiều cao (đổi pha) cả màn hình bị đẩy lên xuống.
   return (
-    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-start h-full max-h-full py-1.5 px-3 overflow-hidden">
+    <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-start flex-1 min-h-0 py-1.5 px-3 overflow-hidden">
       {/* ======================================================== */}
       {/* 1. TOP HEADER & TIMER                                    */}
       {/* ======================================================== */}
@@ -175,6 +177,7 @@ export const VcnvRound: React.FC = () => {
                 : 30
             }
             className="mb-0"
+            reserveSpace
           />
         </div>
       </div>
@@ -399,7 +402,7 @@ export const VcnvRound: React.FC = () => {
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <span className="text-[10px] sm:text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-2.5 py-0.5 rounded-md border border-[#FFD43B]/40 shadow-glow-yellow">
               {subPhase === 'CENTER_QUESTION'
-                ? 'CÂU HỎI TRUNG TÂM'
+                ? 'CÂU HỎI TRUNG TÂM · GỢI Ý'
                 : `HÀNG NGANG ${(activeRowIdx ?? 0) + 1} (${rowLetterCounts[activeRowIdx ?? 0] || 6} CHỮ CÁI)`}
             </span>
             <QuestionSpeakerButton
@@ -412,8 +415,22 @@ export const VcnvRound: React.FC = () => {
             {currentQ.prompt}
           </p>
 
-          {/* Form nhập đáp án */}
-          {(subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && !isEliminated && !isViewer && (
+          {/* Câu ô trung tâm: chỉ là gợi ý, không nhập đáp án */}
+          {subPhase === 'CENTER_QUESTION' && (
+            <div
+              role="note"
+              className="p-2.5 bg-[#FFD43B]/10 border border-[#FFD43B]/50 rounded-lg text-xs sm:text-sm font-bold text-[#FFD43B] flex items-start gap-2"
+            >
+              <Bell size={16} className="shrink-0 mt-0.5" />
+              <span>
+                Đây là câu hỏi gợi ý, không cần trả lời. Dùng nó để đoán <b className="text-white">từ khóa chính</b>
+                {!isEliminated && !isViewer ? ' và bấm chuông ngay khi bạn đoán ra!' : '.'}
+              </span>
+            </div>
+          )}
+
+          {/* Form nhập đáp án (chỉ câu hàng ngang) */}
+          {subPhase === 'ROW_QUESTION' && !isEliminated && !isViewer && (
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
                 ref={inputRef}
@@ -433,14 +450,14 @@ export const VcnvRound: React.FC = () => {
             </form>
           )}
 
-          {isViewer && (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && (
+          {isViewer && subPhase === 'ROW_QUESTION' && (
             <div className="p-2 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-lg text-center text-xs font-bold text-[#00D9FF] flex items-center justify-center gap-1.5 shadow-glow-cyan">
               <Eye size={14} />
               <span>Bạn đang theo dõi với vai trò Khán giả. Đang chờ các thí sinh nhập đáp án...</span>
             </div>
           )}
 
-          {submitted && (subPhase === 'ROW_QUESTION' || subPhase === 'CENTER_QUESTION') && (
+          {submitted && subPhase === 'ROW_QUESTION' && (
             <div className="text-[11px] text-[#20D6A0] mt-1.5 font-bold flex items-center gap-1.5 bg-[#20D6A0]/10 border border-[#20D6A0]/30 px-2.5 py-1 rounded-lg shadow-glow-success w-fit">
               <CheckCircle2 size={13} />
               <span>

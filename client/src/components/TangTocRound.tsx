@@ -29,7 +29,7 @@ export const TangTocRound: React.FC = () => {
   useEffect(() => {
     if (subPhase === 'QUESTION') {
       const timer = setTimeout(() => {
-        inputRef.current?.focus();
+        inputRef.current?.focus({ preventScroll: true });
       }, 100);
       return () => clearTimeout(timer);
     }
