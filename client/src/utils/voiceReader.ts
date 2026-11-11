@@ -148,11 +148,24 @@ const PHONETIC_MAP: Array<[RegExp, string]> = [
 
 const VOICE_VOLUME_KEY = 'olympia_voice_volume';
 
+/**
+ * Tình trạng giọng tiếng Việt trên thiết bị:
+ * - checking: trình duyệt chưa nạp xong danh sách giọng
+ * - ready: có giọng tiếng Việt
+ * - missing: danh sách giọng đã nạp nhưng KHÔNG có giọng tiếng Việt (đọc sẽ bị tiếng Anh nếu cứ đọc)
+ * - unknown: trình duyệt không liệt kê giọng nào (một số trình duyệt di động), thử đọc theo ngôn ngữ vi-VN
+ */
+export type VoiceStatus = 'checking' | 'ready' | 'missing' | 'unknown';
+
 class VoiceReader {
   private enabled: boolean = true;
   /** Âm lượng giọng đọc 0-100 (100 = tối đa của trình duyệt, cũng là mức mặc định cũ). */
   private volumePercent: number = 100;
   private selectedVoice: SpeechSynthesisVoice | null = null;
+  private status: VoiceStatus = 'checking';
+  private statusListeners: Set<(status: VoiceStatus) => void> = new Set();
+  /** Tăng mỗi lần đọc / dừng: lần đọc đang chờ nạp giọng sẽ tự hủy nếu đã có lệnh mới. */
+  private speakToken = 0;
   private speaking: boolean = false;
   private listeners: Set<(speaking: boolean) => void> = new Set();
 
@@ -173,7 +186,26 @@ class VoiceReader {
         this.loadVoice();
       };
       this.loadVoice();
+      // Nhiều trình duyệt nạp giọng bất đồng bộ; sau 2 giây vẫn rỗng thì coi là "không rõ" (đọc theo ngôn ngữ vi-VN)
+      setTimeout(() => {
+        if (this.status === 'checking') this.setStatus('unknown');
+      }, 2000);
     }
+  }
+
+  public get voiceStatus(): VoiceStatus {
+    return this.status;
+  }
+
+  public subscribeStatus(cb: (status: VoiceStatus) => void): () => void {
+    this.statusListeners.add(cb);
+    return () => this.statusListeners.delete(cb);
+  }
+
+  private setStatus(next: VoiceStatus) {
+    if (this.status === next) return;
+    this.status = next;
+    this.statusListeners.forEach((cb) => cb(next));
   }
 
   public subscribe(cb: (speaking: boolean) => void): () => void {
@@ -195,7 +227,8 @@ class VoiceReader {
   public loadVoice(): SpeechSynthesisVoice | null {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
     const voices = window.speechSynthesis.getVoices();
-    if (!voices || voices.length === 0) return null;
+    // Danh sách rỗng: chưa nạp xong (hoặc trình duyệt không liệt kê). Giữ giọng đã chọn, không đặt lại về null.
+    if (!voices || voices.length === 0) return this.selectedVoice;
 
     // Filter Vietnamese voices
     const viVoices = voices.filter((v) => {
@@ -247,10 +280,14 @@ class VoiceReader {
 
       viVoices.sort((a, b) => getScore(b) - getScore(a));
       this.selectedVoice = viVoices[0];
+      this.setStatus('ready');
       return this.selectedVoice;
     }
 
-    this.selectedVoice = null;
+    // Danh sách giọng đã có mà không có giọng tiếng Việt. Nếu trước đó đã có giọng tiếng Việt (vd. giọng
+    // trực tuyến của Chrome tạm thời biến mất khi mất mạng) thì giữ giọng cũ thay vì rơi về giọng tiếng Anh.
+    if (this.selectedVoice) return this.selectedVoice;
+    this.setStatus('missing');
     return null;
   }
 
@@ -333,24 +370,51 @@ class VoiceReader {
     if (!force && !this.enabled) return;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
-    try {
-      this.stop();
+    const token = ++this.speakToken;
+    this.stop(false);
 
+    // Giọng chưa nạp xong: chờ tối đa 1,5 giây thay vì đọc ngay bằng giọng mặc định (thường là tiếng Anh)
+    if (this.status === 'checking') {
+      this.loadVoice();
+      if (this.status === 'checking') {
+        const unsubscribe = this.subscribeStatus(() => {
+          if (this.status !== 'checking') {
+            unsubscribe();
+            clearTimeout(timer);
+            if (token === this.speakToken) this.doSpeak(text);
+          }
+        });
+        const timer = setTimeout(() => {
+          unsubscribe();
+          if (token === this.speakToken) this.doSpeak(text);
+        }, 1500);
+        return;
+      }
+    }
+    this.doSpeak(text);
+  }
+
+  private doSpeak(text: string, retried: boolean = false) {
+    try {
       const cleanText = this.normalizeText(text);
       if (!cleanText) return;
 
-      const utterance = new SpeechSynthesisUtterance(cleanText);
+      if (!this.selectedVoice) this.loadVoice();
 
-      // Luôn đảm bảo chọn giọng tốt nhất hiện có
-      if (!this.selectedVoice) {
-        this.loadVoice();
+      // Thiết bị không có giọng tiếng Việt: KHÔNG đọc (đọc bằng giọng tiếng Anh nghe rất sai).
+      // Navbar sẽ hiện cảnh báo hướng dẫn cài giọng.
+      if (!this.selectedVoice && this.status === 'missing') {
+        console.warn('Thiết bị không có giọng đọc tiếng Việt, bỏ qua đọc câu hỏi.');
+        return;
       }
 
+      const utterance = new SpeechSynthesisUtterance(cleanText);
       if (this.selectedVoice) {
         utterance.voice = this.selectedVoice;
-        utterance.lang = this.selectedVoice.lang;
+        // Android báo "vi_VN" (gạch dưới); chuẩn hóa về "vi-VN"
+        utterance.lang = this.selectedVoice.lang.replace('_', '-');
       } else {
-        utterance.lang = 'vi-VN';
+        utterance.lang = 'vi-VN'; // trạng thái "không rõ": để hệ thống chọn theo ngôn ngữ
       }
 
       // Tăng tốc độ đọc lên một chút (1.15) để nhịp độ thi đấu sôi nổi, dứt khoát
@@ -368,9 +432,20 @@ class VoiceReader {
         this.notify();
       };
 
-      utterance.onerror = () => {
+      utterance.onerror = (event) => {
         this.speaking = false;
         this.notify();
+        // Giọng trực tuyến lỗi (mất mạng...): thử một lần với giọng tiếng Việt cài sẵn trong máy
+        const err = (event as SpeechSynthesisErrorEvent).error;
+        if (!retried && err && err !== 'interrupted' && err !== 'canceled' && this.selectedVoice && !this.selectedVoice.localService) {
+          const local = window.speechSynthesis
+            .getVoices()
+            .find((v) => v.localService && v.lang.toLowerCase().replace('_', '-').startsWith('vi'));
+          if (local) {
+            this.selectedVoice = local;
+            this.doSpeak(text, true);
+          }
+        }
       };
 
       window.speechSynthesis.speak(utterance);
@@ -381,7 +456,8 @@ class VoiceReader {
     }
   }
 
-  public stop() {
+  public stop(cancelPending: boolean = true) {
+    if (cancelPending) this.speakToken++;
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       this.speaking = false;

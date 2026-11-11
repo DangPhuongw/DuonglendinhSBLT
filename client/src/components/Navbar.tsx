@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { voiceReader } from '../utils/voiceReader';
 import { bgmManager } from '../utils/bgmManager';
-import { LogOut, Headphones, Maximize, Minimize, Music } from 'lucide-react';
+import { LogOut, Headphones, Maximize, Minimize, Music, AlertTriangle, X } from 'lucide-react';
 import { VolumeSlider } from './VolumeSlider';
 
 export const Navbar: React.FC = () => {
@@ -11,9 +11,17 @@ export const Navbar: React.FC = () => {
 
   const [ttsEnabled, setTtsEnabled] = useState(voiceReader.isEnabled);
   const [bgmEnabled, setBgmEnabled] = useState(bgmManager.isEnabled);
+  const [voiceStatus, setVoiceStatus] = useState(voiceReader.voiceStatus);
+  const [showVoiceHelp, setShowVoiceHelp] = useState(false);
   const [ttsVolume, setTtsVolume] = useState(voiceReader.volume);
   const [bgmVolume, setBgmVolume] = useState(bgmManager.volume);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
+
+  // Theo dõi việc máy có giọng đọc tiếng Việt hay không
+  useEffect(() => {
+    setVoiceStatus(voiceReader.voiceStatus);
+    return voiceReader.subscribeStatus(setVoiceStatus);
+  }, []);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -92,6 +100,42 @@ export const Navbar: React.FC = () => {
             {ttsEnabled ? 'Giọng đọc: BẬT' : 'Giọng đọc: TẮT'}
           </span>
         </button>
+        {/* Thiết bị không có giọng tiếng Việt: giọng đọc bị tắt để khỏi đọc nhầm bằng tiếng Anh */}
+        {voiceStatus === 'missing' && (
+          <div className="relative">
+            <button
+              onClick={() => setShowVoiceHelp((v) => !v)}
+              className="flex items-center gap-1.5 text-xs font-bold font-heading px-2.5 py-1.5 rounded-xl bg-[#FB923C]/15 text-[#FB923C] border border-[#FB923C]/60 hover:bg-[#FB923C]/25 transition-colors"
+              title="Máy chưa có giọng đọc tiếng Việt: bấm để xem cách cài"
+              aria-label="Máy chưa có giọng đọc tiếng Việt"
+              aria-expanded={showVoiceHelp}
+            >
+              <AlertTriangle size={16} className="stroke-[2.5]" />
+              <span className="hidden lg:inline">Chưa có giọng Việt</span>
+            </button>
+            {showVoiceHelp && (
+              <div
+                role="dialog"
+                className="absolute right-0 top-full mt-2 w-[min(22rem,90vw)] z-[60] rounded-2xl bg-[#111827] border border-[#FB923C]/60 shadow-2xl p-4 text-left"
+              >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <p className="font-heading font-black text-sm text-[#FB923C]">Thiết bị chưa có giọng đọc tiếng Việt</p>
+                  <button onClick={() => setShowVoiceHelp(false)} className="text-[#94A3B8] hover:text-white" aria-label="Đóng">
+                    <X size={16} />
+                  </button>
+                </div>
+                <p className="text-xs text-[#94A3B8] mb-2">
+                  Giọng đọc câu hỏi đã được tạm tắt trên máy này để không đọc nhầm bằng tiếng Anh. Cài giọng tiếng Việt rồi tải lại trang:
+                </p>
+                <ul className="space-y-1.5 text-xs text-[#F8FAFC] list-disc pl-4">
+                  <li><b>Windows:</b> Cài đặt → Thời gian &amp; ngôn ngữ → Giọng nói → Thêm giọng nói → Tiếng Việt. Hoặc dùng trình duyệt <b>Microsoft Edge</b> (có sẵn giọng Hoài My, Nam Minh).</li>
+                  <li><b>Android:</b> Cài đặt → Chuyển văn bản thành giọng nói → Google → cài dữ liệu giọng nói Tiếng Việt.</li>
+                  <li><b>iPhone / iPad / Mac:</b> Cài đặt → Trợ năng → Nội dung được đọc → Giọng nói → Tiếng Việt (Linh).</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
         <VolumeSlider
           className="hidden xl:flex"
           label="Âm lượng giọng đọc"
