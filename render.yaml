@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: olympiavn
+    name: olympia-vn
     runtime: node
     plan: free
     region: singapore
