@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { voiceReader } from '../utils/voiceReader';
 import { bgmManager } from '../utils/bgmManager';
 import { LogOut, Headphones, Maximize, Minimize, Music } from 'lucide-react';
+import { VolumeSlider } from './VolumeSlider';
 
 export const Navbar: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -10,6 +11,8 @@ export const Navbar: React.FC = () => {
 
   const [ttsEnabled, setTtsEnabled] = useState(voiceReader.isEnabled);
   const [bgmEnabled, setBgmEnabled] = useState(bgmManager.isEnabled);
+  const [ttsVolume, setTtsVolume] = useState(voiceReader.volume);
+  const [bgmVolume, setBgmVolume] = useState(bgmManager.volume);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
 
   useEffect(() => {
@@ -28,6 +31,23 @@ export const Navbar: React.FC = () => {
   const toggleTts = () => {
     const next = voiceReader.toggle();
     setTtsEnabled(next);
+  };
+
+  const changeTtsVolume = (value: number) => {
+    voiceReader.volume = value;
+    setTtsVolume(value);
+  };
+
+  const changeBgmVolume = (value: number) => {
+    bgmManager.volume = value;
+    setBgmVolume(value);
+  };
+
+  // Thả thanh trượt giọng đọc: đọc thử một câu ngắn để nghe mức âm lượng (không ngắt khi đang đọc câu hỏi)
+  const previewVoice = () => {
+    if (voiceReader.isEnabled && !voiceReader.isSpeaking) {
+      voiceReader.speak('Kiểm tra âm lượng giọng đọc');
+    }
   };
 
   const toggleFullscreen = async () => {
@@ -57,7 +77,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Voice reading toggle */}
+        {/* Voice reading toggle + volume */}
         <button
           onClick={toggleTts}
           className={`flex items-center gap-2 text-xs sm:text-sm font-bold font-heading px-3.5 py-1.5 rounded-xl border transition-all active:scale-95 ${
@@ -72,6 +92,14 @@ export const Navbar: React.FC = () => {
             {ttsEnabled ? 'Giọng đọc: BẬT' : 'Giọng đọc: TẮT'}
           </span>
         </button>
+        <VolumeSlider
+          className="hidden xl:flex"
+          label="Âm lượng giọng đọc"
+          value={ttsVolume}
+          onChange={changeTtsVolume}
+          onCommit={previewVoice}
+          dimmed={!ttsEnabled}
+        />
 
         {/* BGM Music toggle */}
         <button
@@ -88,6 +116,13 @@ export const Navbar: React.FC = () => {
             {bgmEnabled ? 'Nhạc nền: BẬT' : 'Nhạc nền: TẮT'}
           </span>
         </button>
+        <VolumeSlider
+          className="hidden xl:flex"
+          label="Âm lượng nhạc nền"
+          value={bgmVolume}
+          onChange={changeBgmVolume}
+          dimmed={!bgmEnabled}
+        />
 
         {/* Fullscreen toggle */}
         <button

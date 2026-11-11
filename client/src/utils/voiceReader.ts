@@ -146,8 +146,12 @@ const PHONETIC_MAP: Array<[RegExp, string]> = [
   [/(\d+)\s*%/g, '$1 phần trăm'],
 ];
 
+const VOICE_VOLUME_KEY = 'olympia_voice_volume';
+
 class VoiceReader {
   private enabled: boolean = true;
+  /** Âm lượng giọng đọc 0-100 (100 = tối đa của trình duyệt, cũng là mức mặc định cũ). */
+  private volumePercent: number = 100;
   private selectedVoice: SpeechSynthesisVoice | null = null;
   private speaking: boolean = false;
   private listeners: Set<(speaking: boolean) => void> = new Set();
@@ -155,6 +159,14 @@ class VoiceReader {
   constructor() {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('olympia_tts') : null;
     this.enabled = saved !== null ? saved === 'true' : true;
+    try {
+      const savedVolume = typeof window !== 'undefined' ? localStorage.getItem(VOICE_VOLUME_KEY) : null;
+      if (savedVolume !== null && Number.isFinite(Number(savedVolume))) {
+        this.volumePercent = Math.min(100, Math.max(0, Number(savedVolume)));
+      }
+    } catch {
+      /* localStorage không dùng được: giữ mặc định */
+    }
 
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.onvoiceschanged = () => {
@@ -261,6 +273,20 @@ class VoiceReader {
     return this.isEnabled;
   }
 
+  /** Âm lượng giọng đọc 0-100. Áp dụng từ lần đọc kế tiếp (không đổi được câu đang đọc dở). */
+  public get volume(): number {
+    return this.volumePercent;
+  }
+
+  public set volume(percent: number) {
+    this.volumePercent = Math.min(100, Math.max(0, Math.round(percent)));
+    try {
+      localStorage.setItem(VOICE_VOLUME_KEY, String(this.volumePercent));
+    } catch {
+      /* bỏ qua */
+    }
+  }
+
   public formatQuestionText(question: QuestionLike): string {
     const qText = question.prompt || question.text || '';
     let speech = `Câu hỏi: ${qText}`;
@@ -330,7 +356,7 @@ class VoiceReader {
       // Tăng tốc độ đọc lên một chút (1.15) để nhịp độ thi đấu sôi nổi, dứt khoát
       utterance.rate = 1.15;
       utterance.pitch = 1.0;
-      utterance.volume = 1.0;
+      utterance.volume = this.volumePercent / 100;
 
       utterance.onstart = () => {
         this.speaking = true;
