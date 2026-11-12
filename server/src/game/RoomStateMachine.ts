@@ -13,6 +13,7 @@ import {
   TabLeaveReason,
   RoundResultEntry,
   GAME_CONFIG,
+  PREDICTION_HIGH_SCORE,
   matchAnswer,
   normalizeAnswer,
 } from '@olympia/shared';
@@ -20,6 +21,16 @@ import { EventQueue } from './EventQueue.js';
 import { SnapshotManager } from './SnapshotManager.js';
 import { DEFAULT_QUESTION_SET } from './defaultQuestionSet.js';
 import type { ComposeResult } from './questionComposer.js';
+import {
+  createPredictionState,
+  dropBetsOfNonViewers,
+  isCategoryId,
+  lockForRound,
+  placeBet,
+  resolveCategory,
+  topBy,
+  voidUnresolved,
+} from './predictions.js';
 
 export interface StateMachineCallbacks {
   broadcastRoom: (room: Room) => void;
@@ -992,6 +1003,7 @@ export class RoomStateMachine {
    * mờ dần. Server giữ nhịp (deadline) để mọi máy chuyển màn cùng lúc; client tự chạy hiệu ứng theo startedAt.
    */
   private showRoundResults(finishedRound: RoundType, next: RoundType | 'FINAL'): void {
+    this.resolveRoundPredictions(finishedRound);
     if (finishedRound === 'VCNV') this.clearVcnvElimination();
     this.clearTimer();
     this.buzzedPlayerId = null;
@@ -1199,6 +1211,7 @@ export class RoomStateMachine {
 
   private async startKhoiDongRieng(): Promise<void> {
     this.room.status = 'KD_RIENG';
+    this.lockPredictions('KD_RIENG');
     this.chosenKdPackages.clear();
     const playersInOrder = [...this.room.players].filter((p) => p.role !== 'viewer').sort((a, b) => a.seat - b.seat);
     await this.runKhoiDongRiengTurn(playersInOrder, 0, 0);
@@ -1475,6 +1488,7 @@ export class RoomStateMachine {
 
   private async startKhoiDongChung(): Promise<void> {
     this.room.status = 'KD_CHUNG';
+    this.lockPredictions('KD_CHUNG');
     // Màn nhắc luật trước câu đầu: chuyển từ lượt riêng sang giành chuông, nhắc phím SPACE
     const introMs = GAME_CONFIG.KHOI_DONG.CHUNG_INTRO_SECONDS * 1000;
     this.buzzedPlayerId = null;
@@ -1816,6 +1830,7 @@ export class RoomStateMachine {
 
   private async startVcnv(): Promise<void> {
     this.room.status = 'VCNV';
+    this.lockPredictions('VCNV');
     this.vcnvRowsAskedCount = 0;
     this.vcnvInterrupted = null;
     this.vcnvQuestionsAppearedCount = 0;
@@ -2249,6 +2264,7 @@ export class RoomStateMachine {
 
   private async startTangToc(): Promise<void> {
     this.room.status = 'TANG_TOC';
+    this.lockPredictions('TANG_TOC');
     this.buzzedPlayerId = null;
     this.room.state.buzzerLockedBy = null;
     await this.runTangTocQuestion(0);
@@ -2395,6 +2411,7 @@ export class RoomStateMachine {
 
   private async startVeDich(): Promise<void> {
     this.room.status = 'VE_DICH';
+    this.lockPredictions('VE_DICH');
     this.buzzedPlayerId = null;
     this.room.state.buzzerLockedBy = null;
     this.veDichCompletedPlayerIds.clear();
@@ -2997,9 +3014,67 @@ export class RoomStateMachine {
       finishReason,
       deadline: null,
     };
+    this.resolveFinalPredictions(finalWinnerId);
 
     this.persistSnapshot();
     this.syncRoom();
+  }
+
+  // --- Bảng dự đoán của khán giả ---
+
+  /** Khán giả đặt / đổi / hủy (stake = 0) một cược. */
+  public placePrediction(playerId: string, category: unknown, option: unknown, stake: unknown): { ok: boolean; error?: string } {
+    const player = this.room.players.find((p) => p.id === playerId);
+    if (!player || player.role !== 'viewer') return { ok: false, error: 'Chỉ khán giả mới tham gia dự đoán được.' };
+    if (this.room.status === 'FINISHED') return { ok: false, error: 'Trận đấu đã kết thúc.' };
+    if (!isCategoryId(category)) return { ok: false, error: 'Hạng mục không hợp lệ.' };
+    if (typeof option !== 'string' || typeof stake !== 'number') return { ok: false, error: 'Dữ liệu cược không hợp lệ.' };
+
+    const contestants = this.room.players.filter((p) => (p.role || 'player') === 'player').map((p) => p.id);
+    const state = (this.room.predictions ??= createPredictionState());
+    const res = placeBet(state, playerId, category, option, stake, contestants);
+    if (res.ok) {
+      this.persistSnapshot();
+      this.syncRoom();
+    }
+    return res;
+  }
+
+  private lockPredictions(round: RoundType): void {
+    const state = this.room.predictions;
+    if (!state) return;
+    if (round === 'KD_RIENG') {
+      // Trận bắt đầu: ai đã chuyển sang ghế thí sinh thì không còn được dự đoán
+      dropBetsOfNonViewers(state, new Set(this.room.players.filter((p) => p.role === 'viewer').map((p) => p.id)));
+    }
+    lockForRound(state, round);
+  }
+
+  private resolveRoundPredictions(finishedRound: RoundType): void {
+    const state = this.room.predictions;
+    if (!state) return;
+    const config: Partial<Record<RoundType, { cat: 'top_kd' | 'top_vcnv' | 'top_tt' | 'top_vd'; key: keyof Player['roundScores'] }>> = {
+      KD_CHUNG: { cat: 'top_kd', key: 'kd' },
+      VCNV: { cat: 'top_vcnv', key: 'vcnv' },
+      TANG_TOC: { cat: 'top_tt', key: 'tt' },
+      VE_DICH: { cat: 'top_vd', key: 'vd' },
+    };
+    const c = config[finishedRound];
+    if (!c) return;
+    const contestants = this.room.players.filter((p) => (p.role || 'player') === 'player' && !p.disqualified);
+    // Người kiếm được nhiều điểm nhất TRONG vòng này (điểm riêng của vòng, không phải tổng)
+    resolveCategory(state, c.cat, topBy(contestants, (p) => p.roundScores[c.key], (p) => p.id));
+  }
+
+  private resolveFinalPredictions(winnerId: string | undefined): void {
+    const state = this.room.predictions;
+    if (!state) return;
+    const champ = this.room.players.find((p) => p.id === winnerId && !p.disqualified);
+    resolveCategory(state, 'champion', champ ? [champ.id] : null);
+    const contestants = this.room.players.filter((p) => (p.role || 'player') === 'player');
+    resolveCategory(state, 'lowest', topBy(contestants, (p) => p.score, (p) => p.id, true));
+    resolveCategory(state, 'over_250', [contestants.some((p) => p.score > PREDICTION_HIGH_SCORE) ? 'yes' : 'no']);
+    voidUnresolved(state);
   }
 
   /**
@@ -3050,6 +3125,7 @@ export class RoomStateMachine {
       p.disqualified = false;
     }
     this.room.history = [];
+    delete this.room.predictions;
     this.room.status = 'LOBBY';
     this.room.state = { round: 'LOBBY', subPhase: 'WAITING_PLAYERS', deadline: null };
 

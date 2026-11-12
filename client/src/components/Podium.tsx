@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import confetti from 'canvas-confetti';
 import { Trophy, Download, RotateCcw } from 'lucide-react';
 import { soundManager } from '../utils/soundEffects';
+import { leaderboardOf } from '../utils/predictions';
 import { PlayerAvatar } from './PlayerAvatar';
 
 export const Podium: React.FC = () => {
@@ -75,7 +76,7 @@ export const Podium: React.FC = () => {
     );
 
   return (
-    <div className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-center h-full max-h-full py-1.5 px-3 overflow-hidden">
+    <div className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center justify-start [justify-content:safe_center] h-full max-h-full py-1.5 px-3 overflow-y-auto overflow-x-hidden">
       {/* Title */}
       <div className="text-center mb-2.5 sm:mb-3.5">
         <span className="text-xs sm:text-sm font-heading font-black uppercase tracking-widest bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1 rounded-full border border-[#FFD43B]/40 shadow-glow-yellow mb-1.5 inline-block">
@@ -191,6 +192,9 @@ export const Podium: React.FC = () => {
         </div>
       </div>
 
+      {/* Vinh danh khán giả dự đoán giỏi nhất */}
+      <PredictionKings />
+
       {/* Chơi lại + tải biên bản */}
       <div className="flex flex-wrap items-center justify-center gap-2.5">
       {myPlayer && room.hostId === myPlayer.id ? (
@@ -217,6 +221,52 @@ export const Podium: React.FC = () => {
       </a>
       </div>
       {restartError && <p className="mt-2 text-xs sm:text-sm font-bold text-[#FF496C]" role="alert">{restartError}</p>}
+    </div>
+  );
+};
+
+/** "VUA DỰ ĐOÁN": khán giả nhiều điểm dự đoán nhất, kèm hai người xếp sau. */
+const PredictionKings: React.FC = () => {
+  const room = useGameStore((s) => s.room);
+  const board = leaderboardOf(room?.predictions).slice(0, 3);
+  if (!room || board.length === 0) return null;
+
+  const viewerOf = (id: string) => room.players.find((p) => p.id === id);
+  const [king, ...rest] = board;
+  const kingPlayer = viewerOf(king.viewerId);
+
+  return (
+    <div className="w-full mb-3 rounded-2xl border border-[#FFD43B]/40 bg-gradient-to-r from-[#2A2108] via-[#161A26] to-[#111827] px-3.5 py-2.5 shadow-glow-yellow flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="relative shrink-0">
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg" aria-hidden="true">👑</span>
+          <PlayerAvatar player={kingPlayer ?? { name: '?' }} size={44} className="ring-2 ring-[#FFD43B]" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[10px] sm:text-xs font-heading font-black uppercase tracking-[0.2em] text-[#FFD43B]">Vua dự đoán</div>
+          <div className="text-base sm:text-lg font-heading font-black text-[#F8FAFC] truncate">{kingPlayer?.name ?? 'Khán giả đã rời phòng'}</div>
+          <div className="text-xs text-[#CBD5E1]">
+            <span className="font-digital font-bold text-[#FFD43B]">{king.points}</span> điểm · đoán đúng {king.wins} hạng mục
+          </div>
+        </div>
+      </div>
+      {rest.length > 0 && (
+        <div className="sm:ml-auto flex items-center gap-2">
+          {rest.map((r, i) => {
+            const p = viewerOf(r.viewerId);
+            return (
+              <div key={r.viewerId} className="flex items-center gap-2 rounded-xl bg-[#0E1524] border border-[#303D52] px-2.5 py-1.5">
+                <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[11px] font-heading font-black text-[#090D18] ${i === 0 ? 'bg-[#CBD5E1]' : 'bg-[#D59E5B]'}`}>{i + 2}</span>
+                <PlayerAvatar player={p ?? { name: '?' }} size={24} />
+                <div className="leading-tight">
+                  <div className="text-xs font-bold text-[#F8FAFC] max-w-[90px] truncate">{p?.name ?? 'Đã rời phòng'}</div>
+                  <div className="text-[11px] font-digital text-[#94A3B8]">{r.points} điểm</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

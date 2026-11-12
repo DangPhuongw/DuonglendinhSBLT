@@ -8,6 +8,15 @@ export const GAME_CONFIG = {
   MAX_PLAYERS: 5,                  // Tối đa 5 thí sinh
   MAX_VIEWERS: 10,                 // Tối đa 10 người theo dõi / khán giả
 
+  // Bảng dự đoán của khán giả: mỗi người có START_POINTS điểm, mỗi hạng mục cược MIN_STAKE..MAX_STAKE.
+  // Đoán đúng được cộng đúng số điểm đã cược, đoán sai bị trừ đúng số đó. Không thể cược quá số điểm còn rảnh.
+  PREDICTIONS: {
+    START_POINTS: 1000,
+    MIN_STAKE: 10,
+    MAX_STAKE: 250,
+    STAKE_STEP: 10,
+  },
+
   // Khán giả thả cảm xúc / tin nhắn cố định, bay từ dưới lên (kiểu thả tim livestream)
   VIEWER_REACTIONS: {
     EMOJIS: ['👏', '🔥', '😂', '😱', '❤️', '👍', '🤯', '💯', '😭', '🐐'] as string[],
@@ -133,3 +142,20 @@ export const GAME_CONFIG = {
     ANSWER_SECONDS: 10,
   },
 };
+
+import type { PredictionCategoryDef } from './types.js';
+
+/** Các hạng mục dự đoán, theo thứ tự hiển thị. */
+export const PREDICTION_CATEGORIES: PredictionCategoryDef[] = [
+  { id: 'champion', label: 'Nhà vô địch chung cuộc', lockAt: 'KD_CHUNG', lockLabel: 'Khóa khi hết Khởi động riêng', options: 'player' },
+  { id: 'lowest', label: 'Người thấp điểm nhất chung cuộc', lockAt: 'KD_CHUNG', lockLabel: 'Khóa khi hết Khởi động riêng', options: 'player' },
+  { id: 'over_250', label: 'Trận này có thí sinh nào trên 250 điểm không?', lockAt: 'KD_CHUNG', lockLabel: 'Khóa khi hết Khởi động riêng', options: 'yes_no' },
+  // "Cao điểm nhất vòng X" = kiếm được nhiều điểm nhất TRONG vòng X (không phải tổng điểm sau X vòng)
+  { id: 'top_kd', label: 'Kiếm nhiều điểm nhất vòng 1 · Khởi động', lockAt: 'KD_CHUNG', lockLabel: 'Khóa khi hết Khởi động riêng', options: 'player' },
+  { id: 'top_vcnv', label: 'Kiếm nhiều điểm nhất vòng 2 · Vượt chướng ngại vật', lockAt: 'VCNV', lockLabel: 'Khóa khi vòng 2 bắt đầu', options: 'player' },
+  { id: 'top_tt', label: 'Kiếm nhiều điểm nhất vòng 3 · Tăng tốc', lockAt: 'TANG_TOC', lockLabel: 'Khóa khi vòng 3 bắt đầu', options: 'player' },
+  { id: 'top_vd', label: 'Kiếm nhiều điểm nhất vòng 4 · Về đích', lockAt: 'VE_DICH', lockLabel: 'Khóa khi vòng 4 bắt đầu', options: 'player' },
+];
+
+/** Ngưỡng điểm của hạng mục "có thí sinh trên N điểm không". */
+export const PREDICTION_HIGH_SCORE = 250;

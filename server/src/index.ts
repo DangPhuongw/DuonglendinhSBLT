@@ -586,6 +586,20 @@ io.on('connection', (socket) => {
     });
   });
 
+  // 5d. Khán giả đặt cược trong bảng dự đoán
+  on('prediction:place', (data, cb) => {
+    const reply = typeof cb === 'function' ? cb : () => {};
+    if (checkEventSpam()) return;
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return reply({ ok: false, error: 'Bạn chưa ở trong phòng.' });
+    const machine = roomManager.getRoom(info.roomCode);
+    if (!machine) return reply({ ok: false, error: 'Phòng không tồn tại.' });
+    const stake = asInt(data?.stake);
+    machine.eventQueue.enqueue(async () => {
+      reply(machine.placePrediction(info.playerId, data?.category, data?.option, stake ?? NaN));
+    });
+  });
+
   // 5c. Khán giả thả cảm xúc / tin nhắn cố định
   on('viewer:react', (data, cb) => {
     const reply = typeof cb === 'function' ? cb : () => {};

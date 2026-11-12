@@ -181,6 +181,47 @@ export interface Room {
   history: ScoreEvent[];
   createdAt: number;
   updatedAt: number;
+  /** Bảng dự đoán của khán giả (tạo khi có người đặt cược đầu tiên). */
+  predictions?: PredictionState;
+}
+
+// ===== Bảng dự đoán của khán giả =====
+
+export type PredictionCategoryId =
+  | 'champion'
+  | 'lowest'
+  | 'over_250'
+  | 'top_kd'
+  | 'top_vcnv'
+  | 'top_tt'
+  | 'top_vd';
+
+export type PredictionOptionKind = 'player' | 'yes_no';
+
+export interface PredictionCategoryDef {
+  id: PredictionCategoryId;
+  label: string;
+  /** Khóa đặt cược khi vòng / phần thi này bắt đầu (KD_CHUNG = vừa hết Khởi động riêng). */
+  lockAt: 'KD_CHUNG' | 'VCNV' | 'TANG_TOC' | 'VE_DICH';
+  lockLabel: string;
+  options: PredictionOptionKind;
+}
+
+export type PredictionCategoryStatus = 'open' | 'locked' | 'resolved' | 'void';
+
+export interface PredictionBet {
+  /** Mã thí sinh, hoặc 'yes' / 'no'. */
+  option: string;
+  stake: number;
+  result?: 'win' | 'lose' | 'void';
+}
+
+export interface PredictionState {
+  categories: Record<PredictionCategoryId, { status: PredictionCategoryStatus; winners?: string[] }>;
+  /** bets[mã khán giả][hạng mục] */
+  bets: Record<string, Partial<Record<PredictionCategoryId, PredictionBet>>>;
+  /** Điểm dự đoán hiện có của từng khán giả (bắt đầu từ PREDICTIONS.START_POINTS). */
+  balances: Record<string, number>;
 }
 
 export type ViewerReactionKind = 'emoji' | 'message';
@@ -217,6 +258,7 @@ export interface ClientToServerEvents {
   'room:switchSeat': (data: { targetRole: 'player' | 'viewer'; targetSeat: number }, callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'player:setAvatar': (data: { avatar: string }) => void;
   'room:start': () => void;
+  'prediction:place': (data: { category: PredictionCategoryId; option: string; stake: number }, callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'viewer:react': (data: { kind: ViewerReactionKind; index: number }, callback?: (res: { ok: boolean; error?: string; retryInMs?: number }) => void) => void;
   'room:playAgain': (callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'player:ready': (data: { mediaLoaded: boolean }) => void;

@@ -11,6 +11,7 @@ import {
   AntiCheatAlert,
   ViewerReaction,
   ViewerReactionKind,
+  PredictionCategoryId,
   GAME_CONFIG,
 } from '@olympia/shared';
 import { soundManager } from '../utils/soundEffects';
@@ -42,6 +43,7 @@ interface GameStore {
   reactions: ViewerReaction[];
   sendReaction: (kind: ViewerReactionKind, index: number) => Promise<{ ok: boolean; error?: string; retryInMs?: number }>;
   removeReaction: (id: string) => void;
+  placePrediction: (category: PredictionCategoryId, option: string, stake: number) => Promise<{ ok: boolean; error?: string }>;
   setReady: (mediaLoaded?: boolean) => void;
   submitAnswer: (questionId: string, content: string) => void;
   buzz: () => void;
@@ -376,6 +378,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 
   removeReaction: (id) => set({ reactions: get().reactions.filter((r) => r.id !== id) }),
+
+  placePrediction: (category, option, stake) =>
+    new Promise((resolve) => {
+      const socket = get().socket;
+      if (!socket) return resolve({ ok: false, error: 'Mất kết nối tới máy chủ.' });
+      const timer = setTimeout(() => resolve({ ok: false, error: 'Máy chủ không phản hồi.' }), 6000);
+      socket.emit('prediction:place', { category, option, stake }, (res) => {
+        clearTimeout(timer);
+        resolve(res);
+      });
+    }),
 
   playAgain: () =>
     new Promise((resolve) => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GAME_CONFIG, ViewerReactionKind } from '@olympia/shared';
-import { SmilePlus, X } from 'lucide-react';
+import { SmilePlus, X, Coins } from 'lucide-react';
+import { PredictionPanel } from './PredictionPanel';
 import { useGameStore } from '../store/gameStore';
 
 /**
@@ -11,7 +12,8 @@ export const ViewerReactionBar: React.FC = () => {
   const isViewer = useGameStore((s) => s.player?.role === 'viewer');
   const round = useGameStore((s) => s.room?.state.round);
   const sendReaction = useGameStore((s) => s.sendReaction);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<null | 'reactions' | 'predictions'>(null);
+  const finished = round === 'FINISHED';
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [now, setNow] = useState(Date.now());
   const [notice, setNotice] = useState('');
@@ -36,7 +38,7 @@ export const ViewerReactionBar: React.FC = () => {
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(null);
     };
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
@@ -73,11 +75,22 @@ export const ViewerReactionBar: React.FC = () => {
         </div>
       )}
 
-      {open && (
+      {open === 'predictions' && (
+        <div className="rx-pop w-[min(94vw,390px)] max-h-[min(560px,calc(100dvh-15rem))] overflow-y-auto overscroll-contain rounded-2xl bg-[#111827]/95 border border-[#FFD43B]/40 p-3 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur">
+          <div className="flex justify-end -mb-6">
+            <button onClick={() => setOpen(null)} className="relative z-10 text-[#64748B] hover:text-[#F8FAFC] cursor-pointer" aria-label="Đóng bảng dự đoán">
+              <X size={15} />
+            </button>
+          </div>
+          <PredictionPanel />
+        </div>
+      )}
+
+      {open === 'reactions' && (
         <div className="rx-pop w-[min(92vw,340px)] rounded-2xl bg-[#111827]/95 border border-[#303D52] p-3 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-heading font-black uppercase tracking-wider text-[#00D9FF]">Thả cảm xúc</span>
-            <button onClick={() => setOpen(false)} className="text-[#64748B] hover:text-[#F8FAFC] cursor-pointer" aria-label="Đóng">
+            <button onClick={() => setOpen(null)} className="text-[#64748B] hover:text-[#F8FAFC] cursor-pointer" aria-label="Đóng">
               <X size={15} />
             </button>
           </div>
@@ -111,20 +124,32 @@ export const ViewerReactionBar: React.FC = () => {
         </div>
       )}
 
+      <div className="flex items-center gap-2.5">
+      {!finished && (
+        <button
+          onClick={() => setOpen((v) => (v === 'predictions' ? null : 'predictions'))}
+          className={`h-11 sm:h-12 pl-3 pr-4 rounded-full bg-[#FFD43B] text-[#090D18] shadow-glow-yellow flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform ${open === 'predictions' ? 'ring-4 ring-[#FFD43B]/40' : ''}`}
+          aria-expanded={open === 'predictions'}
+          title="Dự đoán kết quả trận đấu bằng điểm"
+        >
+          <Coins size={20} className="shrink-0" />
+          <span className="font-heading font-black text-xs sm:text-sm tracking-wider whitespace-nowrap">ĐẶT CƯỢC</span>
+        </button>
+      )}
       <button
-        onClick={() => setOpen((v) => !v)}
-        className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#00D9FF] text-[#090D18] shadow-glow-cyan flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-        aria-expanded={open}
-        aria-label="Thả cảm xúc"
-        title="Thả cảm xúc"
+        onClick={() => setOpen((v) => (v === 'reactions' ? null : 'reactions'))}
+        className={`relative overflow-hidden h-11 sm:h-12 pl-3 pr-4 rounded-full bg-[#00D9FF] text-[#090D18] shadow-glow-cyan flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform ${open === 'reactions' ? 'ring-4 ring-[#00D9FF]/40' : ''}`}
+        aria-expanded={open === 'reactions'}
+        title="Thả cảm xúc, tin nhắn cổ vũ"
       >
-        <SmilePlus size={24} />
+        <SmilePlus size={20} className="shrink-0" />
+        <span className="font-heading font-black text-xs sm:text-sm tracking-wider whitespace-nowrap">CỔ VŨ</span>
         {coolingDown && (
-          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
-            <circle cx="18" cy="18" r="16.5" fill="none" stroke="#090D18" strokeOpacity="0.55" strokeWidth="3" strokeDasharray={`${(progress * 103.7).toFixed(1)} 103.7`} />
-          </svg>
+          // Thời gian chờ trước khi thả tiếp: thanh mờ chạy ngang dưới đáy nút
+          <span className="absolute left-0 bottom-0 h-1 bg-[#090D18]/45" style={{ width: `${(progress * 100).toFixed(1)}%` }} aria-hidden="true" />
         )}
       </button>
+      </div>
     </div>
   );
 };
