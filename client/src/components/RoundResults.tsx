@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Crown, ShieldX } from 'lucide-react';
 import { GAME_CONFIG, RoundResultEntry, RoundType } from '@olympia/shared';
 import { useGameStore } from '../store/gameStore';
+import { PlayerAvatar } from './PlayerAvatar';
 import { soundManager } from '../utils/soundEffects';
 
 const ROUND_LABELS: Partial<Record<RoundType, { index: string; name: string }>> = {
@@ -111,6 +112,7 @@ export const RoundResults: React.FC = () => {
               // Vào lại giữa chừng: tên đã bay xong thì hiện luôn, không chạy lại hiệu ứng
               animate={elapsed < cfg.ENTRY_MS}
               isMe={myPlayer?.id === entry.playerId}
+              avatar={room.players.find((pl) => pl.id === entry.playerId)?.avatar}
             />
           );
         })}
@@ -124,7 +126,8 @@ const ResultRow: React.FC<{
   visible: boolean;
   animate: boolean;
   isMe: boolean;
-}> = ({ entry, visible, animate, isMe }) => {
+  avatar?: string;
+}> = ({ entry, visible, animate, isMe, avatar }) => {
   // Giữ trạng thái "đã chạy hiệu ứng" để không bị giật khi animate đổi từ true sang false
   const [settled, setSettled] = useState(!animate);
   useEffect(() => {
@@ -169,6 +172,7 @@ const ResultRow: React.FC<{
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           {isLeader && <Crown size={20} className="shrink-0 text-[#FFD43B]" />}
+          <PlayerAvatar player={{ name: entry.name, avatar }} size={36} dimmed={entry.disqualified} />
           <span
             className={`truncate font-heading font-black text-base sm:text-xl ${
               entry.disqualified ? 'text-[#94A3B8] line-through' : 'text-[#F8FAFC]'

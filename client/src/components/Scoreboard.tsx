@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { soundManager } from '../utils/soundEffects';
 import { Star, WifiOff, Crown, Eye, AlertTriangle } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const Scoreboard: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -115,6 +116,7 @@ export const Scoreboard: React.FC = () => {
               {/* Header: Name & Badges */}
               <div className="flex items-center justify-between gap-1 w-full">
                 <div className="flex items-center gap-1.5 min-w-0">
+                  <PlayerAvatar player={player} size={28} dimmed={isDimmed} className={`sm:!w-8 sm:!h-8 ${isTurn ? 'ring-2 ring-[#FFD43B]' : ''}`} />
                   <span
                     className={`text-xs sm:text-sm lg:text-base font-bold truncate transition-colors ${
                       isTurn ? 'text-[#FFD43B] font-heading font-black' : isDimmed ? 'text-[#64748B]' : 'text-[#F8FAFC]'

@@ -4,6 +4,7 @@ import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
 import { Zap, Send, Clock, CheckCircle2, XCircle, Award, Eye } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const TangTocRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -233,6 +234,7 @@ export const TangTocRound: React.FC = () => {
                     {/* Tên & Đáp án thí sinh */}
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
+                        <PlayerAvatar player={p} size={22} />
                         <span className="font-bold text-[#F8FAFC] text-xs sm:text-sm md:text-base truncate max-w-[90px] sm:max-w-[140px]">
                           {p.name}
                         </span>

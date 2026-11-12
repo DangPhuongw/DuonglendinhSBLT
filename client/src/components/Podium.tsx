@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import confetti from 'canvas-confetti';
 import { Trophy, Download, RotateCcw } from 'lucide-react';
 import { soundManager } from '../utils/soundEffects';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const Podium: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -107,8 +108,11 @@ export const Podium: React.FC = () => {
       {/* Champion Laurel Box */}
       {champ && (
         <div className="w-full max-w-lg bg-[#1C2638] border-2 border-[#FFD43B] rounded-3xl p-5 sm:p-6 mb-3 text-center shadow-glow-yellow-lg flex flex-col items-center relative">
-          <div className="w-16 h-16 rounded-2xl bg-[#FFD43B] text-[#090D18] border border-[#FFD43B] flex items-center justify-center mb-2 shadow-glow-yellow animate-bounce">
-            <Trophy size={34} />
+          <div className="relative mb-2">
+            <PlayerAvatar player={champ} size={96} className="ring-4 ring-[#FFD43B] shadow-glow-yellow" />
+            <div className="absolute -top-3 -right-3 w-10 h-10 rounded-xl bg-[#FFD43B] text-[#090D18] border border-[#FFD43B] flex items-center justify-center shadow-glow-yellow animate-bounce">
+              <Trophy size={22} />
+            </div>
           </div>
           <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/20 px-3.5 py-1 rounded-full border border-[#FFD43B]/50 text-[#FFD43B] mb-1.5 shadow-glow-yellow">
             QUÁN QUÂN VÒNG NGUYỆT QUẾ
@@ -166,6 +170,7 @@ export const Podium: React.FC = () => {
                   </td>
                   <td className="py-2 px-3">
                     <div className="flex items-center gap-2">
+                      <PlayerAvatar player={p} size={28} dimmed={p.disqualified} />
                       <span className="font-bold text-[#F8FAFC] text-xs sm:text-sm">{p.name}</span>
                       {p.disqualified && (
                         <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded bg-[#FF496C]/15 text-[#FF496C] border border-[#FF496C]/50">LOẠI · RỜI TAB</span>

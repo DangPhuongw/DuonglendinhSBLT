@@ -7,6 +7,7 @@ import { Star, Bell, Send, Trophy, CheckCircle2, Eye } from 'lucide-react';
 import { GAME_CONFIG } from '@olympia/shared';
 import { LockedBuzzer } from './LockedBuzzer';
 import { useBuzzLock } from '../utils/useBuzzLock';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const VeDichRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -95,6 +96,7 @@ export const VeDichRound: React.FC = () => {
           <span className="text-xs uppercase font-heading font-black bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1 rounded-full border border-[#FFD43B]/40 shadow-glow-yellow mb-2">
             Lượt thi Về Đích
           </span>
+          <PlayerAvatar player={activePlayer} size={64} className="ring-2 ring-[#FFD43B] shadow-glow-yellow mb-1.5" />
           <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#F8FAFC] mb-1.5">
             {activePlayer?.name}
           </h2>
@@ -313,7 +315,7 @@ export const VeDichRound: React.FC = () => {
       {/* Steal buzzer winner notice */}
       {subPhase === 'STEAL_ANSWER' && room.state.buzzerLockedBy && (
         <div className="w-full p-2.5 mb-2 bg-[#FFD43B]/20 border border-[#FFD43B] rounded-xl text-center text-xs sm:text-sm font-heading font-bold text-[#FFD43B] shadow-glow-yellow animate-bounce">
-          🔔 {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành quyền trả lời câu hỏi!
+          🔔 <PlayerAvatar player={room.players.find((p) => p.id === room.state.buzzerLockedBy)} size={26} className="inline-block align-middle mx-1" /> {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành quyền trả lời câu hỏi!
         </div>
       )}
 

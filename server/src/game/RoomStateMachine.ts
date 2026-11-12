@@ -40,6 +40,13 @@ export function toPublicPlayers(players: Player[]): Player[] {
 
 export const MAX_PLAYER_NAME_LENGTH = 30;
 
+/** Seed ảnh đại diện: chỉ giữ chữ/số/-/_, tối đa 32 ký tự. Trả undefined nếu rỗng. */
+export function sanitizeAvatarSeed(seed: unknown): string | undefined {
+  if (typeof seed !== 'string') return undefined;
+  const clean = seed.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
+  return clean || undefined;
+}
+
 /** Bỏ ký tự điều khiển, gộp khoảng trắng, cắt độ dài. Trả '' nếu không hợp lệ. */
 export function sanitizePlayerName(name: unknown): string {
   if (typeof name !== 'string') return '';
@@ -98,7 +105,7 @@ export class RoomStateMachine {
 
   constructor(
     roomCode: string,
-    hostPlayer: { id: string; name: string; token: string },
+    hostPlayer: { id: string; name: string; token: string; avatar?: string },
     callbacks: StateMachineCallbacks,
     initialQuestionSet?: QuestionSet
   ) {
@@ -110,6 +117,7 @@ export class RoomStateMachine {
     const host: Player = {
       id: hostPlayer.id,
       name: sanitizePlayerName(hostPlayer.name) || 'Chủ phòng',
+      avatar: sanitizeAvatarSeed(hostPlayer.avatar),
       seat: 1,
       role: 'player',
       token: hostPlayer.token,
@@ -301,7 +309,7 @@ export class RoomStateMachine {
 
   // --- Player Management ---
 
-  public addPlayer(name: string, token: string): { ok: boolean; player?: Player; error?: string } {
+  public addPlayer(name: string, token: string, avatar?: string): { ok: boolean; player?: Player; error?: string } {
     if (this.room.status !== 'LOBBY') {
       return { ok: false, error: 'Trận đấu đã bắt đầu, không thể tham gia.' };
     }
@@ -351,6 +359,7 @@ export class RoomStateMachine {
     const newPlayer: Player = {
       id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: cleanName,
+      avatar: sanitizeAvatarSeed(avatar),
       seat: nextSeat,
       role: assignedRole,
       token,
@@ -366,6 +375,17 @@ export class RoomStateMachine {
     this.persistSnapshot();
     this.syncRoom();
     return { ok: true, player: newPlayer };
+  }
+
+  /** Đổi ảnh đại diện (chỉ ở Sảnh chờ). */
+  public setAvatar(playerId: string, avatar: unknown): void {
+    if (this.room.status !== 'LOBBY') return;
+    const player = this.room.players.find((p) => p.id === playerId);
+    const seed = sanitizeAvatarSeed(avatar);
+    if (!player || !seed || player.avatar === seed) return;
+    player.avatar = seed;
+    this.persistSnapshot();
+    this.syncRoom();
   }
 
   public switchSeat(

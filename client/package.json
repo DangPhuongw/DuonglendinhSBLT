@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@multiavatar/multiavatar": "^1.0.7",
     "@olympia/shared": "*",
     "canvas-confetti": "^1.9.3",
     "clsx": "^2.1.1",

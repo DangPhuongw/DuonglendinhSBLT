@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { RulesExplainer } from './RulesExplainer';
 import { CheckCircle2, UserX, Eye } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
 
 const ROUND_NAMES: Record<string, string> = {
   KD_RIENG: 'VÒNG 1: KHỞI ĐỘNG',
@@ -105,6 +106,7 @@ export const ReadyScreen: React.FC = () => {
                   title={`${p.name}: ${p.ready ? 'đã sẵn sàng' : 'chưa sẵn sàng'}`}
                 >
                   {p.ready ? <CheckCircle2 size={13} className="shrink-0" /> : <span className="w-2 h-2 rounded-full bg-[#64748B] shrink-0" />}
+                  <PlayerAvatar player={p} size={18} />
                   <span className="truncate">{p.name}</span>
                   {isHost && isAbsent && !p.ready && (
                     <button

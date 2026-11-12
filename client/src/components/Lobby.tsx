@@ -3,6 +3,9 @@ import { useGameStore } from '../store/gameStore';
 import { GAME_CONFIG } from '@olympia/shared';
 import { ANTI_CHEAT_RULE } from '../utils/antiCheatRules';
 import { InviteLink } from './InviteLink';
+import { AvatarPicker } from './AvatarPicker';
+import { PlayerAvatar } from './PlayerAvatar';
+import { loadMyAvatar, saveMyAvatar } from '../utils/avatar';
 import {
   ShieldAlert,
   Users,
@@ -28,6 +31,13 @@ export const Lobby: React.FC = () => {
   const switchSeat = useGameStore((s) => s.switchSeat);
   const startGame = useGameStore((s) => s.startGame);
   const kickPlayer = useGameStore((s) => s.kickPlayer);
+  const setMyAvatar = useGameStore((s) => s.setAvatar);
+  const [avatar, setAvatar] = useState(loadMyAvatar);
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const chooseAvatar = (seed: string) => {
+    setAvatar(seed);
+    saveMyAvatar(seed);
+  };
   const myToken = useGameStore((s) => s.myToken);
 
   const [name, setName] = useState(() => {
@@ -131,6 +141,10 @@ export const Lobby: React.FC = () => {
               maxLength={24}
               className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] font-bold placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-base"
             />
+            <div className="mt-4">
+              <span className="block text-xs sm:text-sm font-heading font-bold uppercase tracking-wider mb-1.5">Ảnh đại diện</span>
+              <AvatarPicker value={avatar} onChange={chooseAvatar} />
+            </div>
             <button
               type="submit"
               disabled={isJoining}
@@ -188,6 +202,11 @@ export const Lobby: React.FC = () => {
                 maxLength={24}
                 className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] font-bold placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-sm sm:text-base"
               />
+            </div>
+
+            <div>
+              <span className="block text-xs sm:text-sm font-heading font-bold text-[#F8FAFC] uppercase tracking-wider mb-1.5">Ảnh đại diện</span>
+              <AvatarPicker value={avatar} onChange={chooseAvatar} />
             </div>
 
             <div className="pt-1">
@@ -435,6 +454,9 @@ export const Lobby: React.FC = () => {
                     </button>
                   )}
 
+                  {player ? (
+                    <SeatAvatar player={player} isMe={!!isMe} seatLabel={String(seatNum)} onEdit={() => setAvatarModalOpen(true)} accent="yellow" />
+                  ) : (
                   <div
                     className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl flex items-center justify-center font-heading font-black text-sm sm:text-base lg:text-lg mb-1.5 border transition-all ${
                       player
@@ -446,6 +468,7 @@ export const Lobby: React.FC = () => {
                   >
                     {seatNum}
                   </div>
+                  )}
 
                   <span className="font-bold text-xs sm:text-sm md:text-base lg:text-lg text-center truncate max-w-full px-1 text-[#F8FAFC]">
                     {player ? player.name : 'Ghế trống'}
@@ -514,6 +537,9 @@ export const Lobby: React.FC = () => {
                     </button>
                   )}
 
+                  {player ? (
+                    <SeatAvatar player={player} isMe={!!isMe} seatLabel={`👁 ${seatNum}`} onEdit={() => setAvatarModalOpen(true)} accent="cyan" />
+                  ) : (
                   <div
                     className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl flex items-center justify-center font-heading font-black text-sm sm:text-base lg:text-lg mb-1.5 border transition-all ${
                       player
@@ -528,6 +554,7 @@ export const Lobby: React.FC = () => {
                       <span>{seatNum}</span>
                     </div>
                   </div>
+                  )}
 
                   <span className="font-bold text-xs sm:text-sm md:text-base lg:text-lg text-center truncate max-w-full px-1 text-[#F8FAFC]">
                     {player ? player.name : 'Ghế trống'}
@@ -627,6 +654,68 @@ export const Lobby: React.FC = () => {
           )}
         </div>
       )}
+
+      {avatarModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setAvatarModalOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-label="Đổi ảnh đại diện"
+            className="w-full max-w-sm bg-[#111827] border-2 border-[#303D52] rounded-3xl p-5 shadow-2xl text-[#F8FAFC]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-heading font-black uppercase tracking-wider text-sm">Đổi ảnh đại diện</h3>
+              <button type="button" onClick={() => setAvatarModalOpen(false)} aria-label="Đóng" className="p-1 rounded-md hover:bg-[#1C2638] cursor-pointer">
+                <X size={16} />
+              </button>
+            </div>
+            <AvatarPicker
+              value={myPlayer.avatar || avatar}
+              onChange={(seed) => {
+                setAvatar(seed);
+                setMyAvatar(seed);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
+
+/** Ảnh đại diện trong ô ghế ở Sảnh chờ, kèm số ghế; ảnh của chính mình bấm được để đổi. */
+const SeatAvatar: React.FC<{
+  player: { avatar?: string; name: string; connected: boolean };
+  isMe: boolean;
+  seatLabel: string;
+  accent: 'yellow' | 'cyan';
+  onEdit: () => void;
+}> = ({ player, isMe, seatLabel, accent, onEdit }) => {
+  const ring = accent === 'yellow' ? 'ring-[#FFD43B]' : 'ring-[#00D9FF]';
+  const badge = accent === 'yellow' ? 'bg-[#FFD43B]' : 'bg-[#00D9FF]';
+  const content = (
+    <>
+      <PlayerAvatar player={player} size={44} dimmed={!player.connected} className={`ring-2 ${isMe ? ring : 'ring-[#303D52]'} sm:!w-12 sm:!h-12 lg:!w-14 lg:!h-14`} />
+      <span className={`absolute -bottom-1 -right-2 ${badge} text-[#090D18] text-[10px] font-heading font-black px-1.5 rounded-full leading-4 whitespace-nowrap`}>
+        {seatLabel}
+      </span>
+    </>
+  );
+  if (!isMe) return <div className="relative mb-1.5">{content}</div>;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onEdit();
+      }}
+      title="Đổi ảnh đại diện"
+      className="relative mb-1.5 cursor-pointer hover:scale-110 active:scale-95 transition-transform"
+    >
+      {content}
+    </button>
   );
 };

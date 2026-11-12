@@ -50,7 +50,8 @@ export class RoomManager {
   public createRoom(
     hostName: string,
     token: string,
-    customQuestionSet?: QuestionSet
+    customQuestionSet?: QuestionSet,
+    avatar?: string
   ): { roomCode: string; machine: RoomStateMachine; playerId: string } {
     const roomCode = this.generateRoomCode();
     const playerId = `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -58,7 +59,7 @@ export class RoomManager {
 
     const machine = new RoomStateMachine(
       roomCode,
-      { id: playerId, name: hostName, token },
+      { id: playerId, name: hostName, token, avatar },
       callbacks,
       customQuestionSet
     );

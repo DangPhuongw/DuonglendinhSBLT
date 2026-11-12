@@ -4,6 +4,7 @@ import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
 import { Bell, AlertTriangle, Send } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const TieBreakRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -70,7 +71,13 @@ export const TieBreakRound: React.FC = () => {
             Sau 3 câu hỏi phụ vẫn bất phân thắng bại, hệ thống bốc thăm ngẫu nhiên:
           </p>
           <div className="text-xl sm:text-2xl font-heading font-black text-[#FFD43B] p-4 bg-[#1C2638] border-2 border-[#FFD43B] rounded-xl shadow-glow-yellow-lg animate-pulse w-full">
-            {winner ? `🏆 ${winner.name}` : 'Đang quay số...'}
+            {winner ? (
+              <span className="inline-flex items-center gap-2">
+                <PlayerAvatar player={winner} size={40} /> 🏆 {winner.name}
+              </span>
+            ) : (
+              'Đang quay số...'
+            )}
           </div>
         </div>
       </div>
@@ -138,7 +145,7 @@ export const TieBreakRound: React.FC = () => {
       {/* Buzzer Winner Announcement */}
       {subPhase === 'ANSWERING' && Boolean(room.state.buzzerLockedBy) && (
         <div className="w-full p-2.5 mb-2.5 bg-[#FFD43B]/20 border border-[#FFD43B] rounded-xl text-center text-xs sm:text-sm font-heading font-bold text-[#FFD43B] shadow-glow-yellow animate-bounce">
-          🔔 {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành quyền trả lời câu hỏi!
+          🔔 <PlayerAvatar player={room.players.find((p) => p.id === room.state.buzzerLockedBy)} size={26} className="inline-block align-middle mx-1" /> {room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || buzzWinner?.winnerName} đã giành quyền trả lời câu hỏi!
         </div>
       )}
 

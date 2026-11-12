@@ -434,7 +434,7 @@ io.on('connection', (socket) => {
     }
 
     const token = generateToken();
-    const { roomCode, machine, playerId } = roomManager.createRoom(name, token);
+    const { roomCode, machine, playerId } = roomManager.createRoom(name, token, undefined, data?.avatar);
 
     socket.join(roomCode);
     roomManager.associateSocket(socket.id, roomCode, playerId);
@@ -469,7 +469,7 @@ io.on('connection', (socket) => {
     }
 
     const token = generateToken();
-    const res = machine.addPlayer(name, token);
+    const res = machine.addPlayer(name, token, data?.avatar);
 
     if (!res.ok || !res.player) {
       return callback({ ok: false, error: res.error });
@@ -545,6 +545,15 @@ io.on('connection', (socket) => {
     } else {
       callback({ ok: false, error: 'Phòng không tồn tại.' });
     }
+  });
+
+  // 4c. Đổi ảnh đại diện ở Sảnh chờ
+  on('player:setAvatar', (data) => {
+    if (checkEventSpam()) return;
+    const info = roomManager.getPlayerBySocket(socket.id);
+    const machine = info && roomManager.getRoom(info.roomCode);
+    if (!info || !machine) return;
+    machine.eventQueue.enqueue(async () => machine.setAvatar(info.playerId, data?.avatar));
   });
 
   // 5. Start game

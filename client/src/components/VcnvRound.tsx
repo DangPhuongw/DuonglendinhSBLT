@@ -4,6 +4,7 @@ import { CountdownTimer } from './CountdownTimer';
 import { QuestionSpeakerButton } from './QuestionSpeakerButton';
 import { voiceReader } from '../utils/voiceReader';
 import { Bell, Send, CheckCircle2, Sparkles, AlertCircle, Key, Eye } from 'lucide-react';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const VcnvRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -512,7 +513,10 @@ export const VcnvRound: React.FC = () => {
                         key={res.playerId}
                         className="flex items-center justify-between p-2 rounded-xl bg-[#111827] border border-[#303D52] text-xs sm:text-sm"
                       >
-                        <span className="font-bold text-[#F8FAFC] truncate max-w-[90px]">{p.name}:</span>
+                        <span className="flex items-center gap-1.5 min-w-0">
+                          <PlayerAvatar player={p} size={20} />
+                          <span className="font-bold text-[#F8FAFC] truncate max-w-[90px]">{p.name}:</span>
+                        </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {res.answer && (
                             <span className="text-[#94A3B8] text-[11px] sm:text-xs font-mono truncate max-w-[80px]">

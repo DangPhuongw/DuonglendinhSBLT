@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { loadMyAvatar, saveMyAvatar } from '../utils/avatar';
 import { io, Socket } from 'socket.io-client';
 import {
   Room,
@@ -30,6 +31,7 @@ interface GameStore {
   createRoom: (name: string) => Promise<{ ok: boolean; error?: string }>;
   joinRoom: (name: string, roomCode: string) => Promise<{ ok: boolean; error?: string }>;
   rejoinRoom: (roomCode: string, token: string) => Promise<{ ok: boolean; error?: string }>;
+  setAvatar: (seed: string) => void;
   switchSeat: (targetRole: 'player' | 'viewer', targetSeat: 1 | 2 | 3 | 4 | 5) => Promise<{ ok: boolean; error?: string }>;
   startGame: () => void;
   playAgain: () => Promise<{ ok: boolean; error?: string }>;
@@ -206,7 +208,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const s = get().socket;
       if (!s) return resolve({ ok: false, error: 'Chưa kết nối tới máy chủ.' });
 
-      s.emit('room:create', { name }, (res) => {
+      s.emit('room:create', { name, avatar: loadMyAvatar() }, (res) => {
         if (res.ok && res.token && res.roomCode && res.seat) {
           localStorage.setItem('olympia_token', res.token);
           localStorage.setItem('olympia_room_code', res.roomCode);
@@ -232,7 +234,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const s = get().socket;
       if (!s) return resolve({ ok: false, error: 'Chưa kết nối tới máy chủ.' });
 
-      s.emit('room:join', { name, roomCode }, (res) => {
+      s.emit('room:join', { name, roomCode, avatar: loadMyAvatar() }, (res) => {
         if (res.ok && res.token && res.roomCode && res.seat) {
           localStorage.setItem('olympia_token', res.token);
           localStorage.setItem('olympia_room_code', res.roomCode);
@@ -276,6 +278,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       });
     });
+  },
+
+  setAvatar: (seed: string) => {
+    saveMyAvatar(seed);
+    const { socket, room, player } = get();
+    if (!socket || !room || !player) return;
+    // Cập nhật ngay trên máy mình, server sẽ đồng bộ lại cho cả phòng
+    set({
+      player: { ...player, avatar: seed },
+      room: { ...room, players: room.players.map((p) => (p.id === player.id ? { ...p, avatar: seed } : p)) },
+    });
+    socket.emit('player:setAvatar', { avatar: seed });
   },
 
   switchSeat: (targetRole, targetSeat) => {

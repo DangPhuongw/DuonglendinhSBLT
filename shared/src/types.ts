@@ -15,6 +15,8 @@ export type PlayerRole = 'player' | 'viewer';
 export interface Player {
   id: string;
   name: string;
+  /** Seed ảnh đại diện Multiavatar (chữ/số, client tự vẽ SVG từ seed). Trống → dùng tên. */
+  avatar?: string;
   seat: 1 | 2 | 3 | 4 | 5;
   role?: PlayerRole;
   /** Bí mật để vào lại phòng. Chỉ tồn tại ở server và trong callback trả riêng cho chính người chơi;
@@ -195,10 +197,11 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  'room:create': (data: { name: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
-  'room:join': (data: { name: string; roomCode: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
+  'room:create': (data: { name: string; avatar?: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
+  'room:join': (data: { name: string; roomCode: string; avatar?: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:rejoin': (data: { roomCode: string; token: string }, callback: (res: { ok: boolean; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:switchSeat': (data: { targetRole: 'player' | 'viewer'; targetSeat: 1 | 2 | 3 | 4 | 5 }, callback?: (res: { ok: boolean; error?: string }) => void) => void;
+  'player:setAvatar': (data: { avatar: string }) => void;
   'room:start': () => void;
   'room:playAgain': (callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'player:ready': (data: { mediaLoaded: boolean }) => void;
