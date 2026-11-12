@@ -389,3 +389,94 @@
     animation-duration: 1ms !important;
   }
 }
+
+/* ===== Bị trừ điểm: ô thí sinh nháy đỏ + số điểm bị trừ bay lên ===== */
+@keyframes penalty-flash {
+  0%, 100% { opacity: 0; }
+  10%, 40%, 70% { opacity: 1; }
+  25%, 55% { opacity: 0.25; }
+}
+@keyframes penalty-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-5px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-3px); }
+  60% { transform: translateX(3px); }
+}
+@keyframes penalty-number {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); }
+  15% { opacity: 1; transform: translate(-50%, -6px) scale(1.35); }
+  30% { transform: translate(-50%, -10px) scale(1); }
+  75% { opacity: 1; transform: translate(-50%, -34px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -52px) scale(0.9); }
+}
+.penalty-card { animation: penalty-shake 0.6s ease-in-out; }
+.penalty-flash {
+  animation: penalty-flash 1.8s ease-out forwards;
+  background: radial-gradient(ellipse at center, rgba(255, 73, 108, 0.55), rgba(255, 73, 108, 0.2) 70%);
+  box-shadow: 0 0 0 2px #FF496C, 0 0 28px rgba(255, 73, 108, 0.75), inset 0 0 22px rgba(255, 73, 108, 0.55);
+}
+.penalty-number {
+  animation: penalty-number 2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  text-shadow: 0 0 14px rgba(255, 73, 108, 0.95), 0 2px 0 #5c0a1c;
+}
+
+/* ===== Ngôi sao hy vọng: lấp lánh vàng toàn màn hình ===== */
+@keyframes hope-veil { 0% { opacity: 0; } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes hope-star-main {
+  0% { opacity: 0; transform: scale(0.2) rotate(-200deg); }
+  35% { opacity: 1; transform: scale(1.15) rotate(10deg); }
+  50% { transform: scale(1) rotate(0deg); }
+  80% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+@keyframes hope-rays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes hope-sparkle {
+  0% { opacity: 0; transform: translate(0, 0) scale(0) rotate(0deg); }
+  25% { opacity: 1; transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4)) scale(1) rotate(90deg); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3) rotate(240deg); }
+}
+@keyframes hope-twinkle { 0%, 100% { opacity: 0; transform: scale(0.2); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes hope-title {
+  0% { opacity: 0; transform: translateY(16px) scale(0.85); letter-spacing: 0.5em; }
+  40% { opacity: 1; transform: none; letter-spacing: 0.12em; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hope-veil {
+  animation: hope-veil 2.8s ease-out forwards;
+  background: radial-gradient(circle at center, rgba(255, 212, 59, 0.38), rgba(255, 170, 0, 0.12) 40%, rgba(9, 13, 24, 0.55) 80%);
+}
+.hope-rays {
+  animation: hope-rays 6s linear infinite, hope-veil 2.8s ease-out forwards;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 212, 59, 0.28) 0deg 8deg, transparent 8deg 24deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 60%);
+  mask-image: radial-gradient(circle, #000 0%, transparent 60%);
+}
+.hope-star-main {
+  animation: hope-star-main 2.8s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  filter: drop-shadow(0 0 30px rgba(255, 212, 59, 0.95)) drop-shadow(0 0 70px rgba(255, 170, 0, 0.7));
+}
+.hope-sparkle { animation: hope-sparkle var(--dur, 1.8s) ease-out var(--delay, 0s) both; }
+.hope-twinkle { animation: hope-twinkle var(--dur, 1.2s) ease-in-out var(--delay, 0s) 2 both; }
+.hope-title { animation: hope-title 2.8s ease-out forwards; text-shadow: 0 0 18px rgba(255, 212, 59, 0.9), 0 3px 0 #6b4a00; }
+
+@media (prefers-reduced-motion: reduce) {
+  .penalty-card { animation: none !important; }
+  .hope-rays { animation: hope-veil 2.8s ease-out forwards !important; }
+  .hope-sparkle, .hope-twinkle { animation: none !important; opacity: 0; }
+}
+
+/* ===== Điện thoại / màn hình thấp: nội dung vòng thi dài hơn màn hình thì cuộn được, không bị cắt ===== */
+@media (max-width: 639px), (max-height: 640px) {
+  main > .overflow-hidden {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    /* căn giữa khi vừa màn hình, nội dung dài thì bắt đầu từ trên (không mất phần đầu) */
+    justify-content: flex-start;
+    justify-content: safe center;
+    scrollbar-width: thin;
+  }
+}

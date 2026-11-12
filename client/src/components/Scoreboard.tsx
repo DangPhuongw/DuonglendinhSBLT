@@ -1,10 +1,45 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { soundManager } from '../utils/soundEffects';
 import { Star, WifiOff, Crown, Eye, AlertTriangle } from 'lucide-react';
 
 export const Scoreboard: React.FC = () => {
   const room = useGameStore((s) => s.room);
   const myPlayer = useGameStore((s) => s.player);
+
+  // Hiệu ứng bị trừ điểm: so điểm mới với điểm trước đó của từng thí sinh
+  const scoreSig = room ? room.players.map((p) => `${p.id}:${p.score}`).join('|') : '';
+  const prevScores = useRef<Record<string, number> | null>(null);
+  const [penalties, setPenalties] = useState<Record<string, { delta: number; key: number }>>({});
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  useEffect(() => {
+    if (!room) return;
+    const next: Record<string, number> = {};
+    room.players.forEach((p) => (next[p.id] = p.score));
+    const prev = prevScores.current;
+    prevScores.current = next;
+    if (!prev) return; // lần đầu hiển thị: chỉ ghi nhận, không nháy
+    const drops: Record<string, { delta: number; key: number }> = {};
+    for (const [id, score] of Object.entries(next)) {
+      if (prev[id] !== undefined && score < prev[id]) drops[id] = { delta: score - prev[id], key: Date.now() };
+    }
+    if (Object.keys(drops).length === 0) return;
+    soundManager.playPenalty();
+    setPenalties((cur) => ({ ...cur, ...drops }));
+    for (const id of Object.keys(drops)) {
+      clearTimeout(timers.current[id]);
+      timers.current[id] = setTimeout(() => {
+        setPenalties((cur) => {
+          const { [id]: _gone, ...rest } = cur;
+          return rest;
+        });
+      }, 2100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scoreSig]);
+
+  useEffect(() => () => Object.values(timers.current).forEach(clearTimeout), []);
 
   if (!room) return null;
 
@@ -30,7 +65,9 @@ export const Scoreboard: React.FC = () => {
           const player = contestants.find((p) => p.seat === seatNum);
           const isMe = myPlayer && player && player.id === myPlayer.id;
           const isTurn = Boolean(player && activePlayerId && player.id === activePlayerId);
-          const isDimmed = hasActiveTurn && !isTurn;
+          const penalty = player ? penalties[player.id] : undefined;
+          // Ô đang bị trừ điểm luôn sáng rõ để mọi người thấy
+          const isDimmed = hasActiveTurn && !isTurn && !penalty;
           const isHost = player && room.hostId === player.id;
           const isLeader = player && !player.disqualified && player.score === maxScore && maxScore > 0;
 
@@ -49,8 +86,8 @@ export const Scoreboard: React.FC = () => {
 
           return (
             <div
-              key={seatNum}
-              className={`relative rounded-2xl px-3 py-1.5 sm:py-2 flex flex-col justify-between transition-all duration-300 min-h-[64px] sm:min-h-[72px] lg:min-h-[78px] ${
+              key={penalty ? `${seatNum}-${penalty.key}` : seatNum}
+              className={`${penalty ? 'penalty-card ' : ''}relative rounded-2xl px-3 py-1.5 sm:py-2 flex flex-col justify-between transition-all duration-300 min-h-[64px] sm:min-h-[72px] lg:min-h-[78px] ${
                 player.disqualified
                   ? 'bg-[#1A0710]/80 border border-[#FF496C]/60 opacity-60 grayscale'
                   : isTurn
@@ -64,6 +101,17 @@ export const Scoreboard: React.FC = () => {
                   : 'bg-[#111827] border border-[#303D52] hover:border-[#64748B]'
               }`}
             >
+              {penalty && (
+                <>
+                  <div className="penalty-flash absolute inset-0 rounded-2xl pointer-events-none z-20" aria-hidden="true" />
+                  <div
+                    className="penalty-number absolute left-1/2 top-0 z-30 pointer-events-none font-digital font-black text-3xl sm:text-4xl lg:text-5xl text-[#FF496C] whitespace-nowrap"
+                    role="status"
+                  >
+                    {penalty.delta}
+                  </div>
+                </>
+              )}
               {/* Header: Name & Badges */}
               <div className="flex items-center justify-between gap-1 w-full">
                 <div className="flex items-center gap-1.5 min-w-0">

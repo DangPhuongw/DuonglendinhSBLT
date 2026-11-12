@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { GAME_CONFIG } from '@olympia/shared';
 import { ANTI_CHEAT_RULE } from '../utils/antiCheatRules';
+import { InviteLink } from './InviteLink';
 import {
   ShieldAlert,
   Users,
@@ -29,7 +30,20 @@ export const Lobby: React.FC = () => {
   const kickPlayer = useGameStore((s) => s.kickPlayer);
   const myToken = useGameStore((s) => s.myToken);
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState(() => {
+    try {
+      return localStorage.getItem('olympia_last_name') || '';
+    } catch {
+      return '';
+    }
+  });
+  // Mở bằng link mời (?room=ABC123): hiện màn vào phòng nhanh, chỉ cần nhập tên
+  const [invitedCode] = useState(() => {
+    const pathMatch = window.location.pathname.match(/\/r\/([A-Za-z0-9]{6})/);
+    const code = (pathMatch ? pathMatch[1] : new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
+    return /^[A-Z0-9]{6}$/.test(code) ? code : '';
+  });
+  const [showFullForm, setShowFullForm] = useState(false);
   const [roomCodeInput, setRoomCodeInput] = useState(() => {
     const pathMatch = window.location.pathname.match(/\/r\/([A-Za-z0-9]{6})/);
     const searchParams = new URLSearchParams(window.location.search);
@@ -54,18 +68,90 @@ export const Lobby: React.FC = () => {
       const res = await createRoom(name.trim());
       setIsCreating(false);
       if (!res.ok) setErrorMsg(res.error || 'Tạo phòng thất bại.');
+      else rememberAfterEntering();
     };
 
-    const handleJoin = async (e: React.FormEvent) => {
+    // Nhớ tên cho lần sau và bỏ ?room khỏi thanh địa chỉ (để rời phòng không bị mời lại phòng cũ)
+    const rememberAfterEntering = () => {
+      try {
+        localStorage.setItem('olympia_last_name', name.trim());
+      } catch {
+        /* bộ nhớ trình duyệt bị chặn: bỏ qua */
+      }
+      if (window.location.search || /\/r\//.test(window.location.pathname)) {
+        window.history.replaceState(null, '', '/');
+      }
+    };
+
+    const handleJoin = async (e: React.FormEvent, code?: string) => {
       e.preventDefault();
       if (!name.trim()) return setErrorMsg('Vui lòng nhập tên người chơi.');
       if (!roomCodeInput.trim()) return setErrorMsg('Vui lòng nhập mã phòng (6 ký tự).');
       setIsJoining(true);
       setErrorMsg('');
-      const res = await joinRoom(name.trim(), roomCodeInput.trim().toUpperCase());
+      const res = await joinRoom(name.trim(), (code || roomCodeInput).trim().toUpperCase());
       setIsJoining(false);
       if (!res.ok) setErrorMsg(res.error || 'Vào phòng thất bại.');
+      else rememberAfterEntering();
     };
+
+    const handleInvitedJoin = (e: React.FormEvent) => handleJoin(e, invitedCode);
+
+    if (invitedCode && !showFullForm) {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-2 sm:p-4">
+          <form
+            onSubmit={handleInvitedJoin}
+            className="w-full max-w-md bg-[#111827]/95 backdrop-blur-xl border-2 border-[#303D52] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] text-[#F8FAFC]"
+          >
+            <div className="text-center mb-5">
+              <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight">ĐẤU TRƯỜNG TRÍ TUỆ</h1>
+              <p className="mt-2 text-sm text-[#94A3B8] font-medium">Bạn được mời vào phòng thi</p>
+              <div className="mt-2 inline-block font-digital text-3xl sm:text-4xl font-bold tracking-widest text-[#090D18] bg-[#FFD43B] px-4 py-1 rounded-xl shadow-glow-yellow tabular-nums">
+                {invitedCode}
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-[#FF496C] text-xs sm:text-sm font-bold text-center" role="alert">
+                {errorMsg}
+              </div>
+            )}
+
+            <label className="block text-xs sm:text-sm font-heading font-bold uppercase tracking-wider mb-1.5" htmlFor="invite-name">
+              Tên hiển thị của bạn
+            </label>
+            <input
+              id="invite-name"
+              type="text"
+              autoFocus
+              placeholder="Ví dụ: Nguyễn Văn A"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={24}
+              className="w-full h-12 px-4 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] font-bold placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan transition-all text-base"
+            />
+            <button
+              type="submit"
+              disabled={isJoining}
+              className="mt-3 w-full h-12 bg-[#FFD43B] hover:bg-[#ffe066] disabled:opacity-60 text-[#090D18] font-heading font-extrabold rounded-xl border border-[#FFD43B] shadow-glow-yellow active:scale-95 transition-all text-sm uppercase tracking-wider cursor-pointer"
+            >
+              {isJoining ? 'Đang vào phòng...' : 'Vào phòng ngay'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowFullForm(true);
+                setErrorMsg('');
+              }}
+              className="mt-3 w-full text-xs sm:text-sm text-[#94A3B8] hover:text-[#00D9FF] font-medium underline underline-offset-4 cursor-pointer"
+            >
+              Không phải phòng này? Tạo phòng mới hoặc nhập mã khác
+            </button>
+          </form>
+        </div>
+      );
+    }
 
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-2 sm:p-4">
@@ -246,8 +332,8 @@ export const Lobby: React.FC = () => {
           <h2 className="text-lg sm:text-xl lg:text-2xl font-heading font-black text-[#F8FAFC] tracking-tight">
             SẢNH CHỜ TRẬN ĐẤU
           </h2>
-          <div className="flex items-center gap-2 text-sm sm:text-base">
-            <span className="font-heading font-bold uppercase text-[#94A3B8]">Mã phòng:</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
+            <span className="hidden sm:inline font-heading font-bold uppercase text-[#94A3B8]">Mã phòng:</span>
             <span className="font-digital text-2xl sm:text-3xl lg:text-4xl font-bold tracking-widest text-[#090D18] bg-[#FFD43B] px-3.5 py-0.5 rounded-xl border border-[#FFD43B] shadow-glow-yellow tabular-nums">
               {room.code}
             </span>
@@ -258,6 +344,7 @@ export const Lobby: React.FC = () => {
             >
               {copied ? <Check size={16} className="text-[#20D6A0] stroke-[3]" /> : <Copy size={16} />}
             </button>
+            <InviteLink roomCode={room.code} />
           </div>
         </div>
 

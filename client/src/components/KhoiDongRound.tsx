@@ -293,9 +293,9 @@ export const KhoiDongRound: React.FC = () => {
 
       {/* BUZZER SCREEN FOR KD_CHUNG */}
       {currentRound === 'KD_CHUNG' && subPhase === 'QUESTION_BUZZ' && (
-        <div className="w-full flex flex-col items-center my-3">
+        <div className="w-full flex flex-col items-center my-1.5 sm:my-3">
           {isViewer ? (
-            <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-[#1C2638] border-2 border-[#00D9FF]/50 shadow-glow-cyan flex flex-col items-center justify-center gap-1.5 p-3 text-center">
+            <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-full bg-[#1C2638] border-2 border-[#00D9FF]/50 shadow-glow-cyan flex flex-col items-center justify-center gap-1.5 p-3 text-center">
               <Eye size={28} className="text-[#00D9FF] animate-pulse" />
               <span className="font-heading font-black text-xs sm:text-sm uppercase tracking-wider text-[#00D9FF]">
                 KHÁN GIẢ
@@ -313,13 +313,13 @@ export const KhoiDongRound: React.FC = () => {
           ) : (
             <button
               onClick={buzz}
-              className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
+              className="w-24 h-24 sm:w-36 sm:h-36 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
             >
               <Bell size={32} className="text-[#090D18] animate-bounce" />
               <span className="font-heading font-black text-[#090D18] text-sm sm:text-base tracking-wider uppercase">
                 BẤM CHUÔNG
               </span>
-              <span className="text-xs text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2.5 py-0.5 rounded-full mt-0.5">
+              <span className="hidden sm:inline-block text-xs text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2.5 py-0.5 rounded-full mt-0.5">
                 Phím Space
               </span>
             </button>
@@ -342,7 +342,7 @@ export const KhoiDongRound: React.FC = () => {
 
       {/* Question Card */}
       {currentQ && (
-        <div className="w-full bg-[#1C2638] border border-[#303D52] rounded-3xl p-5 sm:p-6 shadow-2xl relative">
+        <div className="w-full bg-[#1C2638] border border-[#303D52] rounded-3xl p-3.5 sm:p-6 shadow-2xl relative">
           <div className="flex items-center justify-between gap-2 mb-3">
             <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
               Câu hỏi
@@ -353,13 +353,13 @@ export const KhoiDongRound: React.FC = () => {
             />
           </div>
 
-          <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#F8FAFC] mb-4 leading-relaxed">
+          <div className="text-base sm:text-xl md:text-2xl font-bold text-[#F8FAFC] mb-3 sm:mb-4 leading-relaxed">
             {currentQ.prompt}
           </div>
 
           {/* MCQ Options A, B, C, D */}
           {currentQ.options && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3.5">
               {currentQ.options.map((opt, idx) => {
                 const letter = ['A', 'B', 'C', 'D'][idx];
                 const isChosenByActive = activeAnswer === letter || (isMyTurn && selectedOption === letter);
@@ -375,7 +375,7 @@ export const KhoiDongRound: React.FC = () => {
                     key={letter}
                     onClick={() => handleSelectOption(letter)}
                     disabled={!isMyTurn || selectedOption !== null || subPhase === 'REVEAL'}
-                    className={`p-3.5 sm:p-4 rounded-2xl border text-left flex items-start justify-between gap-3 transition-all ${
+                    className={`p-2.5 sm:p-4 rounded-2xl border text-left flex items-start justify-between gap-3 transition-all ${
                       isAnswer
                         ? 'bg-[#20D6A0]/20 border-2 border-[#20D6A0] text-[#20D6A0] font-bold shadow-glow-success scale-[1.01]'
                         : isWrongSelection

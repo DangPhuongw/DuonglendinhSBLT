@@ -99,6 +99,69 @@ class SoundManager {
     });
   }
 
+  /** Tiếng "đinh" lấp lánh khi có người đặt Ngôi sao hy vọng: chuông sáng + chuỗi nốt cao rắc lên. */
+  public playStarChime() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const t0 = ctx.currentTime;
+    const bell = (freq: number, start: number, dur: number, vol: number) => {
+      // chuông = nốt chính + họa âm cao, tắt dần dài
+      [1, 2.76].forEach((mult, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq * mult, t0 + start);
+        gain.gain.setValueAtTime(0.0001, t0 + start);
+        gain.gain.exponentialRampToValueAtTime(vol / (i + 1), t0 + start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0 + start);
+        osc.stop(t0 + start + dur + 0.05);
+      });
+    };
+    bell(1318.51, 0, 1.6, 0.28); // E6: tiếng "đinh" chính
+    bell(1975.53, 0.02, 1.2, 0.12); // B6 ngân cùng
+    // rắc lấp lánh đi lên
+    [2093, 2637, 3136, 3520, 4186, 3520, 4186, 4699].forEach((f, i) => bell(f, 0.18 + i * 0.07, 0.35, 0.06));
+  }
+
+  /** Tiếng "bụp" trầm khi bị trừ điểm. */
+  public playPenalty() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    // thân tiếng: sóng sin trượt từ thấp xuống rất thấp
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(42, t + 0.35);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.7, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.52);
+    // tiếng va ngắn ở đầu cho rõ "bụp"
+    const len = Math.floor(ctx.sampleRate * 0.05);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3;
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 600;
+    const ng = ctx.createGain();
+    ng.gain.value = 0.5;
+    noise.connect(lp);
+    lp.connect(ng);
+    ng.connect(ctx.destination);
+    noise.start(t);
+  }
+
   /** Tiếng "vút" khi một tên bay vào màn công bố điểm. */
   public playWhoosh() {
     const ctx = this.getContext();

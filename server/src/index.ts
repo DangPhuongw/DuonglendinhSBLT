@@ -560,6 +560,19 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 5b. Play again (after the match has finished)
+  on('room:playAgain', (cb) => {
+    if (checkEventSpam()) return;
+    const reply = typeof cb === 'function' ? cb : () => {};
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return reply({ ok: false, error: 'Bạn chưa ở trong phòng.' });
+    const machine = roomManager.getRoom(info.roomCode);
+    if (!machine) return reply({ ok: false, error: 'Phòng không tồn tại.' });
+    machine.eventQueue.enqueue(async () => {
+      reply(machine.resetForNewGame(info.playerId));
+    });
+  });
+
   // 6. Player ready
   on('player:ready', (data) => {
     if (checkEventSpam()) return;

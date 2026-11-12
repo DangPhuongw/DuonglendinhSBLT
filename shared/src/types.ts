@@ -200,6 +200,7 @@ export interface ClientToServerEvents {
   'room:rejoin': (data: { roomCode: string; token: string }, callback: (res: { ok: boolean; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:switchSeat': (data: { targetRole: 'player' | 'viewer'; targetSeat: 1 | 2 | 3 | 4 | 5 }, callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'room:start': () => void;
+  'room:playAgain': (callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'player:ready': (data: { mediaLoaded: boolean }) => void;
   'answer:submit': (data: { questionId: string; content: string }) => void;
   'buzz': (data: { questionId?: string }) => void;

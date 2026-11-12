@@ -2966,4 +2966,61 @@ export class RoomStateMachine {
     this.persistSnapshot();
     this.syncRoom();
   }
+
+  /**
+   * Chơi lại: sau khi trận kết thúc, chủ phòng đưa cả phòng về Sảnh chờ với điểm và trạng thái mới,
+   * giữ nguyên người chơi và ghế. Bộ đề tự tải lên được giữ (chủ phòng có thể tải bộ khác trong sảnh);
+   * bộ đề ghép từ kho sẽ được ghép bộ mới khi bắt đầu.
+   */
+  public resetForNewGame(hostId: string): { ok: boolean; error?: string } {
+    if (this.room.hostId !== hostId) return { ok: false, error: 'Chỉ chủ phòng mới có quyền cho chơi lại.' };
+    if (this.room.status !== 'FINISHED') return { ok: false, error: 'Trận đấu chưa kết thúc.' };
+
+    this.clearTimer();
+    this.lastRevealRound = null;
+    this.vcnvFinalGuessRemainingMs = null;
+    this.vcnvInterrupted = null;
+    this.lastTabLeaveAt.clear();
+    this.answersMap.clear();
+    this.disqualifiedBuzzers.clear();
+    this.buzzedPlayerId = null;
+    this.buzzerOpenTime = 0;
+    this.veDichPlayerQueue = [];
+    this.veDichCompletedPlayerIds.clear();
+    this.veDichUsedQuestionIds.clear();
+    this.veDichActiveContestantId = '';
+    this.veDichCurrentPackage = 40;
+    this.veDichCurrentQuestionIndex = 0;
+    this.veDichCurrentQuestionPoints = 10;
+    this.veDichHopeStarActive = false;
+    this.veDichCurrentPointsList = [];
+    this.veDichCurrentTurnIndex = 0;
+    this.veDichCurrentQuestion = null;
+    this.tieBreakQuestionIndex = 0;
+    this.vcnvRowsAskedCount = 0;
+    this.vcnvQuestionsAppearedCount = 0;
+    this.vcnvCurrentRowIndex = 0;
+    this.vcnvPlayerQueue = [];
+    this.lastRevealedPayload = null;
+    this.chosenKdPackages.clear();
+
+    for (const p of this.room.players) {
+      p.score = 0;
+      p.roundScores = { kd: 0, vcnv: 0, tt: 0, vd: 0 };
+      p.ready = false;
+      p.mediaLoaded = false;
+      p.eliminatedVcnv = false;
+      p.starUsed = false;
+      p.tabLeaveCount = 0;
+      p.disqualified = false;
+    }
+    this.room.history = [];
+    this.room.status = 'LOBBY';
+    this.room.state = { round: 'LOBBY', subPhase: 'WAITING_PLAYERS', deadline: null };
+
+    this.persistSnapshot();
+    this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));
+    this.syncRoom();
+    return { ok: true };
+  }
 }

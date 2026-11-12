@@ -1,11 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import confetti from 'canvas-confetti';
-import { Trophy, Download } from 'lucide-react';
+import { Trophy, Download, RotateCcw } from 'lucide-react';
 import { soundManager } from '../utils/soundEffects';
 
 export const Podium: React.FC = () => {
   const room = useGameStore((s) => s.room);
+  const myPlayer = useGameStore((s) => s.player);
+  const playAgain = useGameStore((s) => s.playAgain);
+  const [restarting, setRestarting] = useState(false);
+  const [restartError, setRestartError] = useState('');
+
+  const handlePlayAgain = async () => {
+    setRestarting(true);
+    setRestartError('');
+    const res = await playAgain();
+    setRestarting(false);
+    if (!res.ok) setRestartError(res.error || 'Không thể chơi lại.');
+  };
 
   useEffect(() => {
     // Không có quán quân (tất cả bị loại) thì không ăn mừng
@@ -120,10 +132,10 @@ export const Podium: React.FC = () => {
               <tr className="border-b border-[#303D52] text-[#94A3B8] font-heading font-bold uppercase text-[11px] sm:text-xs tracking-wider">
                 <th className="py-2 px-3">Hạng</th>
                 <th className="py-2 px-3">Thí sinh</th>
-                <th className="py-2 px-2.5 text-center">Khởi Động</th>
-                <th className="py-2 px-2.5 text-center">VCNV</th>
-                <th className="py-2 px-2.5 text-center">Tăng Tốc</th>
-                <th className="py-2 px-2.5 text-center">Về Đích</th>
+                <th className="py-2 px-2.5 text-center hidden sm:table-cell">Khởi Động</th>
+                <th className="py-2 px-2.5 text-center hidden sm:table-cell">VCNV</th>
+                <th className="py-2 px-2.5 text-center hidden sm:table-cell">Tăng Tốc</th>
+                <th className="py-2 px-2.5 text-center hidden sm:table-cell">Về Đích</th>
                 <th className="py-2 px-3 text-right">Tổng Điểm</th>
               </tr>
             </thead>
@@ -160,10 +172,10 @@ export const Podium: React.FC = () => {
                       )}
                     </div>
                   </td>
-                  <td className="py-2 px-2.5 text-center tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.kd}</td>
-                  <td className="py-2 px-2.5 text-center tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.vcnv}</td>
-                  <td className="py-2 px-2.5 text-center tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.tt}</td>
-                  <td className="py-2 px-2.5 text-center tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.vd}</td>
+                  <td className="py-2 px-2.5 text-center hidden sm:table-cell tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.kd}</td>
+                  <td className="py-2 px-2.5 text-center hidden sm:table-cell tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.vcnv}</td>
+                  <td className="py-2 px-2.5 text-center hidden sm:table-cell tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.tt}</td>
+                  <td className="py-2 px-2.5 text-center hidden sm:table-cell tabular-nums font-digital font-bold text-xs sm:text-sm text-[#F8FAFC]">{p.roundScores.vd}</td>
                   <td className="py-2 px-3 text-right tabular-nums font-digital font-bold text-base sm:text-lg text-[#FFD43B]">
                     {p.score}
                   </td>
@@ -174,7 +186,22 @@ export const Podium: React.FC = () => {
         </div>
       </div>
 
-      {/* CSV Export Button */}
+      {/* Chơi lại + tải biên bản */}
+      <div className="flex flex-wrap items-center justify-center gap-2.5">
+      {myPlayer && room.hostId === myPlayer.id ? (
+        <button
+          onClick={handlePlayAgain}
+          disabled={restarting}
+          className="px-6 py-2.5 bg-[#20D6A0] hover:bg-[#3ae3b2] disabled:opacity-60 text-[#090D18] border border-[#20D6A0] shadow-[0_0_18px_rgba(32,214,160,0.45)] hover:scale-105 active:scale-95 rounded-xl font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+        >
+          <RotateCcw size={16} className={restarting ? 'animate-spin' : ''} />
+          <span>{restarting ? 'Đang chuẩn bị...' : 'Chơi lại'}</span>
+        </button>
+      ) : (
+        <span className="px-4 py-2.5 rounded-xl bg-[#1C2638] border border-[#303D52] text-[#94A3B8] text-xs sm:text-sm font-bold">
+          Chờ chủ phòng bấm "Chơi lại" để bắt đầu trận mới
+        </span>
+      )}
       <a
         href={`/api/room/${room.code}/export-csv`}
         download={`bien-ban-tran-dau-${room.code}.csv`}
@@ -183,6 +210,8 @@ export const Podium: React.FC = () => {
         <Download size={16} />
         <span>Tải Biên Bản Trận Đấu (CSV)</span>
       </a>
+      </div>
+      {restartError && <p className="mt-2 text-xs sm:text-sm font-bold text-[#FF496C]" role="alert">{restartError}</p>}
     </div>
   );
 };

@@ -32,6 +32,7 @@ interface GameStore {
   rejoinRoom: (roomCode: string, token: string) => Promise<{ ok: boolean; error?: string }>;
   switchSeat: (targetRole: 'player' | 'viewer', targetSeat: 1 | 2 | 3 | 4 | 5) => Promise<{ ok: boolean; error?: string }>;
   startGame: () => void;
+  playAgain: () => Promise<{ ok: boolean; error?: string }>;
   setReady: (mediaLoaded?: boolean) => void;
   submitAnswer: (questionId: string, content: string) => void;
   buzz: () => void;
@@ -333,6 +334,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     get().socket?.emit('room:start');
   },
 
+  playAgain: () =>
+    new Promise((resolve) => {
+      const socket = get().socket;
+      if (!socket) return resolve({ ok: false, error: 'Mất kết nối tới máy chủ.' });
+      const timer = setTimeout(() => resolve({ ok: false, error: 'Máy chủ không phản hồi, thử lại nhé.' }), 8000);
+      socket.emit('room:playAgain', (res) => {
+        clearTimeout(timer);
+        resolve(res);
+      });
+    }),
+
   setReady: (mediaLoaded = true) => {
     get().socket?.emit('player:ready', { mediaLoaded });
   },
@@ -358,7 +370,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setHopeStar: (useStar) => {
-    soundManager.playStar();
     get().socket?.emit('vd:setStar', { useStar });
   },
 
