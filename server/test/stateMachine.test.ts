@@ -46,17 +46,16 @@ describe('Room & Player lifecycle', () => {
     expect(p6.player?.role).toBe('viewer');
     expect(p6.player?.seat).toBe(1);
 
-    // Fill remaining viewers up to max 5 viewers
-    machine.addPlayer('Viewer 2', 'tok-7');
-    machine.addPlayer('Viewer 3', 'tok-8');
-    machine.addPlayer('Viewer 4', 'tok-9');
-    const p10 = machine.addPlayer('Viewer 5', 'tok-10');
-    expect(p10.ok).toBe(true);
+    // Fill remaining viewers up to max 10 viewers
+    for (let i = 2; i <= 9; i++) machine.addPlayer(`Viewer ${i}`, `tok-v${i}`);
+    const lastViewer = machine.addPlayer('Viewer 10', 'tok-v10');
+    expect(lastViewer.ok).toBe(true);
+    expect(lastViewer.player?.seat).toBe(10);
 
-    // 11th participant rejected when both players and viewers are full
-    const p11 = machine.addPlayer('Participant 11', 'tok-11');
-    expect(p11.ok).toBe(false);
-    expect(p11.error).toContain('Phòng đã đầy');
+    // 16th participant rejected when both players and viewers are full
+    const p16 = machine.addPlayer('Participant 16', 'tok-16');
+    expect(p16.ok).toBe(false);
+    expect(p16.error).toContain('Phòng đã đầy');
   });
 
   it('transfers host only after the disconnect hold period', async () => {

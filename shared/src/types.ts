@@ -17,7 +17,8 @@ export interface Player {
   name: string;
   /** Seed ảnh đại diện Multiavatar (chữ/số, client tự vẽ SVG từ seed). Trống → dùng tên. */
   avatar?: string;
-  seat: 1 | 2 | 3 | 4 | 5;
+  /** Thí sinh: 1..MAX_PLAYERS. Khán giả: 1..MAX_VIEWERS (dãy ghế riêng). */
+  seat: number;
   role?: PlayerRole;
   /** Bí mật để vào lại phòng. Chỉ tồn tại ở server và trong callback trả riêng cho chính người chơi;
    *  luôn bị xóa trước khi broadcast (xem toPublicPlayers). */
@@ -182,6 +183,18 @@ export interface Room {
   updatedAt: number;
 }
 
+export type ViewerReactionKind = 'emoji' | 'message';
+
+/** Một lần khán giả thả cảm xúc / tin nhắn (chỉ số trong bộ cố định GAME_CONFIG.VIEWER_REACTIONS). */
+export interface ViewerReaction {
+  id: string;
+  playerId: string;
+  name: string;
+  kind: ViewerReactionKind;
+  index: number;
+  at: number;
+}
+
 // Socket events interfaces
 export interface ServerToClientEvents {
   'state:sync': (room: Room) => void;
@@ -194,15 +207,17 @@ export interface ServerToClientEvents {
   'time:pong': (data: { clientSentAt: number; serverReceivedAt: number }) => void;
   'player:kicked': (data: { reason: string }) => void;
   'anticheat:alert': (data: AntiCheatAlert) => void;
+  'viewer:reaction': (data: ViewerReaction) => void;
 }
 
 export interface ClientToServerEvents {
   'room:create': (data: { name: string; avatar?: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:join': (data: { name: string; roomCode: string; avatar?: string }, callback: (res: { ok: boolean; token?: string; seat?: number; roomCode?: string; player?: Player; room?: Room; error?: string }) => void) => void;
   'room:rejoin': (data: { roomCode: string; token: string }, callback: (res: { ok: boolean; player?: Player; room?: Room; error?: string }) => void) => void;
-  'room:switchSeat': (data: { targetRole: 'player' | 'viewer'; targetSeat: 1 | 2 | 3 | 4 | 5 }, callback?: (res: { ok: boolean; error?: string }) => void) => void;
+  'room:switchSeat': (data: { targetRole: 'player' | 'viewer'; targetSeat: number }, callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'player:setAvatar': (data: { avatar: string }) => void;
   'room:start': () => void;
+  'viewer:react': (data: { kind: ViewerReactionKind; index: number }, callback?: (res: { ok: boolean; error?: string; retryInMs?: number }) => void) => void;
   'room:playAgain': (callback?: (res: { ok: boolean; error?: string }) => void) => void;
   'player:ready': (data: { mediaLoaded: boolean }) => void;
   'answer:submit': (data: { questionId: string; content: string }) => void;

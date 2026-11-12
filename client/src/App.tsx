@@ -15,6 +15,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AntiCheatGuard } from './components/AntiCheatGuard';
 import { GalaxyBackground } from './components/GalaxyBackground';
 import { HopeStarBurst } from './components/HopeStarBurst';
+import { ReactionLayer } from './components/ReactionLayer';
+import { ViewerReactionBar } from './components/ViewerReactionBar';
 import { bgmManager } from './utils/bgmManager';
 
 export const App: React.FC = () => {
@@ -95,6 +97,8 @@ export const App: React.FC = () => {
         <Navbar />
         <AntiCheatGuard />
         <HopeStarBurst />
+        <ReactionLayer />
+        <ViewerReactionBar />
         <main className="flex-1 min-h-0 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1450px] mx-auto px-2 py-1 sm:px-4 sm:py-2 flex flex-col items-center justify-center overflow-hidden relative">
           {renderCurrentView()}
         </main>

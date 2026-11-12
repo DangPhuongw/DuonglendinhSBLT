@@ -322,7 +322,7 @@ export class RoomStateMachine {
     );
 
     let assignedRole: 'player' | 'viewer' = 'player';
-    let nextSeat: 1 | 2 | 3 | 4 | 5 = 1;
+    let nextSeat = 1;
 
     // Ưu tiên xếp vào ghế thí sinh 1-5
     let foundPlayerSeat = false;
@@ -338,7 +338,7 @@ export class RoomStateMachine {
     // Nếu ghế thí sinh đã đầy, xếp vào ghế khán giả 1-5
     if (!foundPlayerSeat) {
       let foundViewerSeat = false;
-      for (let s = 1; s <= (GAME_CONFIG.MAX_VIEWERS || 5); s++) {
+      for (let s = 1; s <= GAME_CONFIG.MAX_VIEWERS; s++) {
         if (!viewerSeatsTaken.has(s as any)) {
           nextSeat = s as any;
           assignedRole = 'viewer';
@@ -347,7 +347,7 @@ export class RoomStateMachine {
         }
       }
       if (!foundViewerSeat) {
-        return { ok: false, error: 'Phòng đã đầy (tối đa 5 thí sinh và 5 người theo dõi).' };
+        return { ok: false, error: `Phòng đã đầy (tối đa ${GAME_CONFIG.MAX_PLAYERS} thí sinh và ${GAME_CONFIG.MAX_VIEWERS} khán giả).` };
       }
     }
 
@@ -402,12 +402,13 @@ export class RoomStateMachine {
       return { ok: false, error: 'Không tìm thấy thông tin người chơi.' };
     }
 
-    if (targetSeat < 1 || targetSeat > 5) {
-      return { ok: false, error: 'Vị trí ghế không hợp lệ (1-5).' };
-    }
-
     if (targetRole !== 'player' && targetRole !== 'viewer') {
       return { ok: false, error: 'Vai trò không hợp lệ.' };
+    }
+
+    const maxSeat = targetRole === 'viewer' ? GAME_CONFIG.MAX_VIEWERS : GAME_CONFIG.MAX_PLAYERS;
+    if (!Number.isInteger(targetSeat) || targetSeat < 1 || targetSeat > maxSeat) {
+      return { ok: false, error: `Vị trí ghế không hợp lệ (1-${maxSeat}).` };
     }
 
     // Kiểm tra xem vị trí ghế đích đã có người khác ngồi hay chưa
@@ -424,7 +425,7 @@ export class RoomStateMachine {
 
     // Cập nhật vị trí ghế và vai trò
     player.role = targetRole;
-    player.seat = targetSeat as 1 | 2 | 3 | 4 | 5;
+    player.seat = targetSeat;
 
     this.persistSnapshot();
     this.callbacks.broadcastPlayerUpdate(toPublicPlayers(this.room.players));

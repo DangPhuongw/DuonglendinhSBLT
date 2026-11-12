@@ -270,7 +270,7 @@ export const Lobby: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSeatClick = async (targetRole: 'player' | 'viewer', targetSeat: 1 | 2 | 3 | 4 | 5) => {
+  const handleSeatClick = async (targetRole: 'player' | 'viewer', targetSeat: number) => {
     if (myPlayer.seat === targetSeat && myRole === targetRole) {
       return;
     }
@@ -493,20 +493,20 @@ export const Lobby: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 2: 5 VIEWER SEATS */}
+        {/* SECTION 2: GHẾ KHÁN GIẢ (nhỏ, kém nổi bật hơn ghế thí sinh) */}
         <div className="w-full">
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h3 className="text-xs sm:text-sm lg:text-base uppercase font-heading font-black text-[#F8FAFC] tracking-wider flex items-center gap-2">
-              <Eye size={18} className="text-[#00D9FF]" />
-              <span>Khu Vực Người Theo Dõi (Khán giả)</span>
-              <span className="bg-[#00D9FF] text-[#090D18] px-2.5 py-0.5 rounded-full font-heading font-black text-xs sm:text-sm shadow-glow-cyan">
-                {viewers.length}/5
+          <div className="flex items-center justify-between mb-1.5 px-1">
+            <h3 className="text-[11px] sm:text-xs uppercase font-heading font-bold text-[#94A3B8] tracking-wider flex items-center gap-1.5">
+              <Eye size={14} className="text-[#00D9FF]/80" />
+              <span>Khán giả</span>
+              <span className="text-[#00D9FF] font-heading font-black">
+                {viewers.length}/{GAME_CONFIG.MAX_VIEWERS}
               </span>
             </h3>
-            <span className="text-xs sm:text-sm text-[#94A3B8]">Chỉ xem trực tiếp • Không thi đấu</span>
+            <span className="text-[11px] sm:text-xs text-[#64748B]">Xem trực tiếp • Thả cảm xúc</span>
           </div>
-          <div className="grid grid-cols-5 gap-2.5 sm:gap-3.5">
-            {([1, 2, 3, 4, 5] as const).map((seatNum) => {
+          <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
+            {Array.from({ length: GAME_CONFIG.MAX_VIEWERS }, (_, i) => i + 1).map((seatNum) => {
               const player = room.players.find((p) => p.role === 'viewer' && p.seat === seatNum);
               const isMe = player && player.id === myPlayer.id;
 
@@ -514,16 +514,15 @@ export const Lobby: React.FC = () => {
                 <div
                   key={`viewer-${seatNum}`}
                   onClick={() => !player && handleSeatClick('viewer', seatNum)}
-                  className={`relative p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center h-[104px] sm:h-[118px] lg:h-[128px] transition-all group ${
+                  className={`relative rounded-xl border flex flex-col items-center justify-center gap-0.5 h-[54px] sm:h-[60px] px-1 transition-all group ${
                     player
                       ? isMe
-                        ? 'bg-[#1C2638] border-2 border-[#00D9FF] shadow-glow-cyan scale-[1.02]'
-                        : 'bg-[#111827] border-[#303D52]'
-                      : 'bg-[#090D18]/50 border-dashed border-[#303D52]/60 hover:border-[#00D9FF] hover:bg-[#1C2638]/70 hover:shadow-glow-cyan cursor-pointer'
+                        ? 'bg-[#13202E] border-[#00D9FF]/80'
+                        : 'bg-[#0E1524] border-[#303D52]/70'
+                      : 'bg-[#090D18]/40 border-dashed border-[#303D52]/50 hover:border-[#00D9FF]/70 cursor-pointer'
                   }`}
-                  title={player ? (isMe ? 'Vị trí của bạn' : player.name) : 'Bấm để đổi sang ghế khán giả này'}
+                  title={player ? (isMe ? 'Vị trí của bạn (khán giả)' : `${player.name} (khán giả)`) : `Ghế khán giả ${seatNum}: bấm để chuyển sang`}
                 >
-                  {/* Host kick button */}
                   {isHost && player && !isMe && (
                     <button
                       onClick={(e) => {
@@ -531,46 +530,35 @@ export const Lobby: React.FC = () => {
                         kickPlayer(player.id);
                       }}
                       title={`Mời ${player.name} ra khỏi phòng`}
-                      className="absolute top-2 right-2 p-1 rounded-md bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 transition-all z-10"
+                      className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-[#1A0D14] hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/60 transition-all z-10"
                     >
-                      <X size={13} className="stroke-[2.5]" />
+                      <X size={10} className="stroke-[3]" />
                     </button>
                   )}
 
                   {player ? (
-                    <SeatAvatar player={player} isMe={!!isMe} seatLabel={`👁 ${seatNum}`} onEdit={() => setAvatarModalOpen(true)} accent="cyan" />
+                    <>
+                      <button
+                        type="button"
+                        disabled={!isMe}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isMe) setAvatarModalOpen(true);
+                        }}
+                        title={isMe ? 'Đổi ảnh đại diện' : undefined}
+                        className={isMe ? 'cursor-pointer hover:scale-110 transition-transform' : 'cursor-default'}
+                      >
+                        <PlayerAvatar player={player} size={24} dimmed={!player.connected} className={`ring-1 ${isMe ? 'ring-[#00D9FF]' : 'ring-[#303D52]'} sm:!w-7 sm:!h-7`} />
+                      </button>
+                      <span className={`w-full text-center truncate text-[10px] sm:text-[11px] font-bold leading-tight ${isMe ? 'text-[#00D9FF]' : player.connected ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>
+                        {player.name}
+                        {room.hostId === player.id ? ' · Host' : ''}
+                      </span>
+                    </>
                   ) : (
-                  <div
-                    className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl flex items-center justify-center font-heading font-black text-sm sm:text-base lg:text-lg mb-1.5 border transition-all ${
-                      player
-                        ? isMe
-                          ? 'bg-[#00D9FF] text-[#090D18] border-[#00D9FF] shadow-glow-cyan'
-                          : 'bg-[#1C2638] text-[#00D9FF] border-[#00D9FF]/40'
-                        : 'bg-[#0E1524] text-[#64748B] border-[#303D52] group-hover:border-[#00D9FF]/60 group-hover:text-[#00D9FF]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1">
-                      <Eye size={15} className="opacity-80" />
-                      <span>{seatNum}</span>
-                    </div>
-                  </div>
-                  )}
-
-                  <span className="font-bold text-xs sm:text-sm md:text-base lg:text-lg text-center truncate max-w-full px-1 text-[#F8FAFC]">
-                    {player ? player.name : 'Ghế trống'}
-                  </span>
-
-                  {player ? (
-                    <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1.5 mt-0.5">
-                      {room.hostId === player.id && (
-                        <span className="text-[#FFD43B] font-heading font-bold">Host</span>
-                      )}
-                      {isMe && <span className="text-[#00D9FF] font-heading font-bold">Bạn</span>}
-                      {!player.connected && <span className="text-[#FF496C] font-bold">Offline</span>}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] sm:text-xs text-[#00D9FF] opacity-0 group-hover:opacity-100 font-bold transition-opacity mt-0.5">
-                      + Khán giả
+                    <span className="flex items-center gap-0.5 text-[11px] font-heading font-bold text-[#475569] group-hover:text-[#00D9FF]">
+                      <Eye size={11} />
+                      {seatNum}
                     </span>
                   )}
                 </div>

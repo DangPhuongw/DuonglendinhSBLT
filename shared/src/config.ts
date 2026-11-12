@@ -6,7 +6,22 @@ export const DIFFICULTY_LABELS: Record<'easy' | 'medium' | 'hard', string> = {
 
 export const GAME_CONFIG = {
   MAX_PLAYERS: 5,                  // Tối đa 5 thí sinh
-  MAX_VIEWERS: 5,                  // Tối đa 5 người theo dõi / khán giả
+  MAX_VIEWERS: 10,                 // Tối đa 10 người theo dõi / khán giả
+
+  // Khán giả thả cảm xúc / tin nhắn cố định, bay từ dưới lên (kiểu thả tim livestream)
+  VIEWER_REACTIONS: {
+    EMOJIS: ['👏', '🔥', '😂', '😱', '❤️', '👍', '🤯', '💯', '😭', '🐐'] as string[],
+    MESSAGES: ['GOAT 🐐', 'Đẳng cấp', 'Cố lên!', 'Quá đỉnh', 'Hay quá', 'Ngu', 'Bot', 'Hack à?', 'Ăn may', 'Run tay rồi', 'Nhanh lên', 'Tiếc quá'] as string[],
+    // Chống spam mỗi khán giả: cách nhau tối thiểu, và tối đa BURST_MAX lần trong BURST_WINDOW_MS
+    MIN_INTERVAL_MS: 800,
+    BURST_WINDOW_MS: 10_000,
+    BURST_MAX: 6,
+    // Chống ngập màn hình cả phòng: tối đa ROOM_MAX thông điệp trong ROOM_WINDOW_MS (vượt thì bỏ)
+    ROOM_WINDOW_MS: 2_000,
+    ROOM_MAX: 8,
+    // Trên mỗi máy: số thông điệp tối đa cùng bay một lúc
+    MAX_ON_SCREEN: 12,
+  },
   MIN_PLAYERS_FOR_TEST: 2,
   NETWORK_GRACE_MS: 300,           // Bù trễ mạng khi nhận đáp án sau deadline
   DISCONNECT_HOLD_SECONDS: 60,     // Giữ ghế 60s khi mất kết nối (G15)

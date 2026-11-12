@@ -9,6 +9,9 @@ import {
   RevealPayload,
   ScoreEvent,
   AntiCheatAlert,
+  ViewerReaction,
+  ViewerReactionKind,
+  GAME_CONFIG,
 } from '@olympia/shared';
 import { soundManager } from '../utils/soundEffects';
 
@@ -32,9 +35,13 @@ interface GameStore {
   joinRoom: (name: string, roomCode: string) => Promise<{ ok: boolean; error?: string }>;
   rejoinRoom: (roomCode: string, token: string) => Promise<{ ok: boolean; error?: string }>;
   setAvatar: (seed: string) => void;
-  switchSeat: (targetRole: 'player' | 'viewer', targetSeat: 1 | 2 | 3 | 4 | 5) => Promise<{ ok: boolean; error?: string }>;
+  switchSeat: (targetRole: 'player' | 'viewer', targetSeat: number) => Promise<{ ok: boolean; error?: string }>;
   startGame: () => void;
   playAgain: () => Promise<{ ok: boolean; error?: string }>;
+  /** Cảm xúc của khán giả đang bay trên màn hình. */
+  reactions: ViewerReaction[];
+  sendReaction: (kind: ViewerReactionKind, index: number) => Promise<{ ok: boolean; error?: string; retryInMs?: number }>;
+  removeReaction: (id: string) => void;
   setReady: (mediaLoaded?: boolean) => void;
   submitAnswer: (questionId: string, content: string) => void;
   buzz: () => void;
@@ -66,6 +73,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   buzzWinner: null,
   buzzRejectedReason: null,
   antiCheatAlert: null,
+  reactions: [],
 
   initSocket: () => {
     if (get().socket) return;
@@ -175,6 +183,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
           room: { ...currentRoom, players: updatedPlayers },
         });
       }
+    });
+
+    socket.on('viewer:reaction', (reaction) => {
+      const current = get().reactions;
+      // Giới hạn số thông điệp bay cùng lúc trên mỗi máy: quá thì bỏ thông điệp mới (trừ của chính mình)
+      const mine = reaction.playerId === get().myPlayerId;
+      if (current.length >= GAME_CONFIG.VIEWER_REACTIONS.MAX_ON_SCREEN && !mine) return;
+      set({ reactions: [...current.slice(-(GAME_CONFIG.VIEWER_REACTIONS.MAX_ON_SCREEN * 2)), reaction] });
     });
 
     socket.on('anticheat:alert', (data) => {
@@ -347,6 +363,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   startGame: () => {
     get().socket?.emit('room:start');
   },
+
+  sendReaction: (kind, index) =>
+    new Promise((resolve) => {
+      const socket = get().socket;
+      if (!socket) return resolve({ ok: false, error: 'Mất kết nối tới máy chủ.' });
+      const timer = setTimeout(() => resolve({ ok: false, error: 'Máy chủ không phản hồi.' }), 5000);
+      socket.emit('viewer:react', { kind, index }, (res) => {
+        clearTimeout(timer);
+        resolve(res);
+      });
+    }),
+
+  removeReaction: (id) => set({ reactions: get().reactions.filter((r) => r.id !== id) }),
 
   playAgain: () =>
     new Promise((resolve) => {

@@ -10,6 +10,7 @@ import rateLimit from 'express-rate-limit';
 import {
   ClientToServerEvents,
   ServerToClientEvents,
+  GAME_CONFIG,
 } from '@olympia/shared';
 import { RoomManager } from './game/RoomManager.js';
 import { toPublicPlayers, sanitizePlayerName } from './game/RoomStateMachine.js';
@@ -19,6 +20,9 @@ import { validateQuestionSet } from './game/questionValidator.js';
 import { csvCell } from './utils/csv.js';
 import { QuestionBankService, resolveBankDir } from './game/questionBankService.js';
 import { QuestionUsage, listQuestionIds } from './game/questionComposer.js';
+import { ReactionLimiter } from './game/reactionLimiter.js';
+
+const reactionLimiter = new ReactionLimiter();
 
 const app = express();
 app.set('trust proxy', 1); // Trust Render / Cloudflare reverse proxy headers
@@ -580,6 +584,42 @@ io.on('connection', (socket) => {
     machine.eventQueue.enqueue(async () => {
       reply(machine.resetForNewGame(info.playerId));
     });
+  });
+
+  // 5c. Khán giả thả cảm xúc / tin nhắn cố định
+  on('viewer:react', (data, cb) => {
+    const reply = typeof cb === 'function' ? cb : () => {};
+    if (checkEventSpam()) return;
+    const info = roomManager.getPlayerBySocket(socket.id);
+    if (!info) return reply({ ok: false, error: 'Bạn chưa ở trong phòng.' });
+    const machine = roomManager.getRoom(info.roomCode);
+    const player = machine?.room.players.find((p) => p.id === info.playerId);
+    if (!machine || !player) return reply({ ok: false, error: 'Phòng không tồn tại.' });
+    if (player.role !== 'viewer') return reply({ ok: false, error: 'Chỉ khán giả mới thả cảm xúc được.' });
+
+    const kind = data?.kind;
+    const index = asInt(data?.index);
+    const list = kind === 'emoji' ? GAME_CONFIG.VIEWER_REACTIONS.EMOJIS : kind === 'message' ? GAME_CONFIG.VIEWER_REACTIONS.MESSAGES : null;
+    if (!list || index === null || index < 0 || index >= list.length) return reply({ ok: false, error: 'Cảm xúc không hợp lệ.' });
+
+    const now = Date.now();
+    const check = reactionLimiter.check(info.roomCode, player.id, now);
+    if (!check.ok) {
+      return reply({
+        ok: false,
+        retryInMs: check.retryInMs,
+        error: check.scope === 'room' ? 'Màn hình đang nhiều cảm xúc quá, thử lại sau chút nhé.' : 'Thả chậm lại một chút nhé.',
+      });
+    }
+    io.to(info.roomCode).emit('viewer:reaction', {
+      id: `${now.toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      playerId: player.id,
+      name: player.name,
+      kind,
+      index,
+      at: now,
+    });
+    reply({ ok: true });
   });
 
   // 6. Player ready
