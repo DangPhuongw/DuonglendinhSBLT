@@ -350,9 +350,14 @@ export const VcnvRound: React.FC = () => {
                 size={16}
                 className={canBuzz ? 'animate-bounce text-[#FFD43B]' : 'text-[#64748B]'}
               />
+              {canBuzz && (
+                <kbd className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-md bg-white text-[#BE123C] font-heading font-black text-sm tracking-[0.2em] shadow-[0_2px_0_rgba(0,0,0,0.4)] order-last">
+                  SPACE
+                </kbd>
+              )}
               <span className="truncate">
                 {canBuzz
-                  ? 'RUNG CHUÔNG (PHÍM SPACE)'
+                  ? 'RUNG CHUÔNG — NHẤN'
                   : isBuzzerLocked
                   ? `🔒 ${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} ĐÃ BẤM`
                   : isEliminated

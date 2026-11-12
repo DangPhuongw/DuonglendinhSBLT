@@ -292,15 +292,15 @@ export const VeDichRound: React.FC = () => {
           ) : !isMyTurn ? (
             <button
               onClick={buzz}
-              className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-[#FF496C] hover:bg-[#ff6584] border-4 border-[#FF496C] shadow-glow-danger-lg flex flex-col items-center justify-center gap-1.5 buzzer-active cursor-pointer active:scale-95 transition-transform"
+              className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[#FF496C] hover:bg-[#ff6584] border-4 border-[#FF496C] shadow-glow-danger-lg flex flex-col items-center justify-center gap-1.5 buzzer-active cursor-pointer active:scale-95 transition-transform"
             >
               <Bell size={32} className="text-white animate-bounce" />
               <span className="font-heading font-black text-white text-xs sm:text-sm tracking-wider uppercase">
                 GIÀNH QUYỀN
               </span>
-              <span className="text-xs text-white/90 font-heading font-bold uppercase tracking-widest bg-black/40 px-2.5 py-0.5 rounded-full mt-0.5">
-                Phím Space
-              </span>
+              <kbd className="hidden sm:inline-flex items-center justify-center mt-1 px-3.5 py-1 rounded-lg bg-white text-[#BE123C] font-heading font-black text-base tracking-[0.25em] shadow-[0_3px_0_rgba(0,0,0,0.45)] ring-2 ring-black/20">
+                SPACE
+              </kbd>
             </button>
           ) : (
             <div className="text-xs sm:text-sm text-[#FF496C] font-bold p-3 bg-[#FF496C]/10 rounded-xl border border-[#FF496C]/40 shadow-glow-danger text-center">

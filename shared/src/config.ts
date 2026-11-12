@@ -63,6 +63,8 @@ export const GAME_CONFIG = {
     // Khởi động chung: 5 dễ, 4 trung bình, 3 khó (thứ tự trộn lẫn) (tổng = CHUNG_QUESTIONS)
     CHUNG_DIFFICULTY: { easy: 5, medium: 4, hard: 3 },
     CHUNG_BUZZ_SECONDS: 15,
+    // Màn nhắc luật "Khởi động chung - bấm chuông nhanh nhất" trước câu đầu tiên
+    CHUNG_INTRO_SECONDS: 6,
     CHUNG_ANSWER_SECONDS: 3,
     CHUNG_CORRECT_POINTS: 10,
     CHUNG_WRONG_OR_TIMEOUT_POINTS: -5, // G2: Trừ 5 điểm và qua câu mới ngay

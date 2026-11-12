@@ -1454,7 +1454,21 @@ export class RoomStateMachine {
 
   private async startKhoiDongChung(): Promise<void> {
     this.room.status = 'KD_CHUNG';
-    await this.runKdChungQuestion(0);
+    // Màn nhắc luật trước câu đầu: chuyển từ lượt riêng sang giành chuông, nhắc phím SPACE
+    const introMs = GAME_CONFIG.KHOI_DONG.CHUNG_INTRO_SECONDS * 1000;
+    this.buzzedPlayerId = null;
+    this.room.state = {
+      round: 'KD_CHUNG',
+      subPhase: 'INTRO',
+      deadline: null,
+      buzzerLockedBy: null,
+      activePlayerId: undefined,
+    };
+    this.setDeadline(introMs, async () => {
+      await this.runKdChungQuestion(0);
+    });
+    this.persistSnapshot();
+    this.syncRoom();
   }
 
   private async runKdChungQuestion(questionIndex: number): Promise<void> {

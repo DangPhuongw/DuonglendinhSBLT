@@ -7,6 +7,7 @@ import { Bell, Sparkles, Lock, Eye } from 'lucide-react';
 import { GAME_CONFIG } from '@olympia/shared';
 import { LockedBuzzer } from './LockedBuzzer';
 import { useBuzzLock } from '../utils/useBuzzLock';
+import { KdChungIntro } from './KdChungIntro';
 
 export const KhoiDongRound: React.FC = () => {
   const room = useGameStore((s) => s.room);
@@ -105,6 +106,10 @@ export const KhoiDongRound: React.FC = () => {
   }, [currentRound, subPhase, isMyTurn, currentQ, selectedOption, buzz, submitAnswer, buzzLocked]);
 
   if (!room || !myPlayer) return null;
+
+  if (currentRound === 'KD_CHUNG' && subPhase === 'INTRO') {
+    return <KdChungIntro deadline={room.state.deadline} />;
+  }
 
   const handleSelectOption = (letter: string) => {
     if (!isMyTurn || selectedOption || !currentQ) return;
@@ -313,15 +318,15 @@ export const KhoiDongRound: React.FC = () => {
           ) : (
             <button
               onClick={buzz}
-              className="w-24 h-24 sm:w-36 sm:h-36 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
+              className="w-24 h-24 sm:w-40 sm:h-40 rounded-full bg-[#FFD43B] hover:bg-[#ffe066] border-4 border-[#FFD43B] shadow-glow-yellow-lg flex flex-col items-center justify-center gap-1 buzzer-active cursor-pointer active:scale-95 transition-transform"
             >
               <Bell size={32} className="text-[#090D18] animate-bounce" />
               <span className="font-heading font-black text-[#090D18] text-sm sm:text-base tracking-wider uppercase">
                 BẤM CHUÔNG
               </span>
-              <span className="hidden sm:inline-block text-xs text-[#090D18] font-heading font-bold uppercase tracking-widest bg-white/70 px-2.5 py-0.5 rounded-full mt-0.5">
-                Phím Space
-              </span>
+              <kbd className="hidden sm:inline-flex items-center justify-center mt-1 px-3.5 py-1 rounded-lg bg-[#090D18] text-[#FFD43B] font-heading font-black text-base tracking-[0.25em] shadow-[0_3px_0_rgba(0,0,0,0.45)] ring-2 ring-white/60">
+                SPACE
+              </kbd>
             </button>
           )}
 
