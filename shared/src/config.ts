@@ -13,14 +13,16 @@ export const GAME_CONFIG = {
     EMOJIS: ['👏', '🔥', '😂', '😱', '❤️', '👍', '🤯', '💯', '😭', '🐐'] as string[],
     MESSAGES: ['GOAT 🐐', 'Đẳng cấp', 'Cố lên!', 'Quá đỉnh', 'Hay quá', 'Ngu', 'Bot', 'Hack à?', 'Ăn may', 'Run tay rồi', 'Nhanh lên', 'Tiếc quá'] as string[],
     // Chống spam mỗi khán giả: cách nhau tối thiểu, và tối đa BURST_MAX lần trong BURST_WINDOW_MS
-    MIN_INTERVAL_MS: 800,
-    BURST_WINDOW_MS: 10_000,
-    BURST_MAX: 6,
+    MIN_INTERVAL_MS: 3_000,
+    BURST_WINDOW_MS: 20_000,
+    BURST_MAX: 3,
     // Chống ngập màn hình cả phòng: tối đa ROOM_MAX thông điệp trong ROOM_WINDOW_MS (vượt thì bỏ)
-    ROOM_WINDOW_MS: 2_000,
-    ROOM_MAX: 8,
+    ROOM_WINDOW_MS: 4_000,
+    ROOM_MAX: 3,
     // Trên mỗi máy: số thông điệp tối đa cùng bay một lúc
-    MAX_ON_SCREEN: 12,
+    MAX_ON_SCREEN: 6,
+    // Thời gian một thông điệp bay từ chân lên tới đỉnh màn hình (chậm, nhẹ nhàng)
+    FLOAT_MS: 8_000,
   },
   MIN_PLAYERS_FOR_TEST: 2,
   NETWORK_GRACE_MS: 300,           // Bù trễ mạng khi nhận đáp án sau deadline

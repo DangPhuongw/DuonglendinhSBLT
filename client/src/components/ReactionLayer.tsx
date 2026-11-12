@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { GAME_CONFIG, ViewerReaction } from '@olympia/shared';
 import { useGameStore } from '../store/gameStore';
 
-const FLOAT_MS = 3800;
+const FLOAT_MS = GAME_CONFIG.VIEWER_REACTIONS.FLOAT_MS;
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -20,20 +20,27 @@ const FloatingReaction: React.FC<{ reaction: ViewerReaction; onDone: (id: string
   }, [reaction.id, onDone]);
 
   const style = useMemo<CssVars>(() => {
-    const isMsg = reaction.kind === 'message';
-    // Làn bên phải màn hình (kiểu livestream), tin nhắn lệch vào trong hơn một chút để khỏi đè emoji
-    const right = isMsg ? 4 + hashToUnit(reaction.id, 1) * 14 : 1 + hashToUnit(reaction.id, 1) * 10;
-    const drift = (hashToUnit(reaction.id, 2) - 0.5) * 70;
-    return { right: `${right}%`, '--drift': `${drift.toFixed(0)}px`, '--float-ms': `${FLOAT_MS}ms` };
-  }, [reaction.id, reaction.kind]);
+    // Xuất phát ngẫu nhiên dọc cả chân màn hình (nhô lên từ sau thanh điểm).
+    // Bay lên đều như bóng bay; lắc ngang nhẹ là một chuyển động riêng nên không làm chậm/nhanh nhịp bay.
+    const left = 3 + hashToUnit(reaction.id, 1) * 88;
+    const sway = 10 + hashToUnit(reaction.id, 2) * 14;
+    const swayMs = 2600 + hashToUnit(reaction.id, 3) * 1400;
+    const swayDelay = -hashToUnit(reaction.id, 4) * swayMs;
+    return {
+      left: `${left}%`,
+      '--float-ms': `${FLOAT_MS}ms`,
+      '--sway': `${sway.toFixed(0)}px`,
+      '--sway-ms': `${swayMs.toFixed(0)}ms`,
+      '--sway-delay': `${swayDelay.toFixed(0)}ms`,
+    };
+  }, [reaction.id]);
 
   if (reaction.kind === 'emoji') {
     const emoji = GAME_CONFIG.VIEWER_REACTIONS.EMOJIS[reaction.index];
     if (!emoji) return null;
     return (
-      <div className="reaction-float absolute bottom-0 flex flex-col items-center" style={style}>
-        <span className="text-4xl sm:text-5xl drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] leading-none">{emoji}</span>
-        <span className="mt-0.5 max-w-[90px] truncate text-[10px] sm:text-xs font-bold text-white/80 drop-shadow">{reaction.name}</span>
+      <div className="reaction-float absolute bottom-0" style={style}>
+        <span className="reaction-sway block text-3xl sm:text-4xl leading-none">{emoji}</span>
       </div>
     );
   }
@@ -42,17 +49,18 @@ const FloatingReaction: React.FC<{ reaction: ViewerReaction; onDone: (id: string
   if (!text) return null;
   return (
     <div className="reaction-float absolute bottom-0" style={style}>
-      <div className="flex items-baseline gap-1.5 max-w-[220px] rounded-full bg-[#111827]/85 border border-[#00D9FF]/50 px-3 py-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.45)] backdrop-blur-sm">
-        <span className="shrink-0 max-w-[80px] truncate text-[11px] sm:text-xs font-bold text-[#00D9FF]">{reaction.name}</span>
-        <span className="truncate text-sm sm:text-base font-heading font-black text-[#F8FAFC]">{text}</span>
+      <div className="reaction-sway flex items-baseline gap-1.5 max-w-[200px] rounded-full bg-[#111827]/50 border border-[#00D9FF]/25 px-2.5 py-1">
+        <span className="shrink-0 max-w-[70px] truncate text-[10px] sm:text-[11px] font-bold text-[#00D9FF]/80">{reaction.name}</span>
+        <span className="truncate text-xs sm:text-sm font-heading font-bold text-[#F8FAFC]/90">{text}</span>
       </div>
     </div>
   );
 };
 
 /**
- * Cảm xúc / tin nhắn của khán giả bay từ dưới lên ở làn bên phải màn hình (mọi người đều thấy).
- * Không bắt thao tác chuột (pointer-events: none); số lượng cùng lúc bị giới hạn trong store.
+ * Cảm xúc / tin nhắn của khán giả bay chậm từ chân màn hình lên, nằm DƯỚI nội dung (ngay trên nền sao):
+ * chỉ lộ ra ở khoảng trống, bị khung câu hỏi / bảng điểm che, mờ để không làm phân tâm thí sinh.
+ * Không bắt thao tác chuột; số lượng cùng lúc bị giới hạn trong store.
  */
 export const ReactionLayer: React.FC = () => {
   const reactions = useGameStore((s) => s.reactions);
@@ -62,7 +70,7 @@ export const ReactionLayer: React.FC = () => {
   if (!hasRoom || reactions.length === 0) return null;
 
   return (
-    <div className="fixed left-0 right-0 top-14 bottom-24 sm:bottom-28 z-20 pointer-events-none overflow-hidden" aria-hidden="true">
+    <div className="fixed left-0 right-0 top-14 bottom-0 -z-[5] pointer-events-none overflow-hidden" aria-hidden="true">
       {reactions.map((r) => (
         <FloatingReaction key={r.id} reaction={r} onDone={removeReaction} />
       ))}
