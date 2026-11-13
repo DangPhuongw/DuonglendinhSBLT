@@ -7,7 +7,7 @@ import { balanceOf, freePoints, optionLabel } from '../utils/predictions';
 
 const P = GAME_CONFIG.PREDICTIONS;
 
-/** Nội dung bảng dự đoán của khán giả (đặt cược từng hạng mục). */
+/** Nội dung bảng dự đoán của khán giả (dự đoán từng hạng mục). */
 export const PredictionPanel: React.FC = () => {
   const room = useGameStore((s) => s.room);
   const me = useGameStore((s) => s.player);
@@ -28,7 +28,7 @@ export const PredictionPanel: React.FC = () => {
         </span>
       </div>
       <p className="mb-2 text-[11px] text-[#6D75AD] leading-snug">
-        Mỗi hạng mục cược {P.MIN_STAKE}–{P.MAX_STAKE} điểm. Đúng được cộng, sai bị trừ đúng số đã cược.
+        Mỗi hạng mục dự đoán với {P.MIN_STAKE}–{P.MAX_STAKE} điểm. Đúng được cộng, sai bị trừ đúng số điểm đã dùng.
       </p>
       <div className="flex flex-col gap-2">
         {PREDICTION_CATEGORIES.map((def) => (
@@ -68,7 +68,7 @@ const CategoryCard: React.FC<{
     setError('');
     const res = await placePrediction(def.id, option ?? '', nextStake);
     setBusy(false);
-    if (!res.ok) setError(res.error || 'Không đặt được cược.');
+    if (!res.ok) setError(res.error || 'Không gửi được dự đoán.');
   };
 
   const clampStake = (v: number) => Math.max(P.MIN_STAKE, Math.min(maxForThis, Math.round(v / P.STAKE_STEP) * P.STAKE_STEP));
@@ -86,11 +86,12 @@ const CategoryCard: React.FC<{
         <div className="mt-1 text-[11px] sm:text-xs text-[#A6ACDB]">
           {myBet ? (
             <>
-              Bạn cược <span className="font-bold text-[#EEF0FF]">{myBet.stake}</span> vào{' '}
-              <span className="font-bold text-[#EEF0FF]">{optionLabel(myBet.option, nameOf)}</span>
+              Bạn dự đoán{' '}
+              <span className="font-bold text-[#EEF0FF]">{optionLabel(myBet.option, nameOf)}</span> với{' '}
+              <span className="font-bold text-[#EEF0FF]">{myBet.stake}</span> điểm
             </>
           ) : (
-            'Bạn không cược hạng mục này'
+            'Bạn không dự đoán hạng mục này'
           )}
           {cat.status === 'resolved' && winners && (
             <>
@@ -136,7 +137,7 @@ const CategoryCard: React.FC<{
           onClick={() => setStake((v) => clampStake(v - P.STAKE_STEP))}
           className="w-7 h-7 rounded-lg bg-[#0A0D22] border border-[#262E66] text-[#CDD2F2] flex items-center justify-center cursor-pointer disabled:opacity-40"
           disabled={stake <= P.MIN_STAKE}
-          aria-label="Giảm điểm cược"
+          aria-label="Giảm điểm dự đoán"
         >
           <Minus size={13} />
         </button>
@@ -146,7 +147,7 @@ const CategoryCard: React.FC<{
           onClick={() => setStake((v) => clampStake(v + P.STAKE_STEP))}
           className="w-7 h-7 rounded-lg bg-[#0A0D22] border border-[#262E66] text-[#CDD2F2] flex items-center justify-center cursor-pointer disabled:opacity-40"
           disabled={stake >= maxForThis}
-          aria-label="Tăng điểm cược"
+          aria-label="Tăng điểm dự đoán"
         >
           <Plus size={13} />
         </button>
@@ -164,7 +165,7 @@ const CategoryCard: React.FC<{
               onClick={() => submit(0)}
               disabled={busy}
               className="h-7 px-2 rounded-lg text-[11px] font-bold text-[#A6ACDB] hover:text-[#FF5D8F] cursor-pointer"
-              title="Hủy cược hạng mục này"
+              title="Hủy dự đoán hạng mục này"
             >
               Hủy
             </button>
@@ -175,7 +176,7 @@ const CategoryCard: React.FC<{
             disabled={busy || !changed || maxForThis < P.MIN_STAKE}
             className="h-7 px-3 rounded-lg bg-[#F7C873] hover:bg-[#FBE0A8] text-[#05060F] text-xs font-heading font-black cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {myBet ? (changed ? 'Đổi cược' : 'Đã cược') : 'Đặt cược'}
+            {myBet ? (changed ? 'Đổi dự đoán' : 'Đã dự đoán') : 'Dự đoán'}
           </button>
         </div>
       </div>

@@ -8,8 +8,8 @@ export const GAME_CONFIG = {
   MAX_PLAYERS: 5,                  // Tối đa 5 thí sinh
   MAX_VIEWERS: 10,                 // Tối đa 10 người theo dõi / khán giả
 
-  // Bảng dự đoán của khán giả: mỗi người có START_POINTS điểm, mỗi hạng mục cược MIN_STAKE..MAX_STAKE.
-  // Đoán đúng được cộng đúng số điểm đã cược, đoán sai bị trừ đúng số đó. Không thể cược quá số điểm còn rảnh.
+  // Bảng dự đoán của khán giả: mỗi người có START_POINTS điểm, mỗi hạng mục dùng MIN_STAKE..MAX_STAKE điểm.
+  // Đoán đúng được cộng đúng số điểm đã dùng, đoán sai bị trừ đúng số đó. Không thể dùng quá số điểm còn rảnh.
   PREDICTIONS: {
     START_POINTS: 1000,
     MIN_STAKE: 10,

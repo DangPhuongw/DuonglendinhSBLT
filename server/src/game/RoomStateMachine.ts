@@ -3028,13 +3028,13 @@ export class RoomStateMachine {
 
   // --- Bảng dự đoán của khán giả ---
 
-  /** Khán giả đặt / đổi / hủy (stake = 0) một cược. */
+  /** Khán giả đặt / đổi / hủy (stake = 0) một dự đoán. */
   public placePrediction(playerId: string, category: unknown, option: unknown, stake: unknown): { ok: boolean; error?: string } {
     const player = this.room.players.find((p) => p.id === playerId);
     if (!player || player.role !== 'viewer') return { ok: false, error: 'Chỉ khán giả mới tham gia dự đoán được.' };
     if (this.room.status === 'FINISHED') return { ok: false, error: 'Trận đấu đã kết thúc.' };
     if (!isCategoryId(category)) return { ok: false, error: 'Hạng mục không hợp lệ.' };
-    if (typeof option !== 'string' || typeof stake !== 'number') return { ok: false, error: 'Dữ liệu cược không hợp lệ.' };
+    if (typeof option !== 'string' || typeof stake !== 'number') return { ok: false, error: 'Dữ liệu dự đoán không hợp lệ.' };
 
     const contestants = this.room.players.filter((p) => (p.role || 'player') === 'player').map((p) => p.id);
     const state = (this.room.predictions ??= createPredictionState());

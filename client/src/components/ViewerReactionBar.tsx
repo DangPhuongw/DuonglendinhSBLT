@@ -133,7 +133,7 @@ export const ViewerReactionBar: React.FC = () => {
           title="Dự đoán kết quả trận đấu bằng điểm"
         >
           <Coins size={20} className="shrink-0" />
-          <span className="font-heading font-black text-xs sm:text-sm tracking-wider whitespace-nowrap">ĐẶT CƯỢC</span>
+          <span className="font-heading font-black text-xs sm:text-sm tracking-wider whitespace-nowrap">DỰ ĐOÁN</span>
         </button>
       )}
       <button

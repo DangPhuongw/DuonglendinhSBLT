@@ -7,9 +7,9 @@ import {
 } from '@olympia/shared';
 
 /**
- * Bảng dự đoán của khán giả: mỗi khán giả có START_POINTS điểm, đặt cược từng hạng mục
+ * Bảng dự đoán của khán giả: mỗi khán giả có START_POINTS điểm, dự đoán từng hạng mục
  * (tối đa MAX_STAKE / hạng mục, không quá số điểm còn rảnh). Hạng mục bị khóa khi vòng tương ứng bắt đầu,
- * được chấm khi có kết quả: đúng +tiền cược, sai -tiền cược, không xác định được thì hoàn lại.
+ * được chấm khi có kết quả: đúng +điểm đã dùng, sai -điểm đã dùng, không xác định được thì hoàn lại.
  */
 
 const P = GAME_CONFIG.PREDICTIONS;
@@ -25,7 +25,7 @@ export function getBalance(state: PredictionState, viewerId: string): number {
   return state.balances[viewerId] ?? P.START_POINTS;
 }
 
-/** Điểm đang nằm trong các cược chưa có kết quả. */
+/** Điểm đang nằm trong các dự đoán chưa có kết quả. */
 export function pendingStake(state: PredictionState, viewerId: string, except?: PredictionCategoryId): number {
   const bets = state.bets[viewerId] ?? {};
   let sum = 0;
@@ -36,7 +36,7 @@ export function pendingStake(state: PredictionState, viewerId: string, except?: 
   return sum;
 }
 
-/** Điểm còn rảnh để cược thêm. */
+/** Điểm còn rảnh để dự đoán thêm. */
 export function availablePoints(state: PredictionState, viewerId: string, except?: PredictionCategoryId): number {
   return Math.max(0, getBalance(state, viewerId) - pendingStake(state, viewerId, except));
 }
@@ -52,7 +52,7 @@ export function validOptions(category: PredictionCategoryId, contestantIds: stri
   return contestantIds;
 }
 
-/** Đặt / đổi / hủy (stake = 0) cược. */
+/** Đặt / đổi / hủy (stake = 0) một dự đoán. */
 export function placeBet(
   state: PredictionState,
   viewerId: string,
@@ -62,8 +62,8 @@ export function placeBet(
   contestantIds: string[]
 ): { ok: boolean; error?: string } {
   const cat = state.categories[category];
-  if (!cat || cat.status !== 'open') return { ok: false, error: 'Hạng mục này đã khóa, không đặt cược được nữa.' };
-  if (!Number.isInteger(stake) || stake < 0) return { ok: false, error: 'Số điểm cược không hợp lệ.' };
+  if (!cat || cat.status !== 'open') return { ok: false, error: 'Hạng mục này đã khóa, không dự đoán được nữa.' };
+  if (!Number.isInteger(stake) || stake < 0) return { ok: false, error: 'Số điểm dự đoán không hợp lệ.' };
 
   const mine = (state.bets[viewerId] ??= {});
   if (stake === 0) {
@@ -71,12 +71,12 @@ export function placeBet(
     return { ok: true };
   }
   if (stake < P.MIN_STAKE || stake > P.MAX_STAKE) {
-    return { ok: false, error: `Mỗi hạng mục cược từ ${P.MIN_STAKE} đến ${P.MAX_STAKE} điểm.` };
+    return { ok: false, error: `Mỗi hạng mục dự đoán từ ${P.MIN_STAKE} đến ${P.MAX_STAKE} điểm.` };
   }
   if (!validOptions(category, contestantIds).includes(option)) return { ok: false, error: 'Lựa chọn không hợp lệ.' };
 
   const free = availablePoints(state, viewerId, category);
-  if (stake > free) return { ok: false, error: `Bạn chỉ còn ${free} điểm rảnh để cược.` };
+  if (stake > free) return { ok: false, error: `Bạn chỉ còn ${free} điểm rảnh để dự đoán.` };
 
   state.balances[viewerId] = getBalance(state, viewerId);
   mine[category] = { option, stake };
@@ -124,7 +124,7 @@ export function voidUnresolved(state: PredictionState): void {
   }
 }
 
-/** Bỏ cược của những người không còn là khán giả (ví dụ chuyển sang ghế thí sinh trước khi bắt đầu). */
+/** Bỏ dự đoán của những người không còn là khán giả (ví dụ chuyển sang ghế thí sinh trước khi bắt đầu). */
 export function dropBetsOfNonViewers(state: PredictionState, viewerIds: Set<string>): void {
   for (const id of Object.keys(state.bets)) {
     if (!viewerIds.has(id)) {

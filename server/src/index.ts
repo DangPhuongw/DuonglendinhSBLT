@@ -586,7 +586,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 5d. Khán giả đặt cược trong bảng dự đoán
+  // 5d. Khán giả gửi dự đoán trong bảng dự đoán
   on('prediction:place', (data, cb) => {
     const reply = typeof cb === 'function' ? cb : () => {};
     if (checkEventSpam()) return;

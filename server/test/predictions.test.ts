@@ -15,7 +15,7 @@ import { DEFAULT_QUESTION_SET } from '../src/game/defaultQuestionSet.js';
 const P = GAME_CONFIG.PREDICTIONS;
 const PLAYERS = ['a', 'b', 'c'];
 
-describe('Bảng dự đoán: luật đặt cược', () => {
+describe('Bảng dự đoán: luật dự đoán', () => {
   it('mỗi người bắt đầu 1000 điểm, mỗi hạng mục 10-250, không vượt số điểm rảnh', () => {
     const s = createPredictionState();
     expect(availablePoints(s, 'v1')).toBe(P.START_POINTS);
@@ -26,10 +26,10 @@ describe('Bảng dự đoán: luật đặt cược', () => {
     for (const cat of ['champion', 'lowest', 'top_kd', 'top_vcnv'] as const) expect(placeBet(s, 'v1', cat, 'a', 250, PLAYERS).ok).toBe(true);
     expect(availablePoints(s, 'v1')).toBe(0);
     expect(placeBet(s, 'v1', 'top_tt', 'a', 10, PLAYERS)).toMatchObject({ ok: false });
-    // Đổi cược của hạng mục đã đặt thì tính lại phần của chính nó
+    // Đổi dự đoán của hạng mục đã đặt thì tính lại phần của chính nó
     expect(placeBet(s, 'v1', 'champion', 'b', 200, PLAYERS).ok).toBe(true);
     expect(availablePoints(s, 'v1')).toBe(50);
-    // Hủy cược
+    // Hủy dự đoán
     expect(placeBet(s, 'v1', 'lowest', 'a', 0, PLAYERS).ok).toBe(true);
     expect(availablePoints(s, 'v1')).toBe(300);
   });
@@ -54,7 +54,7 @@ describe('Bảng dự đoán: luật đặt cược', () => {
     expect(placeBet(s, 'v1', 'top_vcnv', 'b', 100, PLAYERS).ok).toBe(true);
   });
 
-  it('đúng +tiền cược, sai -tiền cược, đồng hạng đều đúng, không xác định thì hoàn lại', () => {
+  it('đúng +điểm đã dùng, sai -điểm đã dùng, đồng hạng đều đúng, không xác định thì hoàn lại', () => {
     const s = createPredictionState();
     placeBet(s, 'v1', 'top_kd', 'a', 200, PLAYERS);
     placeBet(s, 'v2', 'top_kd', 'b', 150, PLAYERS);
@@ -76,7 +76,7 @@ describe('Bảng dự đoán: luật đặt cược', () => {
   });
 });
 
-// ===== Chơi trọn trận với khán giả đặt cược =====
+// ===== Chơi trọn trận với khán giả dự đoán =====
 
 function mockCallbacks(): StateMachineCallbacks {
   return {
@@ -97,7 +97,7 @@ const answersOf = (qs: QuestionSet) => {
   return m;
 };
 
-/** Bot chơi tự động; `onTick` được gọi mỗi bước để test đặt cược giữa trận. */
+/** Bot chơi tự động; `onTick` được gọi mỗi bước để test dự đoán giữa trận. */
 async function playMatch(machine: RoomStateMachine, contestants: string[], onTick: (round: string) => void) {
   const qs = machine.questionSet;
   const ans = answersOf(qs);
@@ -158,7 +158,7 @@ describe('Bảng dự đoán trong một trận thật', () => {
     viewers.forEach((id, i) => expect(machine.switchSeat(id, 'viewer', i + 1).ok).toBe(true));
     const [v1, v2] = viewers;
 
-    // Thí sinh không được đặt cược
+    // Thí sinh không được dự đoán
     expect(machine.placePrediction(a, 'champion', a, 100).ok).toBe(false);
 
     // Trước trận
@@ -206,7 +206,7 @@ describe('Bảng dự đoán trong một trận thật', () => {
     const anyOver = machine.room.players.some((p) => p.role !== 'viewer' && p.score > 250);
     expect(pred.categories.over_250.winners).toEqual([anyOver ? 'yes' : 'no']);
 
-    // Điểm = 1000 + tổng thắng - tổng thua, khớp với kết quả từng cược
+    // Điểm = 1000 + tổng thắng - tổng thua, khớp với kết quả từng dự đoán
     for (const v of [v1, v2]) {
       let expected = P.START_POINTS;
       for (const bet of Object.values(pred.bets[v])) {

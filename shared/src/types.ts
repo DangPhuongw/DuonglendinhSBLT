@@ -183,7 +183,7 @@ export interface Room {
   history: ScoreEvent[];
   createdAt: number;
   updatedAt: number;
-  /** Bảng dự đoán của khán giả (tạo khi có người đặt cược đầu tiên). */
+  /** Bảng dự đoán của khán giả (tạo khi có người dự đoán đầu tiên). */
   predictions?: PredictionState;
 }
 
@@ -203,7 +203,7 @@ export type PredictionOptionKind = 'player' | 'yes_no';
 export interface PredictionCategoryDef {
   id: PredictionCategoryId;
   label: string;
-  /** Khóa đặt cược khi vòng / phần thi này bắt đầu (KD_CHUNG = vừa hết Khởi động riêng). */
+  /** Khóa dự đoán khi vòng / phần thi này bắt đầu (KD_CHUNG = vừa hết Khởi động riêng). */
   lockAt: 'KD_CHUNG' | 'VCNV' | 'TANG_TOC' | 'VE_DICH';
   lockLabel: string;
   options: PredictionOptionKind;
