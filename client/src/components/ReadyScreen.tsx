@@ -38,10 +38,10 @@ export const ReadyScreen: React.FC = () => {
     <div className="w-full h-full max-w-4xl lg:max-w-5xl mx-auto flex flex-col gap-2 py-1.5 px-2 sm:px-3 overflow-hidden">
       {/* Tiêu đề gọn */}
       <div className="shrink-0 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center">
-        <span className="text-[11px] sm:text-xs lg:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-full border border-[#FFD43B]/40">
+        <span className="text-[11px] sm:text-xs lg:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#F7C873]/15 text-[#F7C873] px-3 py-1 rounded-full border border-[#F7C873]/40">
           Chuẩn bị bước vào
         </span>
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-heading font-black text-[#F8FAFC]">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-heading font-black text-[#EEF0FF]">
           {ROUND_NAMES[targetRound] || 'VÒNG TIẾP THEO'}
         </h2>
       </div>
@@ -54,11 +54,11 @@ export const ReadyScreen: React.FC = () => {
         <div className="flex flex-col items-center sm:items-start gap-1 sm:w-64 shrink-0">
           {isCountdown ? (
             <div className="w-full">
-              <span className="block text-xs uppercase font-heading font-bold text-[#94A3B8] mb-1 text-center sm:text-left">Vòng thi bắt đầu sau</span>
+              <span className="block text-xs uppercase font-heading font-bold text-[#A6ACDB] mb-1 text-center sm:text-left">Vòng thi bắt đầu sau</span>
               <CountdownTimer deadline={room.state.deadline} totalDurationSeconds={3} label="" />
             </div>
           ) : isViewer ? (
-            <div className="w-full p-2.5 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-xl flex items-center gap-2 text-xs sm:text-sm text-[#00D9FF] font-bold">
+            <div className="w-full p-2.5 bg-[#7CB4FF]/10 border border-[#7CB4FF]/40 rounded-xl flex items-center gap-2 text-xs sm:text-sm text-[#7CB4FF] font-bold">
               <Eye size={18} className="shrink-0" />
               <span>Bạn là khán giả. Vòng thi bắt đầu khi thí sinh sẵn sàng.</span>
             </div>
@@ -68,8 +68,8 @@ export const ReadyScreen: React.FC = () => {
               disabled={myPlayer.ready}
               className={`w-full py-3 px-6 rounded-2xl font-heading font-black uppercase tracking-wider text-sm sm:text-base flex items-center justify-center gap-2 border transition-all ${
                 myPlayer.ready
-                  ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success cursor-default'
-                  : 'bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] border-[#FFD43B] shadow-glow-yellow-lg hover:scale-[1.02] active:scale-95 cursor-pointer'
+                  ? 'bg-[#43E6B5] text-[#05060F] border-[#43E6B5] shadow-glow-success cursor-default'
+                  : 'bg-[#F7C873] hover:bg-[#FBE0A8] text-[#05060F] border-[#F7C873] shadow-glow-yellow-lg hover:scale-[1.02] active:scale-95 cursor-pointer'
               }`}
             >
               <CheckCircle2 size={20} />
@@ -79,7 +79,7 @@ export const ReadyScreen: React.FC = () => {
           {isHost && !isCountdown && (
             <button
               onClick={forceStartRound}
-              className="text-xs font-heading font-bold text-[#94A3B8] hover:text-[#FFD43B] underline cursor-pointer"
+              className="text-xs font-heading font-bold text-[#A6ACDB] hover:text-[#F7C873] underline cursor-pointer"
               title="Bắt đầu vòng thi ngay lập tức không cần chờ"
             >
               ⚡ Bắt đầu vòng thi ngay (Chủ phòng)
@@ -89,7 +89,7 @@ export const ReadyScreen: React.FC = () => {
 
         {/* Trạng thái sẵn sàng của thí sinh */}
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] sm:text-xs uppercase tracking-wider font-heading font-bold text-[#94A3B8] mb-1">
+          <div className="text-[11px] sm:text-xs uppercase tracking-wider font-heading font-bold text-[#A6ACDB] mb-1">
             Đã sẵn sàng {readyCount}/{contestants.length}
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -100,18 +100,18 @@ export const ReadyScreen: React.FC = () => {
                   key={p.id}
                   className={`inline-flex items-center gap-1.5 max-w-[11rem] pl-2 pr-1.5 py-1 rounded-full border text-xs font-bold ${
                     p.ready
-                      ? 'bg-[#20D6A0]/15 text-[#20D6A0] border-[#20D6A0]/50'
-                      : 'bg-[#111827] text-[#94A3B8] border-[#303D52]'
+                      ? 'bg-[#43E6B5]/15 text-[#43E6B5] border-[#43E6B5]/50'
+                      : 'bg-[#0A0D22] text-[#A6ACDB] border-[#262E66]'
                   }`}
                   title={`${p.name}: ${p.ready ? 'đã sẵn sàng' : 'chưa sẵn sàng'}`}
                 >
-                  {p.ready ? <CheckCircle2 size={13} className="shrink-0" /> : <span className="w-2 h-2 rounded-full bg-[#64748B] shrink-0" />}
+                  {p.ready ? <CheckCircle2 size={13} className="shrink-0" /> : <span className="w-2 h-2 rounded-full bg-[#6D75AD] shrink-0" />}
                   <PlayerAvatar player={p} size={18} />
                   <span className="truncate">{p.name}</span>
                   {isHost && isAbsent && !p.ready && (
                     <button
                       onClick={() => skipAbsent(p.id)}
-                      className="ml-0.5 p-0.5 rounded-full bg-[#FF496C]/20 hover:bg-[#FF496C] text-[#FF496C] hover:text-white"
+                      className="ml-0.5 p-0.5 rounded-full bg-[#FF5D8F]/20 hover:bg-[#FF5D8F] text-[#FF5D8F] hover:text-white"
                       title="Bỏ qua thí sinh mất kết nối quá 60 giây"
                       aria-label={`Bỏ qua ${p.name}`}
                     >

@@ -57,16 +57,16 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
 
   // Color logic according to spec: Yellow -> Orange -> Red
   const timerColor = isCritical
-    ? 'text-[#FF496C] border-[#FF496C] bg-[#FF496C]/10 shadow-glow-danger'
+    ? 'text-[#FF5D8F] border-[#FF5D8F] bg-[#FF5D8F]/10 shadow-glow-danger'
     : isWarning
-    ? 'text-[#FB923C] border-[#FB923C] bg-[#FB923C]/10 shadow-[0_0_15px_rgba(251,146,60,0.35)]'
-    : 'text-[#FFD43B] border-[#FFD43B]/60 bg-[#FFD43B]/10 shadow-glow-yellow';
+    ? 'text-[#D6903F] border-[#D6903F] bg-[#D6903F]/10 shadow-[0_0_15px_rgba(214,144,63,0.16)]'
+    : 'text-[#F7C873] border-[#F7C873]/60 bg-[#F7C873]/10 shadow-glow-yellow';
 
   const barColor = isCritical
-    ? 'bg-[#FF496C] shadow-[0_0_12px_#FF496C]'
+    ? 'bg-[#FF5D8F] shadow-[0_0_12px_#FF5D8F]'
     : isWarning
-    ? 'bg-[#FB923C] shadow-[0_0_12px_#FB923C]'
-    : 'bg-[#FFD43B] shadow-[0_0_12px_#FFD43B]';
+    ? 'bg-[#D6903F] shadow-[0_0_12px_#D6903F]'
+    : 'bg-[#F7C873] shadow-[0_0_12px_#F7C873]';
 
   return (
     <div
@@ -74,7 +74,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       aria-hidden={inactive || undefined}
     >
       <div className={`flex ${showSeconds ? 'justify-between' : 'justify-center'} items-center w-full px-1`}>
-        <span className="text-xs uppercase tracking-wider font-heading font-bold text-[#94A3B8]">
+        <span className="text-xs uppercase tracking-wider font-heading font-bold text-[#A6ACDB]">
           {label}
         </span>
         {showSeconds && (
@@ -87,7 +87,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
           </span>
         )}
       </div>
-      <div className="w-full bg-[#111827] rounded-full h-3 sm:h-3.5 p-0.5 overflow-hidden border border-[#303D52]">
+      <div className="w-full bg-[#0A0D22] rounded-full h-3 sm:h-3.5 p-0.5 overflow-hidden border border-[#262E66]">
         <div
           className={`h-full rounded-full transition-all duration-100 ease-linear ${barColor}`}
           style={{ width: `${percent}%` }}

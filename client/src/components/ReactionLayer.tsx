@@ -49,9 +49,9 @@ const FloatingReaction: React.FC<{ reaction: ViewerReaction; onDone: (id: string
   if (!text) return null;
   return (
     <div className="reaction-float absolute bottom-0" style={style}>
-      <div className="reaction-sway flex items-baseline gap-1.5 max-w-[200px] rounded-full bg-[#111827]/50 border border-[#00D9FF]/25 px-2.5 py-1">
-        <span className="shrink-0 max-w-[70px] truncate text-[10px] sm:text-[11px] font-bold text-[#00D9FF]/80">{reaction.name}</span>
-        <span className="truncate text-xs sm:text-sm font-heading font-bold text-[#F8FAFC]/90">{text}</span>
+      <div className="reaction-sway flex items-baseline gap-1.5 max-w-[200px] rounded-full bg-[#0A0D22]/50 border border-[#7CB4FF]/25 px-2.5 py-1">
+        <span className="shrink-0 max-w-[70px] truncate text-[10px] sm:text-[11px] font-bold text-[#7CB4FF]/80">{reaction.name}</span>
+        <span className="truncate text-xs sm:text-sm font-heading font-bold text-[#EEF0FF]/90">{text}</span>
       </div>
     </div>
   );

@@ -27,9 +27,9 @@ export const VolumeSlider: React.FC<{
       }}
       aria-label={label}
       aria-valuetext={`${value}%`}
-      className="w-24 h-1.5 cursor-pointer accent-[#FFD43B]"
+      className="w-24 h-1.5 cursor-pointer accent-[#F7C873]"
     />
-    <span className="w-9 text-right text-xs font-digital font-bold tabular-nums text-[#94A3B8]">
+    <span className="w-9 text-right text-xs font-digital font-bold tabular-nums text-[#A6ACDB]">
       {value}%
     </span>
   </label>

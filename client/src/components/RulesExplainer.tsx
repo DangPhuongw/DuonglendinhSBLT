@@ -31,7 +31,7 @@ const d = (ms: number): React.CSSProperties => ({ animationDelay: `${ms}ms` });
 const Points: React.FC<{ value: number; delay: number; className?: string }> = ({ value, delay, className = '' }) => (
   <span
     className={`rx-fly-up absolute font-digital font-black text-2xl sm:text-3xl tabular-nums ${
-      value > 0 ? 'text-[#20D6A0]' : value < 0 ? 'text-[#FF496C]' : 'text-[#94A3B8]'
+      value > 0 ? 'text-[#43E6B5]' : value < 0 ? 'text-[#FF5D8F]' : 'text-[#A6ACDB]'
     } ${className}`}
     style={d(delay)}
   >
@@ -41,7 +41,7 @@ const Points: React.FC<{ value: number; delay: number; className?: string }> = (
 
 const Avatar: React.FC<{ label: string; color: string; className?: string; style?: React.CSSProperties }> = ({ label, color, className = '', style }) => (
   <div
-    className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-heading font-black text-sm sm:text-base text-[#090D18] shrink-0 ${className}`}
+    className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-heading font-black text-sm sm:text-base text-[#05060F] shrink-0 ${className}`}
     style={{ background: color, ...style }}
   >
     {label}
@@ -51,11 +51,11 @@ const Avatar: React.FC<{ label: string; color: string; className?: string; style
 /** Đếm ngược 3 -> 0 rồi chuông sáng lên (khóa chuông đầu mỗi lượt giành chuông). */
 const BellLock: React.FC<{ accent: string; startAt?: number }> = ({ accent, startAt = 0 }) => (
   <div className="relative w-20 h-20 sm:w-24 sm:h-24">
-    <div className="rx-fade-out absolute inset-0 rounded-full bg-[#111827] border-4 border-[#303D52] flex flex-col items-center justify-center" style={d(startAt + LOCK * 1000)}>
-      <Lock size={16} className="text-[#64748B]" />
+    <div className="rx-fade-out absolute inset-0 rounded-full bg-[#0A0D22] border-4 border-[#262E66] flex flex-col items-center justify-center" style={d(startAt + LOCK * 1000)}>
+      <Lock size={16} className="text-[#6D75AD]" />
       <div className="relative h-7 w-10">
         {Array.from({ length: LOCK }, (_, i) => (
-          <span key={i} className="rx-blink-once absolute inset-0 text-center font-digital font-black text-2xl text-[#F8FAFC]" style={d(startAt + i * 1000)}>
+          <span key={i} className="rx-blink-once absolute inset-0 text-center font-digital font-black text-2xl text-[#EEF0FF]" style={d(startAt + i * 1000)}>
             {LOCK - i}
           </span>
         ))}
@@ -65,19 +65,19 @@ const BellLock: React.FC<{ accent: string; startAt?: number }> = ({ accent, star
       className="rx-pop absolute inset-0 rounded-full flex items-center justify-center"
       style={{ background: accent, boxShadow: `0 0 30px ${accent}`, ...d(startAt + LOCK * 1000) }}
     >
-      <Bell size={34} className="text-[#090D18]" />
+      <Bell size={34} className="text-[#05060F]" />
     </div>
   </div>
 );
 
 const Option: React.FC<{ letter: string; text: string; state?: 'right' | 'wrong'; delay?: number }> = ({ letter, text, state, delay = 0 }) => (
   <div
-    className={`relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl border bg-[#111827] text-xs sm:text-sm font-bold text-[#F8FAFC] ${
-      state ? (state === 'right' ? 'rx-mark-right' : 'rx-mark-wrong') : 'border-[#303D52]'
+    className={`relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl border bg-[#0A0D22] text-xs sm:text-sm font-bold text-[#EEF0FF] ${
+      state ? (state === 'right' ? 'rx-mark-right' : 'rx-mark-wrong') : 'border-[#262E66]'
     }`}
     style={state ? d(delay) : undefined}
   >
-    <span className="w-6 h-6 rounded-lg bg-[#1C2638] border border-[#303D52] flex items-center justify-center text-[#FFD43B] text-xs">{letter}</span>
+    <span className="w-6 h-6 rounded-lg bg-[#11163A] border border-[#262E66] flex items-center justify-center text-[#F7C873] text-xs">{letter}</span>
     <span className="truncate">{text}</span>
   </div>
 );
@@ -85,7 +85,7 @@ const Option: React.FC<{ letter: string; text: string; state?: 'right' | 'wrong'
 const LetterRow: React.FC<{ letters: string; reveal?: number; highlight?: boolean }> = ({ letters, reveal, highlight }) => (
   <div className={`flex gap-1 ${highlight ? 'rx-glow-row' : ''}`}>
     {letters.split('').map((ch, i) => (
-      <div key={i} className="relative w-5 h-6 sm:w-6 sm:h-7 rounded-md bg-[#111827] border border-[#00D9FF]/40 flex items-center justify-center text-[11px] sm:text-xs font-digital font-bold text-[#00D9FF]">
+      <div key={i} className="relative w-5 h-6 sm:w-6 sm:h-7 rounded-md bg-[#0A0D22] border border-[#7CB4FF]/40 flex items-center justify-center text-[11px] sm:text-xs font-digital font-bold text-[#7CB4FF]">
         {reveal !== undefined ? (
           <span className="rx-pop" style={d(reveal + i * 90)}>{ch}</span>
         ) : null}
@@ -107,14 +107,14 @@ function khoiDongScenes(): Scene[] {
             <div
               key={n}
               className={`w-11 h-14 sm:w-14 sm:h-16 rounded-xl border-2 flex items-center justify-center font-heading font-black text-lg ${
-                n === 3 ? 'rx-pick border-[#303D52] text-[#94A3B8]' : 'border-[#303D52] text-[#64748B]'
+                n === 3 ? 'rx-pick border-[#262E66] text-[#A6ACDB]' : 'border-[#262E66] text-[#6D75AD]'
               }`}
               style={n === 3 ? d(1500) : undefined}
             >
               {n === 3 ? (
                 <span className="relative w-full h-full flex items-center justify-center">
                   <span className="rx-fade-out absolute" style={d(1500)}>?</span>
-                  <span className="rx-pop absolute text-[10px] sm:text-xs text-[#FFD43B] text-center leading-tight" style={d(1700)}>
+                  <span className="rx-pop absolute text-[10px] sm:text-xs text-[#F7C873] text-center leading-tight" style={d(1700)}>
                     {KD.RIENG_QUESTIONS_PER_PLAYER}
                     <br />
                     câu
@@ -130,7 +130,7 @@ function khoiDongScenes(): Scene[] {
     },
     {
       title: 'Chọn đáp án là chốt luôn',
-      text: <>Bấm một đáp án là chốt, không đổi được. Đúng <b className="text-[#20D6A0]">+{KD.RIENG_CORRECT_POINTS} điểm</b>, sai <b>không bị trừ</b>.</>,
+      text: <>Bấm một đáp án là chốt, không đổi được. Đúng <b className="text-[#43E6B5]">+{KD.RIENG_CORRECT_POINTS} điểm</b>, sai <b>không bị trừ</b>.</>,
       visual: (
         <div className="relative grid grid-cols-2 gap-2 w-full max-w-sm">
           <Option letter="A" text="Nhà Lý" state="right" delay={1600} />
@@ -146,18 +146,18 @@ function khoiDongScenes(): Scene[] {
       text: <>{KD.CHUNG_QUESTIONS} câu hỏi cho tất cả. Chuông bị khóa <b>{LOCK} giây</b> khi câu hỏi hiện ra, sau đó ai bấm <b>nhanh nhất</b> giành quyền trả lời.</>,
       visual: (
         <div className="flex items-center gap-4 sm:gap-6">
-          <BellLock accent="#FFD43B" startAt={300} />
+          <BellLock accent="#F7C873" startAt={300} />
           <div className="flex flex-col gap-2">
             {[
-              ['An', '#00D9FF', 'rx-press'],
-              ['Bình', '#A855F7', ''],
+              ['An', '#7CB4FF', 'rx-press'],
+              ['Bình', '#9B7BFF', ''],
               ['Chi', '#FB923C', ''],
             ].map(([name, color, cls], i) => (
               <div key={name} className="flex items-center gap-2">
                 <Avatar label={name[0]} color={color} className={cls} style={cls ? d(300 + LOCK * 1000 + 300) : undefined} />
-                <span className="text-xs sm:text-sm font-bold text-[#F8FAFC] w-10">{name}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#EEF0FF] w-10">{name}</span>
                 {i === 0 && (
-                  <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-[#090D18] bg-[#FFD43B] px-2 py-0.5 rounded-full" style={d(300 + LOCK * 1000 + 500)}>
+                  <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-[#05060F] bg-[#F7C873] px-2 py-0.5 rounded-full" style={d(300 + LOCK * 1000 + 500)}>
                     GIÀNH QUYỀN
                   </span>
                 )}
@@ -169,17 +169,17 @@ function khoiDongScenes(): Scene[] {
     },
     {
       title: `Giành chuông: ${KD.CHUNG_ANSWER_SECONDS} giây để trả lời`,
-      text: <>Người giành chuông có <b>{KD.CHUNG_ANSWER_SECONDS} giây</b>. Đúng <b className="text-[#20D6A0]">+{KD.CHUNG_CORRECT_POINTS}</b>, sai hoặc hết giờ <b className="text-[#FF496C]">{KD.CHUNG_WRONG_OR_TIMEOUT_POINTS}</b>. Không chắc thì đừng bấm!</>,
+      text: <>Người giành chuông có <b>{KD.CHUNG_ANSWER_SECONDS} giây</b>. Đúng <b className="text-[#43E6B5]">+{KD.CHUNG_CORRECT_POINTS}</b>, sai hoặc hết giờ <b className="text-[#FF5D8F]">{KD.CHUNG_WRONG_OR_TIMEOUT_POINTS}</b>. Không chắc thì đừng bấm!</>,
       visual: (
         <div className="flex items-center gap-6 sm:gap-10">
           <div className="relative flex flex-col items-center gap-1.5">
-            <Avatar label="A" color="#00D9FF" />
-            <span className="rx-pop w-8 h-8 rounded-full bg-[#20D6A0] flex items-center justify-center" style={d(1000)}><Check size={18} className="text-[#090D18]" /></span>
+            <Avatar label="A" color="#7CB4FF" />
+            <span className="rx-pop w-8 h-8 rounded-full bg-[#43E6B5] flex items-center justify-center" style={d(1000)}><Check size={18} className="text-[#05060F]" /></span>
             <Points value={KD.CHUNG_CORRECT_POINTS} delay={1500} className="-top-6" />
           </div>
           <div className="relative flex flex-col items-center gap-1.5">
-            <Avatar label="B" color="#A855F7" />
-            <span className="rx-pop w-8 h-8 rounded-full bg-[#FF496C] flex items-center justify-center" style={d(2600)}><X size={18} className="text-white" /></span>
+            <Avatar label="B" color="#9B7BFF" />
+            <span className="rx-pop w-8 h-8 rounded-full bg-[#FF5D8F] flex items-center justify-center" style={d(2600)}><X size={18} className="text-white" /></span>
             <Points value={KD.CHUNG_WRONG_OR_TIMEOUT_POINTS} delay={3100} className="-top-6" />
           </div>
         </div>
@@ -193,7 +193,7 @@ function vcnvScenes(): Scene[] {
   return [
     {
       title: '4 hàng ngang che giấu một từ khóa',
-      text: <>Lần lượt từng người chọn một hàng ngang. Cả phòng cùng trả lời trong <b>{VC.ROW_TIME_SECONDS} giây</b>, đúng <b className="text-[#20D6A0]">+{VC.ROW_CORRECT_POINTS} điểm</b>. Có người đúng thì chữ của hàng được mở.</>,
+      text: <>Lần lượt từng người chọn một hàng ngang. Cả phòng cùng trả lời trong <b>{VC.ROW_TIME_SECONDS} giây</b>, đúng <b className="text-[#43E6B5]">+{VC.ROW_CORRECT_POINTS} điểm</b>. Có người đúng thì chữ của hàng được mở.</>,
       visual: (
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex flex-col gap-1.5">
@@ -203,10 +203,10 @@ function vcnvScenes(): Scene[] {
             <LetterRow letters="CẦUVỒNG" />
           </div>
           <div className="relative flex flex-col items-center gap-1">
-            <span className="text-[10px] sm:text-xs font-heading font-bold text-[#94A3B8] uppercase">Từ khóa</span>
+            <span className="text-[10px] sm:text-xs font-heading font-bold text-[#A6ACDB] uppercase">Từ khóa</span>
             <div className="flex gap-1">
               {Array.from({ length: 6 }, (_, i) => (
-                <div key={i} className="w-5 h-6 sm:w-6 sm:h-7 rounded-md bg-[#1C2638] border border-[#FFD43B]/50 text-[#FFD43B] text-xs font-bold flex items-center justify-center">?</div>
+                <div key={i} className="w-5 h-6 sm:w-6 sm:h-7 rounded-md bg-[#11163A] border border-[#F7C873]/50 text-[#F7C873] text-xs font-bold flex items-center justify-center">?</div>
               ))}
             </div>
             <Points value={VC.ROW_CORRECT_POINTS} delay={2400} className="-bottom-8" />
@@ -222,12 +222,12 @@ function vcnvScenes(): Scene[] {
           {[...ladder, VC.FINAL_GUESS_CORRECT_POINTS].map((pts, i) => (
             <div key={i} className="flex flex-col items-center gap-1">
               <div
-                className="rx-grow-bar w-10 sm:w-12 rounded-t-lg bg-gradient-to-t from-[#FFD43B]/30 to-[#FFD43B] flex items-start justify-center pt-1 font-digital font-black text-[#090D18] text-sm sm:text-base"
+                className="rx-grow-bar w-10 sm:w-12 rounded-t-lg bg-gradient-to-t from-[#F7C873]/30 to-[#F7C873] flex items-start justify-center pt-1 font-digital font-black text-[#05060F] text-sm sm:text-base"
                 style={{ height: `${pts * 1.4}px`, ...d(200 + i * 350) }}
               >
                 {pts}
               </div>
-              <span className="text-[10px] sm:text-xs text-[#94A3B8] font-bold text-center leading-tight w-12">
+              <span className="text-[10px] sm:text-xs text-[#A6ACDB] font-bold text-center leading-tight w-12">
                 {i < 4 ? `Sau hàng ${i + 1}` : 'Ô trung tâm'}
               </span>
             </div>
@@ -237,36 +237,36 @@ function vcnvScenes(): Scene[] {
     },
     {
       title: 'Đoán sai: bị loại khỏi vòng này',
-      text: <>Đoán sai thì <b className="text-[#FF496C]">không được chơi tiếp VCNV</b> (vẫn giữ điểm đã có). Nếu đang giữa câu hỏi, câu đó <b>chạy lại từ đầu</b> cho những người còn lại.</>,
+      text: <>Đoán sai thì <b className="text-[#FF5D8F]">không được chơi tiếp VCNV</b> (vẫn giữ điểm đã có). Nếu đang giữa câu hỏi, câu đó <b>chạy lại từ đầu</b> cho những người còn lại.</>,
       visual: (
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="flex flex-col items-center gap-1.5">
-            <Avatar label="A" color="#00D9FF" className="rx-dim" style={d(1800)} />
-            <span className="rx-shake px-2.5 py-1 rounded-lg bg-[#FF496C]/15 border border-[#FF496C]/50 text-[#FF496C] text-xs font-bold" style={d(900)}>"BẦU TRỜI" ✗</span>
-            <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-white bg-[#FF496C] px-2 py-0.5 rounded-full" style={d(1800)}>BỊ LOẠI</span>
+            <Avatar label="A" color="#7CB4FF" className="rx-dim" style={d(1800)} />
+            <span className="rx-shake px-2.5 py-1 rounded-lg bg-[#FF5D8F]/15 border border-[#FF5D8F]/50 text-[#FF5D8F] text-xs font-bold" style={d(900)}>"BẦU TRỜI" ✗</span>
+            <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-white bg-[#FF5D8F] px-2 py-0.5 rounded-full" style={d(1800)}>BỊ LOẠI</span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <RotateCcw size={28} className="rx-spin-once text-[#FFD43B]" style={d(2500)} />
-            <span className="text-xs text-[#F8FAFC] font-bold">Câu hỏi chạy lại</span>
-            <span className="rx-pop font-digital font-black text-xl text-[#FFD43B]" style={d(2700)}>{VC.ROW_TIME_SECONDS}s</span>
+            <RotateCcw size={28} className="rx-spin-once text-[#F7C873]" style={d(2500)} />
+            <span className="text-xs text-[#EEF0FF] font-bold">Câu hỏi chạy lại</span>
+            <span className="rx-pop font-digital font-black text-xl text-[#F7C873]" style={d(2700)}>{VC.ROW_TIME_SECONDS}s</span>
           </div>
         </div>
       ),
     },
     {
       title: 'Câu hỏi thứ 5 là gợi ý',
-      text: <>Hết 4 hàng ngang, câu hỏi ô trung tâm hiện ra <b>{VC.CENTER_TIME_SECONDS} giây</b> làm gợi ý: <b>không cần trả lời</b>, hãy dùng nó để đoán từ khóa và bấm chuông. Sau đó còn <b>{VC.FINAL_GUESS_SECONDS} giây đoán cuối</b>. Đoán đúng lúc này <b className="text-[#20D6A0]">+{VC.FINAL_GUESS_CORRECT_POINTS}</b>.</>,
+      text: <>Hết 4 hàng ngang, câu hỏi ô trung tâm hiện ra <b>{VC.CENTER_TIME_SECONDS} giây</b> làm gợi ý: <b>không cần trả lời</b>, hãy dùng nó để đoán từ khóa và bấm chuông. Sau đó còn <b>{VC.FINAL_GUESS_SECONDS} giây đoán cuối</b>. Đoán đúng lúc này <b className="text-[#43E6B5]">+{VC.FINAL_GUESS_CORRECT_POINTS}</b>.</>,
       visual: (
         <div className="relative flex flex-col items-center gap-2">
           <div className="grid grid-cols-2 gap-1.5">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="w-16 h-6 sm:w-20 sm:h-7 rounded-md bg-[#00D9FF]/15 border border-[#00D9FF]/40" />
+              <div key={i} className="w-16 h-6 sm:w-20 sm:h-7 rounded-md bg-[#7CB4FF]/15 border border-[#7CB4FF]/40" />
             ))}
           </div>
-          <div className="rx-pop -mt-12 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#FFD43B] text-[#090D18] font-heading font-black flex items-center justify-center shadow-glow-yellow" style={d(700)}>
+          <div className="rx-pop -mt-12 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#F7C873] text-[#05060F] font-heading font-black flex items-center justify-center shadow-glow-yellow" style={d(700)}>
             ★
           </div>
-          <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-[#090D18] bg-[#FFD43B] px-2 py-0.5 rounded-full" style={d(1500)}>
+          <span className="rx-pop text-[10px] sm:text-xs font-heading font-black text-[#05060F] bg-[#F7C873] px-2 py-0.5 rounded-full" style={d(1500)}>
             GỢI Ý
           </span>
         </div>
@@ -278,9 +278,9 @@ function vcnvScenes(): Scene[] {
 function tangTocScenes(): Scene[] {
   const rows = [
     { name: 'Chi', t: '3.21s', pts: TT.POINTS_BY_RANK[0], color: '#FB923C' },
-    { name: 'An', t: '5.08s', pts: TT.POINTS_BY_RANK[1], color: '#00D9FF' },
-    { name: 'Bình', t: '9.47s', pts: TT.POINTS_BY_RANK[2], color: '#A855F7' },
-    { name: 'Dũng', t: 'Sai', pts: 0, color: '#64748B' },
+    { name: 'An', t: '5.08s', pts: TT.POINTS_BY_RANK[1], color: '#7CB4FF' },
+    { name: 'Bình', t: '9.47s', pts: TT.POINTS_BY_RANK[2], color: '#9B7BFF' },
+    { name: 'Dũng', t: 'Sai', pts: 0, color: '#6D75AD' },
   ];
   return [
     {
@@ -289,11 +289,11 @@ function tangTocScenes(): Scene[] {
       visual: (
         <div className="flex items-center gap-2 sm:gap-3">
           {Array.from({ length: TT.QUESTION_COUNT }, (_, i) => (
-            <div key={i} className="rx-pop w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-[#00D9FF]/60 bg-[#00D9FF]/10 flex items-center justify-center font-heading font-black text-[#00D9FF] text-lg" style={d(200 + i * 300)}>
+            <div key={i} className="rx-pop w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-[#7CB4FF]/60 bg-[#7CB4FF]/10 flex items-center justify-center font-heading font-black text-[#7CB4FF] text-lg" style={d(200 + i * 300)}>
               {i + 1}
             </div>
           ))}
-          <div className="rx-pop ml-2 font-digital font-black text-2xl sm:text-3xl text-[#FFD43B]" style={d(1600)}>{TT.TIME_SECONDS}s</div>
+          <div className="rx-pop ml-2 font-digital font-black text-2xl sm:text-3xl text-[#F7C873]" style={d(1600)}>{TT.TIME_SECONDS}s</div>
         </div>
       ),
     },
@@ -303,12 +303,12 @@ function tangTocScenes(): Scene[] {
       visual: (
         <div className="flex flex-col gap-1.5 w-full max-w-sm">
           {rows.map((r, i) => (
-            <div key={r.name} className="rx-slide-in flex items-center gap-2 px-2 py-1 rounded-xl bg-[#111827] border border-[#303D52]" style={d(300 + i * 450)}>
-              <span className="w-5 text-center font-heading font-black text-[#94A3B8] text-sm">{r.pts ? i + 1 : '–'}</span>
+            <div key={r.name} className="rx-slide-in flex items-center gap-2 px-2 py-1 rounded-xl bg-[#0A0D22] border border-[#262E66]" style={d(300 + i * 450)}>
+              <span className="w-5 text-center font-heading font-black text-[#A6ACDB] text-sm">{r.pts ? i + 1 : '–'}</span>
               <Avatar label={r.name[0]} color={r.color} className="!w-7 !h-7 !text-xs" />
-              <span className="flex-1 text-xs sm:text-sm font-bold text-[#F8FAFC]">{r.name}</span>
-              <span className="text-xs font-digital font-bold text-[#94A3B8] w-12 text-right">{r.t}</span>
-              <span className={`w-10 text-right font-digital font-black ${r.pts ? 'text-[#20D6A0]' : 'text-[#64748B]'}`}>{r.pts ? `+${r.pts}` : '0'}</span>
+              <span className="flex-1 text-xs sm:text-sm font-bold text-[#EEF0FF]">{r.name}</span>
+              <span className="text-xs font-digital font-bold text-[#A6ACDB] w-12 text-right">{r.t}</span>
+              <span className={`w-10 text-right font-digital font-black ${r.pts ? 'text-[#43E6B5]' : 'text-[#6D75AD]'}`}>{r.pts ? `+${r.pts}` : '0'}</span>
             </div>
           ))}
         </div>
@@ -326,9 +326,9 @@ function veDichScenes(): Scene[] {
       visual: (
         <div className="flex gap-2 sm:gap-3">
           {packs.map(([total, list], i) => (
-            <div key={total} className={`rx-pop flex flex-col items-center gap-1 px-3 py-2 rounded-2xl border-2 ${i === 1 ? 'rx-pick border-[#303D52]' : 'border-[#303D52]'} bg-[#111827]`} style={d(200 + i * 300)}>
-              <span className="font-digital font-black text-2xl sm:text-3xl text-[#FFD43B]">{total}</span>
-              <span className="text-[10px] sm:text-xs text-[#94A3B8] font-bold">{list.join(' · ')}</span>
+            <div key={total} className={`rx-pop flex flex-col items-center gap-1 px-3 py-2 rounded-2xl border-2 ${i === 1 ? 'rx-pick border-[#262E66]' : 'border-[#262E66]'} bg-[#0A0D22]`} style={d(200 + i * 300)}>
+              <span className="font-digital font-black text-2xl sm:text-3xl text-[#F7C873]">{total}</span>
+              <span className="text-[10px] sm:text-xs text-[#A6ACDB] font-bold">{list.join(' · ')}</span>
             </div>
           ))}
         </div>
@@ -336,31 +336,31 @@ function veDichScenes(): Scene[] {
     },
     {
       title: 'Ngôi sao hy vọng: nhân đôi hoặc mất điểm',
-      text: <>Mỗi người được dùng <b>1 lần</b>, chọn trước khi câu hỏi bắt đầu. Đúng được <b className="text-[#20D6A0]">gấp đôi</b>, sai <b className="text-[#FF496C]">bị trừ đúng số điểm câu đó</b>.</>,
+      text: <>Mỗi người được dùng <b>1 lần</b>, chọn trước khi câu hỏi bắt đầu. Đúng được <b className="text-[#43E6B5]">gấp đôi</b>, sai <b className="text-[#FF5D8F]">bị trừ đúng số điểm câu đó</b>.</>,
       visual: (
         <div className="flex items-center gap-5 sm:gap-8">
-          <Star size={56} className="rx-pop rx-spin-once fill-[#FFD43B] text-[#FFD43B] drop-shadow-[0_0_14px_rgba(255,212,59,0.8)]" style={d(300)} />
+          <Star size={56} className="rx-pop rx-spin-once fill-[#F7C873] text-[#F7C873] drop-shadow-[0_0_14px_rgba(247,200,115,0.8)]" style={d(300)} />
           <div className="relative flex flex-col gap-2 font-digital font-black text-xl sm:text-2xl">
-            <span className="rx-pop text-[#20D6A0]" style={d(1200)}>Đúng 30 × 2 = +60</span>
-            <span className="rx-pop text-[#FF496C]" style={d(2200)}>Sai: −30</span>
+            <span className="rx-pop text-[#43E6B5]" style={d(1200)}>Đúng 30 × 2 = +60</span>
+            <span className="rx-pop text-[#FF5D8F]" style={d(2200)}>Sai: −30</span>
           </div>
         </div>
       ),
     },
     {
       title: 'Cướp điểm khi người chính trả lời sai',
-      text: <>Chuông khóa <b>{LOCK} giây</b> rồi mở <b>{VD.STEAL_BUZZ_SECONDS} giây</b> cho người khác. Cướp đúng: được điểm câu, người chính bị trừ chừng đó. Cướp sai: <b className="text-[#FF496C]">trừ một nửa</b> điểm câu.</>,
+      text: <>Chuông khóa <b>{LOCK} giây</b> rồi mở <b>{VD.STEAL_BUZZ_SECONDS} giây</b> cho người khác. Cướp đúng: được điểm câu, người chính bị trừ chừng đó. Cướp sai: <b className="text-[#FF5D8F]">trừ một nửa</b> điểm câu.</>,
       visual: (
         <div className="flex items-center gap-4 sm:gap-6">
-          <BellLock accent="#FF496C" startAt={300} />
+          <BellLock accent="#FF5D8F" startAt={300} />
           <div className="relative flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Avatar label="B" color="#A855F7" className="rx-press" style={d(300 + LOCK * 1000 + 200)} />
-              <span className="rx-pop font-digital font-black text-xl text-[#20D6A0]" style={d(300 + LOCK * 1000 + 700)}>+20</span>
+              <Avatar label="B" color="#9B7BFF" className="rx-press" style={d(300 + LOCK * 1000 + 200)} />
+              <span className="rx-pop font-digital font-black text-xl text-[#43E6B5]" style={d(300 + LOCK * 1000 + 700)}>+20</span>
             </div>
             <div className="flex items-center gap-2">
-              <Avatar label="A" color="#00D9FF" />
-              <span className="rx-pop font-digital font-black text-xl text-[#FF496C]" style={d(300 + LOCK * 1000 + 1100)}>−20</span>
+              <Avatar label="A" color="#7CB4FF" />
+              <span className="rx-pop font-digital font-black text-xl text-[#FF5D8F]" style={d(300 + LOCK * 1000 + 1100)}>−20</span>
             </div>
           </div>
         </div>
@@ -371,11 +371,11 @@ function veDichScenes(): Scene[] {
       text: <>Người bằng điểm cao nhất thi câu hỏi phụ. Chờ tín hiệu {TB.WAIT_SIGNAL_SECONDS} giây (<b>bấm sớm mất quyền</b>), ai trả lời đúng trước <b>thắng</b>. Hết {TB.MAX_QUESTIONS} câu vẫn hòa thì bốc thăm.</>,
       visual: (
         <div className="flex items-center gap-4">
-          <Avatar label="A" color="#00D9FF" />
-          <span className="font-heading font-black text-[#FFD43B] text-lg">=</span>
+          <Avatar label="A" color="#7CB4FF" />
+          <span className="font-heading font-black text-[#F7C873] text-lg">=</span>
           <Avatar label="C" color="#FB923C" />
-          <ChevronRight className="text-[#64748B]" />
-          <div className="rx-pop flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FFD43B]/15 border border-[#FFD43B]/50 text-[#FFD43B] font-heading font-black text-sm" style={d(1200)}>
+          <ChevronRight className="text-[#6D75AD]" />
+          <div className="rx-pop flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F7C873]/15 border border-[#F7C873]/50 text-[#F7C873] font-heading font-black text-sm" style={d(1200)}>
             <Bell size={16} /> Ai đúng trước thắng
           </div>
         </div>
@@ -390,10 +390,10 @@ const antiCheatScene = (): Scene => ({
   text: <>{ANTI_CHEAT_RULE}</>,
   visual: (
     <div className="flex items-center gap-4">
-      <ShieldAlert size={52} className="rx-pop text-[#FF496C]" style={d(200)} />
+      <ShieldAlert size={52} className="rx-pop text-[#FF5D8F]" style={d(200)} />
       <div className="flex flex-col gap-1.5 text-xs sm:text-sm font-bold">
-        <span className="rx-slide-in text-[#FFD43B]" style={d(700)}>Lần 1, 2: cảnh cáo</span>
-        <span className="rx-slide-in text-[#FF496C]" style={d(1300)}>
+        <span className="rx-slide-in text-[#F7C873]" style={d(700)}>Lần 1, 2: cảnh cáo</span>
+        <span className="rx-slide-in text-[#FF5D8F]" style={d(1300)}>
           Từ lần {GAME_CONFIG.ANTI_CHEAT.PENALTY_FROM_VIOLATION}: −{GAME_CONFIG.ANTI_CHEAT.PENALTY_POINTS} điểm mỗi lần
         </span>
       </div>
@@ -451,7 +451,7 @@ export const RulesExplainer: React.FC<{ round: string; className?: string }> = (
 
   return (
     <section
-      className={`w-full flex flex-col rounded-2xl bg-[#1C2638] border border-[#303D52] overflow-hidden ${className}`}
+      className={`w-full flex flex-col rounded-2xl bg-[#11163A] border border-[#262E66] overflow-hidden ${className}`}
       aria-roledescription="trình chiếu luật chơi"
       aria-label="Luật chơi"
     >
@@ -461,12 +461,12 @@ export const RulesExplainer: React.FC<{ round: string; className?: string }> = (
           <button
             key={i}
             onClick={() => go(i)}
-            className="flex-1 h-1.5 rounded-full bg-[#303D52] overflow-hidden cursor-pointer"
+            className="flex-1 h-1.5 rounded-full bg-[#262E66] overflow-hidden cursor-pointer"
             aria-label={`Cảnh ${i + 1}`}
           >
             <span
               key={`${index}-${cycle}-${i}`}
-              className={`block h-full bg-[#FFD43B] ${i === index && playing ? 'rx-progress' : ''}`}
+              className={`block h-full bg-[#F7C873] ${i === index && playing ? 'rx-progress' : ''}`}
               style={{
                 width: i < index ? '100%' : i === index && !playing ? '100%' : i === index ? undefined : '0%',
                 animationDuration: `${SCENE_MS}ms`,
@@ -486,33 +486,33 @@ export const RulesExplainer: React.FC<{ round: string; className?: string }> = (
 
       {/* Lời giải thích */}
       <div className="px-4 pb-3 text-left" aria-live="polite">
-        <h3 key={`t-${index}-${cycle}`} className="rx-fade-up font-heading font-black text-base sm:text-lg lg:text-xl text-[#F8FAFC]">
+        <h3 key={`t-${index}-${cycle}`} className="rx-fade-up font-heading font-black text-base sm:text-lg lg:text-xl text-[#EEF0FF]">
           {scene.title}
         </h3>
-        <p key={`p-${index}-${cycle}`} className="rx-fade-up mt-1 text-xs sm:text-sm lg:text-base text-[#CBD5E1] leading-relaxed" style={d(150)}>
+        <p key={`p-${index}-${cycle}`} className="rx-fade-up mt-1 text-xs sm:text-sm lg:text-base text-[#CDD2F2] leading-relaxed" style={d(150)}>
           {scene.text}
         </p>
       </div>
 
       {/* Điều khiển */}
       <div className="flex items-center justify-between gap-2 px-3 pb-3">
-        <span className="text-[11px] sm:text-xs font-heading font-bold text-[#64748B] tabular-nums">
+        <span className="text-[11px] sm:text-xs font-heading font-bold text-[#6D75AD] tabular-nums">
           {index + 1}/{scenes.length}
         </span>
         <div className="flex items-center gap-1.5">
-          <button onClick={() => go(index - 1)} disabled={index === 0} className="p-1.5 rounded-lg bg-[#111827] border border-[#303D52] text-[#94A3B8] hover:text-[#F8FAFC] disabled:opacity-40" aria-label="Cảnh trước">
+          <button onClick={() => go(index - 1)} disabled={index === 0} className="p-1.5 rounded-lg bg-[#0A0D22] border border-[#262E66] text-[#A6ACDB] hover:text-[#EEF0FF] disabled:opacity-40" aria-label="Cảnh trước">
             <ChevronLeft size={16} />
           </button>
           {atEnd ? (
-            <button onClick={replay} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#111827] border border-[#303D52] text-[#F8FAFC] text-xs font-heading font-bold hover:border-[#FFD43B]" aria-label="Xem lại từ đầu">
+            <button onClick={replay} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#0A0D22] border border-[#262E66] text-[#EEF0FF] text-xs font-heading font-bold hover:border-[#F7C873]" aria-label="Xem lại từ đầu">
               <RotateCcw size={14} /> Xem lại
             </button>
           ) : (
-            <button onClick={() => setPlaying((p) => !p)} className="p-1.5 rounded-lg bg-[#111827] border border-[#303D52] text-[#94A3B8] hover:text-[#F8FAFC]" aria-label={playing ? 'Tạm dừng' : 'Tiếp tục'}>
+            <button onClick={() => setPlaying((p) => !p)} className="p-1.5 rounded-lg bg-[#0A0D22] border border-[#262E66] text-[#A6ACDB] hover:text-[#EEF0FF]" aria-label={playing ? 'Tạm dừng' : 'Tiếp tục'}>
               {playing ? <Pause size={16} /> : <Play size={16} />}
             </button>
           )}
-          <button onClick={() => go(index + 1)} disabled={index === scenes.length - 1} className="p-1.5 rounded-lg bg-[#111827] border border-[#303D52] text-[#94A3B8] hover:text-[#F8FAFC] disabled:opacity-40" aria-label="Cảnh sau">
+          <button onClick={() => go(index + 1)} disabled={index === scenes.length - 1} className="p-1.5 rounded-lg bg-[#0A0D22] border border-[#262E66] text-[#A6ACDB] hover:text-[#EEF0FF] disabled:opacity-40" aria-label="Cảnh sau">
             <ChevronRight size={16} />
           </button>
         </div>

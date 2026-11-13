@@ -73,12 +73,12 @@ export const TangTocRound: React.FC = () => {
       {/* Header */}
       <div className="w-full flex items-center justify-between mb-2.5 px-1 gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3.5 py-1.5 rounded-xl border border-[#FFD43B]/40 shadow-glow-yellow flex items-center gap-2">
-            <Zap size={16} className="fill-[#FFD43B] text-[#FFD43B]" />
+          <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#F7C873]/15 text-[#F7C873] px-3.5 py-1.5 rounded-xl border border-[#F7C873]/40 shadow-glow-yellow flex items-center gap-2">
+            <Zap size={16} className="fill-[#F7C873] text-[#F7C873]" />
             Vòng 3: Tăng Tốc (Câu {questionIndex + 1}/4)
           </span>
         </div>
-        <span className="text-xs sm:text-sm text-[#94A3B8] font-bold bg-[#1C2638] border border-[#303D52] px-3.5 py-1.5 rounded-xl">
+        <span className="text-xs sm:text-sm text-[#A6ACDB] font-bold bg-[#11163A] border border-[#262E66] px-3.5 py-1.5 rounded-xl">
           Nộp nhanh nhất nhận điểm cao nhất
         </span>
       </div>
@@ -88,21 +88,21 @@ export const TangTocRound: React.FC = () => {
 
       {/* Question & Media Card */}
       {currentQ && (
-        <div className="w-full bg-[#1C2638] border border-[#303D52] rounded-3xl p-4 sm:p-5 lg:p-6 shadow-xl mb-2.5">
+        <div className="w-full bg-[#11163A] border border-[#262E66] rounded-3xl hud p-4 sm:p-5 lg:p-6 shadow-xl mb-2.5">
           <div className="flex items-center justify-between gap-2 mb-2.5">
-            <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 rounded-lg border border-[#FFD43B]/40 shadow-glow-yellow">
+            <span className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider bg-[#F7C873]/15 text-[#F7C873] px-3 py-1 rounded-lg border border-[#F7C873]/40 shadow-glow-yellow">
               Câu hỏi số {questionIndex + 1}
             </span>
             <QuestionSpeakerButton question={currentQ} autoRead={subPhase === 'QUESTION'} />
           </div>
 
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-[#F8FAFC] mb-3 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-[#EEF0FF] mb-3 leading-relaxed">
             {currentQ.prompt}
           </p>
 
           {/* Media if present */}
           {currentQ.media && (
-            <div className="my-2.5 rounded-xl overflow-hidden border border-[#303D52] max-h-36 sm:max-h-44 flex items-center justify-center bg-[#090D18] shadow-inner">
+            <div className="my-2.5 rounded-xl overflow-hidden border border-[#262E66] max-h-36 sm:max-h-44 flex items-center justify-center bg-[#05060F] shadow-inner">
               {currentQ.media.endsWith('.mp4') ? (
                 <video src={currentQ.media} autoPlay controls className="max-h-36 sm:max-h-44 w-auto" />
               ) : (
@@ -124,11 +124,11 @@ export const TangTocRound: React.FC = () => {
                 placeholder="Nhập câu trả lời của bạn (Enter để gửi)..."
                 value={inputAnswer}
                 onChange={(e) => setInputAnswer(e.target.value)}
-                className="flex-1 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] uppercase placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan text-xs sm:text-sm md:text-base font-heading font-bold tracking-wider transition-all"
+                className="flex-1 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#05060F] border border-[#262E66] rounded-xl text-[#EEF0FF] uppercase placeholder-[#6D75AD] focus:outline-none focus:border-[#F7C873]/70 focus:shadow-glow-yellow text-xs sm:text-sm md:text-base font-heading font-bold tracking-wider transition-all"
               />
               <button
                 type="submit"
-                className="px-5 py-2 sm:px-6 sm:py-2.5 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-black rounded-xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#FFD43B] shadow-glow-yellow hover:scale-105 active:scale-95 cursor-pointer"
+                className="px-5 py-2 sm:px-6 sm:py-2.5 bg-[#F7C873] hover:bg-[#FBE0A8] text-[#05060F] font-heading font-black rounded-xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#F7C873] shadow-glow-yellow hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Send size={15} />
                 <span>{submitted ? 'Đổi đáp án' : 'Gửi'}</span>
@@ -137,15 +137,15 @@ export const TangTocRound: React.FC = () => {
           )}
 
           {subPhase === 'QUESTION' && isViewer && (
-            <div className="mt-2.5 p-2.5 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-xl text-center text-xs sm:text-sm font-bold text-[#00D9FF] flex items-center justify-center gap-1.5 shadow-glow-cyan">
+            <div className="mt-2.5 p-2.5 bg-[#B9C0EA]/10 border border-[#B9C0EA]/40 rounded-xl text-center text-xs sm:text-sm font-bold text-[#B9C0EA] flex items-center justify-center gap-1.5 shadow-glow-cyan">
               <Eye size={15} />
               <span>Bạn đang theo dõi với vai trò Khán giả. Đang chờ các thí sinh nộp đáp án...</span>
             </div>
           )}
 
           {submitted && subPhase === 'QUESTION' && (
-            <div className="text-xs text-[#20D6A0] mt-2 font-bold flex items-center gap-1.5 bg-[#20D6A0]/10 border border-[#20D6A0]/30 px-3 py-1.5 rounded-xl shadow-glow-success">
-              <CheckCircle2 size={15} className="text-[#20D6A0]" />
+            <div className="text-xs text-[#43E6B5] mt-2 font-bold flex items-center gap-1.5 bg-[#43E6B5]/10 border border-[#43E6B5]/30 px-3 py-1.5 rounded-xl shadow-glow-success">
+              <CheckCircle2 size={15} className="text-[#43E6B5]" />
               <span>
                 Đã ghi nhận: <strong className="text-white font-heading font-black">"{inputAnswer.toUpperCase()}"</strong>
               </span>
@@ -158,27 +158,27 @@ export const TangTocRound: React.FC = () => {
       {/* REVEAL SCREEN: Hiện đáp án của 4 người theo thời gian kèm dấu tick đúng/sai */}
       {/* ========================================================================= */}
       {subPhase === 'REVEAL' && lastReveal && (
-        <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-3.5 sm:p-4 shadow-xl">
+        <div className="w-full bg-[#0A0D22] border border-[#262E66] rounded-2xl p-3.5 sm:p-4 shadow-xl">
           {/* Header Đáp án chính xác */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pb-2.5 border-b border-[#303D52]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pb-2.5 border-b border-[#262E66]">
             <div>
-              <span className="text-xs uppercase font-heading font-bold text-[#94A3B8] tracking-wider block">
+              <span className="text-xs uppercase font-heading font-bold text-[#A6ACDB] tracking-wider block">
                 Đáp án chính xác:
               </span>
-              <span className="text-base sm:text-lg md:text-xl font-heading font-black text-[#090D18] bg-[#20D6A0] px-3.5 py-1 rounded-xl shadow-glow-success tracking-wider mt-1 inline-block">
+              <span className="text-base sm:text-lg md:text-xl font-heading font-black text-[#05060F] bg-[#43E6B5] px-3.5 py-1 rounded-xl shadow-glow-success tracking-wider mt-1 inline-block">
                 {lastReveal.correctAnswer}
               </span>
             </div>
-            <div className="px-3 py-1 rounded-full bg-[#1C2638] border border-[#303D52] text-xs font-medium text-[#94A3B8] flex items-center gap-1.5">
-              <Clock size={13} className="text-[#00D9FF]" />
+            <div className="px-3 py-1 rounded-full bg-[#11163A] border border-[#262E66] text-xs font-medium text-[#A6ACDB] flex items-center gap-1.5">
+              <Clock size={13} className="text-[#B9C0EA]" />
               <span>Sắp xếp theo thời gian nộp nhanh nhất</span>
             </div>
           </div>
 
           {/* Danh sách các thí sinh theo thời gian kèm dấu tick đúng/sai */}
           <div className="mt-2.5 space-y-2">
-            <h4 className="text-xs font-heading font-bold text-[#94A3B8] uppercase tracking-widest flex items-center gap-1.5">
-              <Award size={14} className="text-[#FFD43B]" />
+            <h4 className="text-xs font-heading font-bold text-[#A6ACDB] uppercase tracking-widest flex items-center gap-1.5">
+              <Award size={14} className="text-[#F7C873]" />
               <span>BẢNG KẾT QUẢ TĂNG TỐC</span>
             </h4>
 
@@ -193,10 +193,10 @@ export const TangTocRound: React.FC = () => {
                   key={res.playerId}
                   className={`p-2.5 sm:p-3 rounded-xl border transition-all flex items-center justify-between gap-2.5 ${
                     res.isCorrect
-                      ? 'bg-[#20D6A0]/10 border-[#20D6A0]/50 shadow-glow-success'
+                      ? 'bg-[#43E6B5]/10 border-[#43E6B5]/50 shadow-glow-success'
                       : hasSubmitted
-                      ? 'bg-[#FF496C]/10 border-[#FF496C]/40'
-                      : 'bg-[#1C2638]/50 border-[#303D52]/40 opacity-70'
+                      ? 'bg-[#FF5D8F]/10 border-[#FF5D8F]/40'
+                      : 'bg-[#11163A]/50 border-[#262E66]/40 opacity-70'
                   }`}
                 >
                   {/* Left: Thứ hạng + Dấu tick đúng/sai + Thông tin thí sinh & đáp án */}
@@ -205,8 +205,8 @@ export const TangTocRound: React.FC = () => {
                     <div
                       className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center font-heading font-black text-xs sm:text-sm shrink-0 ${
                         res.isCorrect
-                          ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow'
-                          : 'bg-[#1C2638] text-[#94A3B8] border-[#303D52]'
+                          ? 'bg-[#F7C873] text-[#05060F] border-[#F7C873] shadow-glow-yellow'
+                          : 'bg-[#11163A] text-[#A6ACDB] border-[#262E66]'
                       }`}
                     >
                       {index + 1}
@@ -217,14 +217,14 @@ export const TangTocRound: React.FC = () => {
                       {res.isCorrect ? (
                         <div
                           title="Đúng"
-                          className="w-7 h-7 rounded-full bg-[#20D6A0] text-[#090D18] flex items-center justify-center shadow-glow-success"
+                          className="w-7 h-7 rounded-full bg-[#43E6B5] text-[#05060F] flex items-center justify-center shadow-glow-success"
                         >
                           <CheckCircle2 size={18} className="stroke-[2.5]" />
                         </div>
                       ) : (
                         <div
                           title="Sai"
-                          className="w-7 h-7 rounded-full bg-[#FF496C] text-[#090D18] flex items-center justify-center shadow-glow-danger"
+                          className="w-7 h-7 rounded-full bg-[#FF5D8F] text-[#05060F] flex items-center justify-center shadow-glow-danger"
                         >
                           <XCircle size={18} className="stroke-[2.5]" />
                         </div>
@@ -235,7 +235,7 @@ export const TangTocRound: React.FC = () => {
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <PlayerAvatar player={p} size={22} />
-                        <span className="font-bold text-[#F8FAFC] text-xs sm:text-sm md:text-base truncate max-w-[90px] sm:max-w-[140px]">
+                        <span className="font-bold text-[#EEF0FF] text-xs sm:text-sm md:text-base truncate max-w-[90px] sm:max-w-[140px]">
                           {p.name}
                         </span>
                       </div>
@@ -243,13 +243,13 @@ export const TangTocRound: React.FC = () => {
                         {hasSubmitted ? (
                           <span
                             className={`font-heading font-bold tracking-wider uppercase ${
-                              res.isCorrect ? 'text-[#20D6A0]' : 'text-[#64748B] line-through'
+                              res.isCorrect ? 'text-[#43E6B5]' : 'text-[#6D75AD] line-through'
                             }`}
                           >
                             "{res.answer}"
                           </span>
                         ) : (
-                          <span className="text-[#64748B] italic text-xs">
+                          <span className="text-[#6D75AD] italic text-xs">
                             (Chưa nộp)
                           </span>
                         )}
@@ -261,20 +261,20 @@ export const TangTocRound: React.FC = () => {
                   <div className="flex items-center gap-2 sm:gap-3 shrink-0 font-digital">
                     {/* Thời gian */}
                     {hasSubmitted && res.timeSec != null ? (
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#090D18] border border-[#303D52] text-xs sm:text-sm text-[#00D9FF] font-bold shadow-glow-cyan tabular-nums">
-                        <Clock size={13} className="text-[#00D9FF]" />
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#05060F] border border-[#262E66] text-xs sm:text-sm text-[#B9C0EA] font-bold shadow-glow-cyan tabular-nums">
+                        <Clock size={13} className="text-[#B9C0EA]" />
                         <span>{Number(res.timeSec).toFixed(2)}s</span>
                       </div>
                     ) : (
-                      <span className="text-[#64748B] text-xs italic px-1">--</span>
+                      <span className="text-[#6D75AD] text-xs italic px-1">--</span>
                     )}
 
                     {/* Điểm số */}
                     <div
                       className={`text-xs sm:text-sm md:text-base font-bold px-3 py-1 rounded-xl min-w-[56px] text-center tabular-nums ${
                         res.delta > 0
-                          ? 'bg-[#FFD43B] text-[#090D18] shadow-glow-yellow'
-                          : 'bg-[#1C2638] text-[#64748B] border border-[#303D52]'
+                          ? 'bg-[#F7C873] text-[#05060F] shadow-glow-yellow'
+                          : 'bg-[#11163A] text-[#6D75AD] border border-[#262E66]'
                       }`}
                     >
                       {res.delta > 0 ? `+${res.delta}đ` : '0đ'}

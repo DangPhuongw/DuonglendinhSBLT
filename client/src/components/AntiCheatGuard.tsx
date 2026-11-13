@@ -115,7 +115,7 @@ export const AntiCheatGuard: React.FC = () => {
 
       {/* Nhãn đã bị cảnh cáo (cho chính thí sinh) */}
       {warnedOnce && !showModal && (
-        <div className="fixed top-16 right-3 z-40 max-w-[92vw] flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-[#FF496C] text-white text-xs sm:text-sm font-black shadow-[0_0_18px_rgba(255,73,108,0.6)] pointer-events-none animate-pulse">
+        <div className="fixed top-16 right-3 z-40 max-w-[92vw] flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-[#FF5D8F] text-white text-xs sm:text-sm font-black shadow-[0_0_18px_rgba(255,93,143,0.27)] pointer-events-none animate-pulse">
           <AlertTriangle size={15} />
           {badgeText}
         </div>
@@ -123,11 +123,11 @@ export const AntiCheatGuard: React.FC = () => {
 
       {/* Toast cho cả phòng */}
       {showToast && alert && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B0D18]/95 border-2 border-[#FF496C] text-white text-sm sm:text-base font-bold shadow-[0_0_30px_rgba(255,73,108,0.5)]">
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A0F24]/95 border-2 border-[#FF5D8F] text-white text-sm sm:text-base font-bold shadow-[0_0_30px_rgba(255,93,143,0.23)]">
           {alert.disqualified ? (
-            <ShieldX size={20} className="text-[#FF496C] shrink-0" />
+            <ShieldX size={20} className="text-[#FF5D8F] shrink-0" />
           ) : (
-            <AlertTriangle size={20} className="text-[#FF496C] shrink-0" />
+            <AlertTriangle size={20} className="text-[#FF5D8F] shrink-0" />
           )}
           <span>
             {alert.disqualified
@@ -141,21 +141,21 @@ export const AntiCheatGuard: React.FC = () => {
 
       {/* Cảnh báo đỏ toàn màn hình cho người vi phạm */}
       {showModal && alert && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#2A0610]/85 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border-4 border-[#FF496C] bg-[#1A0710] p-6 sm:p-8 text-center shadow-[0_0_80px_rgba(255,73,108,0.7)] animate-[pulse_1.2s_ease-in-out_2]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#2A0F24]/88 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border-4 border-[#FF5D8F] bg-[#2A0F24] p-6 sm:p-8 text-center shadow-[0_0_80px_rgba(255,93,143,0.32)] animate-[pulse_1.2s_ease-in-out_2]">
             {alert.disqualified ? (
-              <ShieldX size={64} className="mx-auto text-[#FF496C]" />
+              <ShieldX size={64} className="mx-auto text-[#FF5D8F]" />
             ) : (
-              <AlertTriangle size={64} className="mx-auto text-[#FF496C]" />
+              <AlertTriangle size={64} className="mx-auto text-[#FF5D8F]" />
             )}
-            <h2 className="mt-4 text-2xl sm:text-3xl font-heading font-black text-[#FF496C] uppercase tracking-wide">
+            <h2 className="mt-4 text-2xl sm:text-3xl font-heading font-black text-[#FF5D8F] uppercase tracking-wide">
               {alert.disqualified
                 ? 'Bạn đã bị loại'
                 : alert.penalty > 0
                 ? `Bị trừ ${alert.penalty} điểm`
                 : `Cảnh cáo lần ${alert.count}/${FREE_WARNINGS}`}
             </h2>
-            <p className="mt-3 text-[#F8FAFC] text-sm sm:text-base leading-relaxed">
+            <p className="mt-3 text-[#EEF0FF] text-sm sm:text-base leading-relaxed">
               {alert.disqualified
                 ? `Bạn đã rời khỏi tab trò chơi ${alert.count} lần trong lúc thi. Bạn bị loại khỏi trận đấu và chỉ có thể tiếp tục theo dõi.`
                 : alert.penalty > 0
@@ -163,7 +163,7 @@ export const AntiCheatGuard: React.FC = () => {
                 : 'Hệ thống phát hiện bạn vừa rời khỏi tab trò chơi trong lúc thi. Cả phòng đã được thông báo.'}
             </p>
             {!alert.disqualified && (
-              <p className="mt-3 text-[#FFD43B] font-bold text-sm sm:text-base">
+              <p className="mt-3 text-[#F7C873] font-bold text-sm sm:text-base">
                 {alert.penalty > 0
                   ? `Mỗi lần rời tab tiếp theo sẽ bị trừ thêm ${cfg.PENALTY_POINTS} điểm.`
                   : alert.count >= FREE_WARNINGS
@@ -173,7 +173,7 @@ export const AntiCheatGuard: React.FC = () => {
             )}
             <button
               onClick={() => setModalFor(null)}
-              className="mt-6 w-full py-3 rounded-xl bg-[#FF496C] hover:bg-[#ff5f7e] text-white font-heading font-black uppercase tracking-wider transition-colors"
+              className="mt-6 w-full py-3 rounded-xl bg-[#FF5D8F] hover:bg-[#FF7FA6] text-white font-heading font-black uppercase tracking-wider transition-colors"
             >
               Tôi đã hiểu
             </button>

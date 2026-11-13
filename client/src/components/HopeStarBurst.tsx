@@ -11,8 +11,8 @@ const StarShape: React.FC<{ size: number; className?: string }> = ({ size, class
   <svg viewBox="0 0 24 24" width={size} height={size} className={className} aria-hidden="true">
     <path
       d="M12 1.6l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.7 5.6 21.2 7 14.1 1.7 9.1l7.2-.9z"
-      fill="#FFD43B"
-      stroke="#FFF3B0"
+      fill="#F7C873"
+      stroke="#FBE0A8"
       strokeWidth="0.8"
       strokeLinejoin="round"
     />
@@ -106,9 +106,9 @@ export const HopeStarBurst: React.FC = () => {
         <div className="relative flex flex-col items-center gap-3 sm:gap-4">
           <StarShape size={180} className="hope-star-main w-32 h-32 sm:w-44 sm:h-44 lg:w-52 lg:h-52" />
           <div className="hope-title text-center px-4">
-            <div className="font-heading font-black text-2xl sm:text-4xl lg:text-5xl text-[#FFD43B] uppercase">Ngôi sao hy vọng</div>
+            <div className="font-heading font-black text-2xl sm:text-4xl lg:text-5xl text-[#F7C873] uppercase">Ngôi sao hy vọng</div>
             {playerName && (
-              <div className="mt-1 font-heading font-bold text-sm sm:text-lg text-[#FFF3B0]">{playerName} đặt ngôi sao cho câu hỏi này</div>
+              <div className="mt-1 font-heading font-bold text-sm sm:text-lg text-[#FBE0A8]">{playerName} đặt ngôi sao cho câu hỏi này</div>
             )}
           </div>
         </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&family=Oxanium:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,17 +14,25 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: #090D18;
-    color: #F8FAFC;
-    background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 217, 255, 0.08), transparent),
-      radial-gradient(ellipse 60% 40% at 50% 120%, rgba(255, 212, 59, 0.05), transparent);
-    background-attachment: fixed;
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #05060F;
+    color: #EEF0FF;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, .font-heading {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Chakra Petch', 'Be Vietnam Pro', sans-serif;
+    letter-spacing: 0.01em;
+  }
+
+  .font-digital {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  ::selection {
+    background: #F7C873;
+    color: #05060F;
   }
 }
 
@@ -34,55 +42,55 @@
 
 /* Dark Gaming Show UI Components */
 .card-dark {
-  background-color: #111827;
-  border: 1px solid #303D52;
+  background-color: #0A0D22;
+  border: 1px solid #262E66;
   border-radius: 14px;
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 .card-elevated {
-  background-color: #1C2638;
-  border: 1px solid #303D52;
+  background-color: #11163A;
+  border: 1px solid #262E66;
   border-radius: 16px;
   box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.75), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }
 
 .btn-primary {
-  background-color: #FFD43B;
-  color: #090D18;
+  background-color: #F7C873;
+  color: #05060F;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  border: 1px solid #FFD43B;
+  border: 1px solid #F7C873;
   border-radius: 10px;
-  box-shadow: 0 0 15px rgba(255, 212, 59, 0.35);
+  box-shadow: 0 0 15px rgba(247, 200, 115, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-primary:hover {
-  background-color: #ffe066;
-  box-shadow: 0 0 25px rgba(255, 212, 59, 0.55);
+  background-color: #FBE0A8;
+  box-shadow: 0 0 25px rgba(247, 200, 115, 0.55);
   transform: translateY(-1px);
 }
 
 .btn-primary:active {
   transform: translateY(1px);
-  box-shadow: 0 0 8px rgba(255, 212, 59, 0.3);
+  box-shadow: 0 0 8px rgba(247, 200, 115, 0.3);
 }
 
 .btn-secondary {
-  background-color: #1C2638;
-  color: #F8FAFC;
+  background-color: #11163A;
+  color: #EEF0FF;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 600;
-  border: 1px solid #303D52;
+  border: 1px solid #262E66;
   border-radius: 10px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-secondary:hover {
-  background-color: #24324a;
-  border-color: #00D9FF;
-  box-shadow: 0 0 15px rgba(0, 217, 255, 0.25);
+  background-color: #1B2255;
+  border-color: #7CB4FF;
+  box-shadow: 0 0 15px rgba(124, 180, 255, 0.25);
   transform: translateY(-1px);
 }
 
@@ -91,73 +99,73 @@
 }
 
 .input-dark {
-  background-color: #111827;
-  border: 1px solid #303D52;
-  color: #F8FAFC;
+  background-color: #0A0D22;
+  border: 1px solid #262E66;
+  color: #EEF0FF;
   border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .input-dark:focus {
   outline: none;
-  border-color: #00D9FF;
-  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
-  background-color: #141c2e;
+  border-color: #7CB4FF;
+  box-shadow: 0 0 15px rgba(124, 180, 255, 0.3);
+  background-color: #0D1130;
 }
 
 /* Compatibility classes styled for Dark Gaming Theme */
 .btn-neo {
-  border: 1px solid #303D52;
+  border: 1px solid #262E66;
   transition: all 0.2s ease;
 }
 
 .card-neo {
-  background-color: #111827;
-  border: 1px solid #303D52;
+  background-color: #0A0D22;
+  border: 1px solid #262E66;
   border-radius: 14px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .card-neo-lg {
-  background-color: #1C2638;
-  border: 1px solid #303D52;
+  background-color: #11163A;
+  border: 1px solid #262E66;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
 }
 
 .card-neo-yellow {
-  background-color: #1C2638;
-  border: 2px solid #FFD43B;
-  box-shadow: 0 0 20px rgba(255, 212, 59, 0.25);
+  background-color: #11163A;
+  border: 2px solid #F7C873;
+  box-shadow: 0 0 20px rgba(247, 200, 115, 0.25);
   border-radius: 14px;
 }
 
 .badge-neo {
-  border: 1px solid #303D52;
+  border: 1px solid #262E66;
   border-radius: 6px;
 }
 
 @keyframes pulse-neon {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 212, 59, 0.6);
+    box-shadow: 0 0 0 0 rgba(247, 200, 115, 0.6);
   }
   70% {
-    box-shadow: 0 0 0 16px rgba(255, 212, 59, 0);
+    box-shadow: 0 0 0 16px rgba(247, 200, 115, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 212, 59, 0);
+    box-shadow: 0 0 0 0 rgba(247, 200, 115, 0);
   }
 }
 
 @keyframes pulse-danger {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 73, 108, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 93, 143, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 16px rgba(255, 73, 108, 0);
+    box-shadow: 0 0 0 16px rgba(255, 93, 143, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 73, 108, 0);
+    box-shadow: 0 0 0 0 rgba(255, 93, 143, 0);
   }
 }
 
@@ -169,23 +177,23 @@
   animation: pulse-danger 1.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
 }
 
-/* Custom dark scrollbar */
+/* Thanh cuộn mảnh, trong suốt, ánh chàm */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090D18;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #303D52;
+  background: rgba(124, 150, 255, 0.28);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00D9FF;
+  background: rgba(155, 123, 255, 0.7);
 }
 
 /* Galaxy & Nebula Background Animations */
@@ -264,17 +272,17 @@
 }
 
 .shooting-star-streak {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(0, 217, 255, 0.4), transparent);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(124, 180, 255, 0.4), transparent);
   animation: shooting-star 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
   animation-delay: 2s;
-  box-shadow: 0 0 8px rgba(0, 217, 255, 0.8);
+  box-shadow: 0 0 8px rgba(124, 180, 255, 0.8);
 }
 
 .shooting-star-streak-2 {
-  background: linear-gradient(90deg, rgba(255, 212, 59, 0.9), rgba(168, 85, 247, 0.4), transparent);
+  background: linear-gradient(90deg, rgba(247, 200, 115, 0.9), rgba(155, 123, 255, 0.4), transparent);
   animation: shooting-star 16s cubic-bezier(0.16, 1, 0.3, 1) infinite;
   animation-delay: 8s;
-  box-shadow: 0 0 8px rgba(255, 212, 59, 0.8);
+  box-shadow: 0 0 8px rgba(247, 200, 115, 0.8);
 }
 
 /* ---------- Màn công bố điểm sau vòng ---------- */
@@ -373,15 +381,15 @@
 @keyframes rx-blink-once { 0% { opacity: 0; transform: scale(1.3); } 12% { opacity: 1; transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes rx-fly-up { 0% { opacity: 0; transform: translateY(10px) scale(0.6); } 20% { opacity: 1; transform: translateY(0) scale(1.15); } 70% { opacity: 1; transform: translateY(-14px) scale(1); } 100% { opacity: 0; transform: translateY(-28px); } }
 @keyframes rx-slide-in { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
-@keyframes rx-mark-right { from { border-color: #303D52; } to { border-color: #20D6A0; background: rgba(32, 214, 160, 0.18); box-shadow: 0 0 14px rgba(32, 214, 160, 0.45); } }
-@keyframes rx-mark-wrong { from { border-color: #303D52; } to { border-color: #FF496C; background: rgba(255, 73, 108, 0.18); } }
-@keyframes rx-pick { from { border-color: #303D52; transform: scale(1); } 60% { transform: scale(1.12); } to { border-color: #FFD43B; transform: scale(1.06); box-shadow: 0 0 18px rgba(255, 212, 59, 0.55); } }
-@keyframes rx-press { 0% { transform: scale(1); } 40% { transform: scale(0.82); } 100% { transform: scale(1.08); box-shadow: 0 0 0 4px #FFD43B, 0 0 18px rgba(255, 212, 59, 0.7); } }
+@keyframes rx-mark-right { from { border-color: #262E66; } to { border-color: #43E6B5; background: rgba(67, 230, 181, 0.18); box-shadow: 0 0 14px rgba(67, 230, 181, 0.45); } }
+@keyframes rx-mark-wrong { from { border-color: #262E66; } to { border-color: #FF5D8F; background: rgba(255, 93, 143, 0.18); } }
+@keyframes rx-pick { from { border-color: #262E66; transform: scale(1); } 60% { transform: scale(1.12); } to { border-color: #F7C873; transform: scale(1.06); box-shadow: 0 0 18px rgba(247, 200, 115, 0.55); } }
+@keyframes rx-press { 0% { transform: scale(1); } 40% { transform: scale(0.82); } 100% { transform: scale(1.08); box-shadow: 0 0 0 4px #F7C873, 0 0 18px rgba(247, 200, 115, 0.7); } }
 @keyframes rx-grow-bar { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
 @keyframes rx-dim { to { opacity: 0.35; filter: grayscale(1); } }
 @keyframes rx-shake { 0% { opacity: 0; transform: translateX(0); } 15% { opacity: 1; } 30% { transform: translateX(-6px); } 45% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 75% { transform: translateX(4px); } 100% { opacity: 1; transform: none; } }
 @keyframes rx-spin-once { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-@keyframes rx-glow-row { 0%, 100% { box-shadow: none; } 30%, 70% { box-shadow: 0 0 0 2px #FFD43B, 0 0 16px rgba(255, 212, 59, 0.5); } }
+@keyframes rx-glow-row { 0%, 100% { box-shadow: none; } 30%, 70% { box-shadow: 0 0 0 2px #F7C873, 0 0 16px rgba(247, 200, 115, 0.5); } }
 @keyframes rx-progress { from { width: 0%; } to { width: 100%; } }
 
 @media (prefers-reduced-motion: reduce) {
@@ -413,12 +421,12 @@
 .penalty-card { animation: penalty-shake 0.6s ease-in-out; }
 .penalty-flash {
   animation: penalty-flash 1.8s ease-out forwards;
-  background: radial-gradient(ellipse at center, rgba(255, 73, 108, 0.55), rgba(255, 73, 108, 0.2) 70%);
-  box-shadow: 0 0 0 2px #FF496C, 0 0 28px rgba(255, 73, 108, 0.75), inset 0 0 22px rgba(255, 73, 108, 0.55);
+  background: radial-gradient(ellipse at center, rgba(255, 93, 143, 0.55), rgba(255, 93, 143, 0.2) 70%);
+  box-shadow: 0 0 0 2px #FF5D8F, 0 0 28px rgba(255, 93, 143, 0.75), inset 0 0 22px rgba(255, 93, 143, 0.55);
 }
 .penalty-number {
   animation: penalty-number 2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-  text-shadow: 0 0 14px rgba(255, 73, 108, 0.95), 0 2px 0 #5c0a1c;
+  text-shadow: 0 0 14px rgba(255, 93, 143, 0.95), 0 2px 0 #2A0F24;
 }
 
 /* ===== Ngôi sao hy vọng: lấp lánh vàng toàn màn hình ===== */
@@ -445,21 +453,21 @@
 }
 .hope-veil {
   animation: hope-veil 2.8s ease-out forwards;
-  background: radial-gradient(circle at center, rgba(255, 212, 59, 0.38), rgba(255, 170, 0, 0.12) 40%, rgba(9, 13, 24, 0.55) 80%);
+  background: radial-gradient(circle at center, rgba(247, 200, 115, 0.38), rgba(247, 200, 115, 0.12) 40%, rgba(5, 6, 15, 0.55) 80%);
 }
 .hope-rays {
   animation: hope-rays 6s linear infinite, hope-veil 2.8s ease-out forwards;
-  background: repeating-conic-gradient(from 0deg, rgba(255, 212, 59, 0.28) 0deg 8deg, transparent 8deg 24deg);
+  background: repeating-conic-gradient(from 0deg, rgba(247, 200, 115, 0.28) 0deg 8deg, transparent 8deg 24deg);
   -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 60%);
   mask-image: radial-gradient(circle, #000 0%, transparent 60%);
 }
 .hope-star-main {
   animation: hope-star-main 2.8s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-  filter: drop-shadow(0 0 30px rgba(255, 212, 59, 0.95)) drop-shadow(0 0 70px rgba(255, 170, 0, 0.7));
+  filter: drop-shadow(0 0 30px rgba(247, 200, 115, 0.95)) drop-shadow(0 0 70px rgba(247, 200, 115, 0.7));
 }
 .hope-sparkle { animation: hope-sparkle var(--dur, 1.8s) ease-out var(--delay, 0s) both; }
 .hope-twinkle { animation: hope-twinkle var(--dur, 1.2s) ease-in-out var(--delay, 0s) 2 both; }
-.hope-title { animation: hope-title 2.8s ease-out forwards; text-shadow: 0 0 18px rgba(255, 212, 59, 0.9), 0 3px 0 #6b4a00; }
+.hope-title { animation: hope-title 2.8s ease-out forwards; text-shadow: 0 0 18px rgba(247, 200, 115, 0.9), 0 3px 0 #6B4A00; }
 
 @media (prefers-reduced-motion: reduce) {
   .penalty-card { animation: none !important; }
@@ -483,12 +491,12 @@
 
 /* ===== Phím SPACE nhún xuống liên tục để nhắc bấm chuông ===== */
 @keyframes space-key-press {
-  0%, 55%, 100% { transform: translateY(0); box-shadow: 0 5px 0 #7C8799, 0 0 0 rgba(255, 212, 59, 0); }
-  70% { transform: translateY(4px); box-shadow: 0 1px 0 #7C8799, 0 0 22px rgba(255, 212, 59, 0.85); }
+  0%, 55%, 100% { transform: translateY(0); box-shadow: 0 5px 0 #6D75AD, 0 0 0 rgba(247, 200, 115, 0); }
+  70% { transform: translateY(4px); box-shadow: 0 1px 0 #6D75AD, 0 0 22px rgba(247, 200, 115, 0.85); }
 }
 .space-key-press { animation: space-key-press 1.1s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .space-key-press { animation: none; box-shadow: 0 5px 0 #7C8799, 0 0 18px rgba(255, 212, 59, 0.6); }
+  .space-key-press { animation: none; box-shadow: 0 5px 0 #6D75AD, 0 0 18px rgba(247, 200, 115, 0.6); }
 }
 
 /* ===== Cảm xúc của khán giả bay từ dưới lên ===== */
@@ -508,4 +516,123 @@
 @media (prefers-reduced-motion: reduce) {
   .reaction-float { animation: rx-fade-out var(--float-ms, 8000ms) ease-in forwards; }
   .reaction-sway { animation: none; }
+}
+
+
+/* =====================================================================
+   GALAXY THEME: nền ngân hà, bề mặt kính tối, khung HUD kỹ thuật
+   ===================================================================== */
+
+.galaxy-bg { background: #05060F; }
+
+/* Mây tinh vân: tím / hồng / xanh băng trên nền chàm sâu */
+.galaxy-nebula {
+  background:
+    radial-gradient(58% 48% at 10% 6%, rgba(112, 84, 255, 0.22), transparent 72%),
+    radial-gradient(52% 44% at 92% 20%, rgba(255, 93, 143, 0.13), transparent 72%),
+    radial-gradient(72% 56% at 52% 112%, rgba(58, 138, 255, 0.2), transparent 72%),
+    radial-gradient(38% 30% at 72% 66%, rgba(155, 123, 255, 0.11), transparent 72%),
+    radial-gradient(30% 24% at 22% 78%, rgba(67, 230, 181, 0.06), transparent 72%),
+    linear-gradient(180deg, #070A1C 0%, #05060F 58%, #04050B 100%);
+}
+
+/* Lớp sao trôi rất chậm: đủ để thấy chiều sâu, không gây phân tâm */
+.galaxy-drift { animation: galaxy-drift 240s ease-in-out infinite alternate; will-change: transform; }
+@keyframes galaxy-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-2.4%, -1.6%, 0) scale(1.012); }
+}
+
+/* Lưới kỹ thuật mờ, tan dần ra mép */
+.galaxy-grid {
+  background-image:
+    linear-gradient(rgba(124, 180, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 180, 255, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 78% 68% at 50% 46%, #000 12%, transparent 80%);
+  mask-image: radial-gradient(ellipse 78% 68% at 50% 46%, #000 12%, transparent 80%);
+}
+
+.galaxy-vignette { background: radial-gradient(ellipse at 50% 45%, transparent 42%, rgba(2, 3, 10, 0.72) 100%); }
+
+/* Hạt nhiễu phim: bớt phẳng, chống sọc màu ở gradient tối */
+.galaxy-grain {
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .galaxy-drift { animation: none; }
+}
+
+/* ---- Bề mặt kính: ánh sáng nhẹ từ trên xuống, viền mảnh ánh chàm ---- */
+.bg-\[\#0A0D22\],
+.bg-\[\#11163A\] {
+  background-image: linear-gradient(180deg, rgba(150, 165, 255, 0.05), rgba(150, 165, 255, 0) 46%);
+}
+
+@layer components {
+  /* Khung HUD: hai góc vát kiểu buồng lái. Thêm class "hud" vào thẻ muốn có. */
+  .hud { position: relative; }
+  .hud::before,
+  .hud::after {
+    content: '';
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    pointer-events: none;
+    border: 1px solid rgba(165, 180, 255, 0.6);
+    transition: border-color 0.25s ease, width 0.25s ease, height 0.25s ease;
+  }
+  .hud::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .hud::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+  .hud-gold::before, .hud-gold::after { border-color: rgba(247, 200, 115, 0.85); }
+  .hud-ice::before, .hud-ice::after { border-color: rgba(124, 180, 255, 0.8); }
+
+  /* Chữ tiêu đề ánh sao: vàng nhạt chuyển trắng rồi tím */
+  .text-gold-gradient {
+    background-image: linear-gradient(100deg, #FBE0A8 0%, #EEF0FF 45%, #B9A6FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Nhãn kỹ thuật nhỏ: chữ hoa, giãn chữ, màu chàm nhạt */
+  .tech-label {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8F98D6;
+  }
+}
+
+/* Thanh trên cùng: vạch sáng chuyển màu mảnh dưới viền */
+.nav-hairline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(155, 123, 255, 0.55) 22%, rgba(124, 180, 255, 0.75) 50%, rgba(255, 93, 143, 0.45) 78%, transparent);
+  pointer-events: none;
+}
+
+/* Vòng quỹ đạo của logo */
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
+.orbit-ring { animation: orbit-spin 14s linear infinite; transform-origin: 50% 50%; }
+@media (prefers-reduced-motion: reduce) { .orbit-ring { animation: none; } }
+
+/* ---- Nút chuông: mặt kim loại có vệt sáng + vòng ngoài mảnh (thay cho khối vàng phẳng) ---- */
+.buzzer-active {
+  border-width: 2px;
+  border-color: rgba(255, 240, 205, 0.55);
+  background-image:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at 50% 118%, rgba(120, 60, 10, 0.4), rgba(120, 60, 10, 0) 62%);
+  outline: 1px solid rgba(247, 200, 115, 0.4);
+  outline-offset: 7px;
 }

@@ -85,14 +85,14 @@ export const RoundResults: React.FC = () => {
     >
       {/* Tiêu đề */}
       <div className="text-center mb-4 sm:mb-6 rr-title">
-        <span className="inline-block text-xs sm:text-sm font-heading font-black uppercase tracking-[0.25em] bg-[#FFD43B]/15 text-[#FFD43B] px-4 py-1 rounded-full border border-[#FFD43B]/40 shadow-glow-yellow">
+        <span className="inline-block text-xs sm:text-sm font-heading font-black uppercase tracking-[0.25em] bg-[#F7C873]/15 text-[#F7C873] px-4 py-1 rounded-full border border-[#F7C873]/40 shadow-glow-yellow">
           Kết thúc {label?.index ?? 'vòng thi'}
         </span>
-        <h1 className="mt-2 text-2xl sm:text-4xl lg:text-5xl font-heading font-black text-[#F8FAFC] tracking-tight">
+        <h1 className="mt-2 text-2xl sm:text-4xl lg:text-5xl font-heading font-black text-[#EEF0FF] tracking-tight">
           BẢNG ĐIỂM
         </h1>
         {label && (
-          <p className="mt-1 text-sm sm:text-base font-heading font-bold text-[#94A3B8] uppercase tracking-wider">
+          <p className="mt-1 text-sm sm:text-base font-heading font-bold text-[#A6ACDB] uppercase tracking-wider">
             {label.name}
           </p>
         )}
@@ -140,18 +140,18 @@ const ResultRow: React.FC<{
   const isLeader = entry.rank === 1 && !entry.disqualified;
 
   const rowTone = entry.disqualified
-    ? 'bg-[#1A0D14]/90 border-[#FF496C]/40'
+    ? 'bg-[#2A0F24]/90 border-[#FF5D8F]/40'
     : isLeader
-    ? 'bg-gradient-to-r from-[#3A2E06]/95 via-[#1C2638]/95 to-[#1C2638]/95 border-[#FFD43B] shadow-[0_0_28px_rgba(255,212,59,0.35)]'
+    ? 'bg-gradient-to-r from-[#3B2D12]/95 via-[#11163A]/95 to-[#11163A]/95 border-[#F7C873] shadow-[0_0_28px_rgba(247,200,115,0.35)]'
     : isMe
-    ? 'bg-[#0E2A35]/90 border-[#00D9FF]/70'
-    : 'bg-[#111827]/90 border-[#303D52]';
+    ? 'bg-[#0F2142]/90 border-[#7CB4FF]/70'
+    : 'bg-[#0A0D22]/90 border-[#262E66]';
 
   const rankTone = entry.disqualified
-    ? 'bg-[#FF496C]/15 text-[#FF496C] border-[#FF496C]/50'
+    ? 'bg-[#FF5D8F]/15 text-[#FF5D8F] border-[#FF5D8F]/50'
     : isLeader
-    ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B]'
-    : 'bg-[#1C2638] text-[#F8FAFC] border-[#303D52]';
+    ? 'bg-[#F7C873] text-[#05060F] border-[#F7C873]'
+    : 'bg-[#11163A] text-[#EEF0FF] border-[#262E66]';
 
   return (
     <li
@@ -171,23 +171,23 @@ const ResultRow: React.FC<{
       {/* Tên */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
-          {isLeader && <Crown size={20} className="shrink-0 text-[#FFD43B]" />}
+          {isLeader && <Crown size={20} className="shrink-0 text-[#F7C873]" />}
           <PlayerAvatar player={{ name: entry.name, avatar }} size={36} dimmed={entry.disqualified} />
           <span
             className={`truncate font-heading font-black text-base sm:text-xl ${
-              entry.disqualified ? 'text-[#94A3B8] line-through' : 'text-[#F8FAFC]'
+              entry.disqualified ? 'text-[#A6ACDB] line-through' : 'text-[#EEF0FF]'
             }`}
           >
             {entry.name}
           </span>
           {isMe && (
-            <span className="shrink-0 text-[10px] sm:text-xs font-heading font-bold uppercase text-[#00D9FF] bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-md px-1.5 py-0.5">
+            <span className="shrink-0 text-[10px] sm:text-xs font-heading font-bold uppercase text-[#7CB4FF] bg-[#7CB4FF]/10 border border-[#7CB4FF]/40 rounded-md px-1.5 py-0.5">
               Bạn
             </span>
           )}
         </div>
         {entry.disqualified && (
-          <span className="text-[11px] sm:text-xs font-heading font-bold uppercase tracking-wider text-[#FF496C]/80">
+          <span className="text-[11px] sm:text-xs font-heading font-bold uppercase tracking-wider text-[#FF5D8F]/80">
             Bị loại
           </span>
         )}
@@ -198,10 +198,10 @@ const ResultRow: React.FC<{
         <span
           className={`shrink-0 font-digital font-bold text-sm sm:text-lg tabular-nums px-2 py-0.5 rounded-lg border ${
             entry.roundScore > 0
-              ? 'text-[#20D6A0] border-[#20D6A0]/40 bg-[#20D6A0]/10'
+              ? 'text-[#43E6B5] border-[#43E6B5]/40 bg-[#43E6B5]/10'
               : entry.roundScore < 0
-              ? 'text-[#FF496C] border-[#FF496C]/40 bg-[#FF496C]/10'
-              : 'text-[#64748B] border-[#303D52] bg-transparent'
+              ? 'text-[#FF5D8F] border-[#FF5D8F]/40 bg-[#FF5D8F]/10'
+              : 'text-[#6D75AD] border-[#262E66] bg-transparent'
           } ${visible ? 'rr-pop' : 'opacity-0'}`}
           style={visible && animate && !settled ? { animationDelay: `${cfg.ENTRY_MS}ms` } : undefined}
           title="Điểm giành được trong vòng này"
@@ -213,7 +213,7 @@ const ResultRow: React.FC<{
       {/* Tổng điểm */}
       <span
         className={`shrink-0 w-16 sm:w-24 text-right font-digital font-bold text-2xl sm:text-4xl tabular-nums ${
-          isLeader ? 'text-[#FFD43B]' : 'text-[#F8FAFC]'
+          isLeader ? 'text-[#F7C873]' : 'text-[#EEF0FF]'
         }`}
       >
         {entry.score}

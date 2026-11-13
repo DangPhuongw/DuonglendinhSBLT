@@ -70,15 +70,15 @@ export const ViewerReactionBar: React.FC = () => {
       className={`fixed right-3 sm:right-5 z-40 flex flex-col items-end gap-2 ${inLobby ? 'bottom-4' : 'bottom-28 sm:bottom-32'}`}
     >
       {notice && (
-        <div className="rx-fade-up max-w-[260px] rounded-xl bg-[#111827] border border-[#FFD43B]/50 px-3 py-1.5 text-xs font-bold text-[#FFD43B] shadow-lg" role="status">
+        <div className="rx-fade-up max-w-[260px] rounded-xl bg-[#0A0D22] border border-[#F7C873]/50 px-3 py-1.5 text-xs font-bold text-[#F7C873] shadow-lg" role="status">
           {notice}
         </div>
       )}
 
       {open === 'predictions' && (
-        <div className="rx-pop w-[min(94vw,390px)] max-h-[min(560px,calc(100dvh-15rem))] overflow-y-auto overscroll-contain rounded-2xl bg-[#111827]/95 border border-[#FFD43B]/40 p-3 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur">
+        <div className="rx-pop w-[min(94vw,390px)] max-h-[min(560px,calc(100dvh-15rem))] overflow-y-auto overscroll-contain rounded-2xl bg-[#0A0D22]/95 border border-[#F7C873]/40 p-3 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur">
           <div className="flex justify-end -mb-6">
-            <button onClick={() => setOpen(null)} className="relative z-10 text-[#64748B] hover:text-[#F8FAFC] cursor-pointer" aria-label="Đóng bảng dự đoán">
+            <button onClick={() => setOpen(null)} className="relative z-10 text-[#6D75AD] hover:text-[#EEF0FF] cursor-pointer" aria-label="Đóng bảng dự đoán">
               <X size={15} />
             </button>
           </div>
@@ -87,10 +87,10 @@ export const ViewerReactionBar: React.FC = () => {
       )}
 
       {open === 'reactions' && (
-        <div className="rx-pop w-[min(92vw,340px)] rounded-2xl bg-[#111827]/95 border border-[#303D52] p-3 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur">
+        <div className="rx-pop w-[min(92vw,340px)] rounded-2xl bg-[#0A0D22]/95 border border-[#262E66] p-3 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-heading font-black uppercase tracking-wider text-[#00D9FF]">Thả cảm xúc</span>
-            <button onClick={() => setOpen(null)} className="text-[#64748B] hover:text-[#F8FAFC] cursor-pointer" aria-label="Đóng">
+            <span className="text-xs font-heading font-black uppercase tracking-wider text-[#7CB4FF]">Thả cảm xúc</span>
+            <button onClick={() => setOpen(null)} className="text-[#6D75AD] hover:text-[#EEF0FF] cursor-pointer" aria-label="Đóng">
               <X size={15} />
             </button>
           </div>
@@ -101,7 +101,7 @@ export const ViewerReactionBar: React.FC = () => {
                 key={emoji}
                 onClick={() => send('emoji', i)}
                 disabled={coolingDown}
-                className="h-11 rounded-xl bg-[#1C2638] hover:bg-[#24324a] border border-[#303D52] text-2xl leading-none cursor-pointer active:scale-90 transition-transform disabled:cursor-not-allowed"
+                className="h-11 rounded-xl bg-[#11163A] hover:bg-[#1B2255] border border-[#262E66] text-2xl leading-none cursor-pointer active:scale-90 transition-transform disabled:cursor-not-allowed"
                 aria-label={`Thả ${emoji}`}
               >
                 {emoji}
@@ -115,7 +115,7 @@ export const ViewerReactionBar: React.FC = () => {
                 key={msg}
                 onClick={() => send('message', i)}
                 disabled={coolingDown}
-                className="px-2.5 py-1 rounded-full bg-[#0E1524] hover:bg-[#162132] border border-[#00D9FF]/40 hover:border-[#00D9FF] text-xs sm:text-sm font-heading font-bold text-[#F8FAFC] cursor-pointer active:scale-95 transition-all disabled:cursor-not-allowed"
+                className="px-2.5 py-1 rounded-full bg-[#0D1130] hover:bg-[#121739] border border-[#7CB4FF]/40 hover:border-[#7CB4FF] text-xs sm:text-sm font-heading font-bold text-[#EEF0FF] cursor-pointer active:scale-95 transition-all disabled:cursor-not-allowed"
               >
                 {msg}
               </button>
@@ -128,7 +128,7 @@ export const ViewerReactionBar: React.FC = () => {
       {!finished && (
         <button
           onClick={() => setOpen((v) => (v === 'predictions' ? null : 'predictions'))}
-          className={`h-11 sm:h-12 pl-3 pr-4 rounded-full bg-[#FFD43B] text-[#090D18] shadow-glow-yellow flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform ${open === 'predictions' ? 'ring-4 ring-[#FFD43B]/40' : ''}`}
+          className={`h-11 sm:h-12 pl-3 pr-4 rounded-full bg-[#F7C873] text-[#05060F] shadow-glow-yellow flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform ${open === 'predictions' ? 'ring-4 ring-[#F7C873]/40' : ''}`}
           aria-expanded={open === 'predictions'}
           title="Dự đoán kết quả trận đấu bằng điểm"
         >
@@ -138,7 +138,7 @@ export const ViewerReactionBar: React.FC = () => {
       )}
       <button
         onClick={() => setOpen((v) => (v === 'reactions' ? null : 'reactions'))}
-        className={`relative overflow-hidden h-11 sm:h-12 pl-3 pr-4 rounded-full bg-[#00D9FF] text-[#090D18] shadow-glow-cyan flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform ${open === 'reactions' ? 'ring-4 ring-[#00D9FF]/40' : ''}`}
+        className={`relative overflow-hidden h-11 sm:h-12 pl-3 pr-4 rounded-full bg-[#7CB4FF] text-[#05060F] shadow-glow-cyan flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform ${open === 'reactions' ? 'ring-4 ring-[#7CB4FF]/40' : ''}`}
         aria-expanded={open === 'reactions'}
         title="Thả cảm xúc, tin nhắn cổ vũ"
       >
@@ -146,7 +146,7 @@ export const ViewerReactionBar: React.FC = () => {
         <span className="font-heading font-black text-xs sm:text-sm tracking-wider whitespace-nowrap">CỔ VŨ</span>
         {coolingDown && (
           // Thời gian chờ trước khi thả tiếp: thanh mờ chạy ngang dưới đáy nút
-          <span className="absolute left-0 bottom-0 h-1 bg-[#090D18]/45" style={{ width: `${(progress * 100).toFixed(1)}%` }} aria-hidden="true" />
+          <span className="absolute left-0 bottom-0 h-1 bg-[#05060F]/45" style={{ width: `${(progress * 100).toFixed(1)}%` }} aria-hidden="true" />
         )}
       </button>
       </div>

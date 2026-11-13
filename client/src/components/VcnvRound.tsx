@@ -150,12 +150,12 @@ export const VcnvRound: React.FC = () => {
       {/* ======================================================== */}
       {/* 1. TOP HEADER & TIMER                                    */}
       {/* ======================================================== */}
-      <div className="w-full bg-[#111827] border border-[#303D52] rounded-2xl p-2 sm:px-4 sm:py-2 mb-2 shadow-xl flex items-center justify-between gap-3 shrink-0">
+      <div className="w-full bg-[#0A0D22] border border-[#262E66] rounded-2xl p-2 sm:px-4 sm:py-2 mb-2 shadow-xl flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-[#FFD43B]/40 shadow-glow-yellow">
+          <span className="text-xs sm:text-sm lg:text-base font-heading font-black uppercase tracking-wider bg-[#F7C873]/15 text-[#F7C873] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-[#F7C873]/40 shadow-glow-yellow">
             VÒNG 2: VƯỢT CHƯỚNG NGẠI VẬT
           </span>
-          <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2.5 py-1 rounded-lg border border-[#303D52] hidden sm:inline-block">
+          <span className="text-xs text-[#A6ACDB] font-digital font-bold tabular-nums bg-[#11163A] px-2.5 py-1 rounded-lg border border-[#262E66] hidden sm:inline-block">
             {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
           </span>
         </div>
@@ -184,7 +184,7 @@ export const VcnvRound: React.FC = () => {
       </div>
 
       {buzzRejectedReason && (
-        <div className="w-full py-1.5 px-3.5 mb-2 bg-[#FF496C]/15 border border-[#FF496C]/50 rounded-xl text-center text-xs sm:text-sm font-bold text-[#FF496C] shadow-glow-danger shrink-0">
+        <div className="w-full py-1.5 px-3.5 mb-2 bg-[#FF5D8F]/15 border border-[#FF5D8F]/50 rounded-xl text-center text-xs sm:text-sm font-bold text-[#FF5D8F] shadow-glow-danger shrink-0">
           {buzzRejectedReason}
         </div>
       )}
@@ -194,12 +194,12 @@ export const VcnvRound: React.FC = () => {
       {/* ======================================================== */}
       <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3 mb-2 shrink-0">
         {/* LEFT: 4 HÀNG NGANG (GỢI Ý) */}
-        <div className="md:col-span-7 bg-[#111827] border border-[#303D52] rounded-2xl p-2.5 sm:p-3 shadow-xl flex flex-col justify-between">
+        <div className="md:col-span-7 bg-[#0A0D22] border border-[#262E66] rounded-2xl p-2.5 sm:p-3 shadow-xl flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1.5 px-0.5">
-            <span className="text-xs sm:text-sm font-heading font-black uppercase tracking-wider text-[#F8FAFC]">
+            <span className="text-xs sm:text-sm font-heading font-black uppercase tracking-wider text-[#EEF0FF]">
               4 Hàng Ngang (Gợi Ý)
             </span>
-            <span className="text-xs text-[#94A3B8] font-digital font-bold tabular-nums bg-[#1C2638] px-2 py-0.5 rounded-lg border border-[#303D52]">
+            <span className="text-xs text-[#A6ACDB] font-digital font-bold tabular-nums bg-[#11163A] px-2 py-0.5 rounded-lg border border-[#262E66]">
               {rowsRevealed.filter(Boolean).length}/4 hàng đã mở
             </span>
           </div>
@@ -220,22 +220,22 @@ export const VcnvRound: React.FC = () => {
                   onClick={() => isClickable && pickVcnvRow(idx)}
                   className={`px-2.5 py-1.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
                     isClickable
-                      ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow hover:scale-[1.01] cursor-pointer active:scale-95 animate-pulse'
+                      ? 'bg-[#11163A] border-2 border-[#F7C873] shadow-glow-yellow hover:scale-[1.01] cursor-pointer active:scale-95 animate-pulse'
                       : isCurrent
-                      ? 'bg-[#1C2638] border-2 border-[#00D9FF] shadow-glow-cyan font-bold'
+                      ? 'bg-[#11163A] border-2 border-[#B9C0EA] shadow-glow-cyan font-bold'
                       : isRevealed
-                      ? 'bg-[#162132] border border-[#303D52]'
-                      : 'bg-[#0E1524] border-[#303D52]/40 opacity-75'
+                      ? 'bg-[#080B1E] border border-[#262E66]'
+                      : 'bg-[#080B1E] border-[#262E66]/40 opacity-75'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span
                       className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-heading font-black text-xs shrink-0 ${
                         isClickable || isCurrent
-                          ? 'bg-[#FFD43B] text-[#090D18]'
+                          ? 'bg-[#F7C873] text-[#05060F]'
                           : isRevealed && revealedLetters
-                          ? 'bg-[#20D6A0] text-[#090D18]'
-                          : 'bg-[#1C2638] text-[#94A3B8] border border-[#303D52]'
+                          ? 'bg-[#43E6B5] text-[#05060F]'
+                          : 'bg-[#11163A] text-[#A6ACDB] border border-[#262E66]'
                       }`}
                     >
                       {idx + 1}
@@ -250,10 +250,10 @@ export const VcnvRound: React.FC = () => {
                             key={charIdx}
                             className={`w-6 h-7 sm:w-7 sm:h-8 rounded-md flex items-center justify-center font-digital font-bold text-xs border transition-all ${
                               char
-                                ? 'bg-[#20D6A0] text-[#090D18] border-[#20D6A0] shadow-glow-success font-black'
+                                ? 'bg-[#43E6B5] text-[#05060F] border-[#43E6B5] shadow-glow-success font-black'
                                 : isCurrent
-                                ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF] shadow-glow-cyan'
-                                : 'bg-[#1C2638] text-[#64748B] border-[#303D52]'
+                                ? 'bg-[#B9C0EA]/20 text-[#B9C0EA] border-[#B9C0EA] shadow-glow-cyan'
+                                : 'bg-[#11163A] text-[#6D75AD] border-[#262E66]'
                             }`}
                           >
                             {char || (isCurrent ? '?' : '•')}
@@ -268,26 +268,26 @@ export const VcnvRound: React.FC = () => {
                     {isClickable ? (
                       <button
                         type="button"
-                        className="px-2.5 py-0.5 bg-[#FFD43B] text-[#090D18] font-heading font-black text-xs uppercase tracking-wider rounded-lg shadow-glow-yellow hover:scale-105 transition-transform cursor-pointer"
+                        className="px-2.5 py-0.5 bg-[#F7C873] text-[#05060F] font-heading font-black text-xs uppercase tracking-wider rounded-lg shadow-glow-yellow hover:scale-105 transition-transform cursor-pointer"
                       >
                         Chọn
                       </button>
                     ) : isRevealed ? (
                       revealedLetters ? (
-                        <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#20D6A0]/20 text-[#20D6A0] border border-[#20D6A0]/40 tracking-wider">
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#43E6B5]/20 text-[#43E6B5] border border-[#43E6B5]/40 tracking-wider">
                           ĐÃ MỞ
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30 tracking-wider">
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#FF5D8F]/15 text-[#FF5D8F] border border-[#FF5D8F]/30 tracking-wider">
                           KHÓA
                         </span>
                       )
                     ) : isCurrent ? (
-                      <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/40 tracking-wider animate-pulse">
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-heading font-extrabold bg-[#B9C0EA]/20 text-[#B9C0EA] border border-[#B9C0EA]/40 tracking-wider animate-pulse">
                         ĐANG GIẢI
                       </span>
                     ) : (
-                      <span className="text-[#64748B] text-[11px] font-heading font-bold tracking-widest px-1">
+                      <span className="text-[#6D75AD] text-[11px] font-heading font-bold tracking-widest px-1">
                         CHƯA MỞ
                       </span>
                     )}
@@ -299,15 +299,15 @@ export const VcnvRound: React.FC = () => {
         </div>
 
         {/* RIGHT: TỪ KHÓA CHƯỚNG NGẠI VẬT & RUNG CHUÔNG */}
-        <div className="md:col-span-5 bg-gradient-to-b from-[#1C2638] via-[#151D2C] to-[#111827] border-2 border-[#FFD43B]/60 rounded-2xl p-3 sm:p-3.5 shadow-[0_4px_25px_rgba(255,212,59,0.18)] flex flex-col justify-between text-center">
+        <div className="md:col-span-5 bg-gradient-to-b from-[#11163A] via-[#080B1E] to-[#0A0D22] border-2 border-[#F7C873]/60 rounded-2xl p-3 sm:p-3.5 shadow-[0_4px_25px_rgba(247,200,115,0.18)] flex flex-col justify-between text-center">
           {/* Title & Reward points */}
           <div className="w-full flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-black text-[#FFD43B] uppercase tracking-wider">
-              <Key size={16} className="text-[#FFD43B]" />
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm font-heading font-black text-[#F7C873] uppercase tracking-wider">
+              <Key size={16} className="text-[#F7C873]" />
               <span>TỪ KHÓA ({obstacleLetterCount} CHỮ)</span>
             </div>
             <div
-              className="px-2.5 py-0.5 rounded-lg bg-[#20D6A0]/20 border border-[#20D6A0]/40 text-[#20D6A0] text-xs font-digital font-bold shadow-glow-success select-none"
+              className="px-2.5 py-0.5 rounded-lg bg-[#43E6B5]/20 border border-[#43E6B5]/40 text-[#43E6B5] text-xs font-digital font-bold shadow-glow-success select-none"
               title="Điểm khi giải thành công từ khóa lúc này"
             >
               +{currentCnvPoints}đ
@@ -323,8 +323,8 @@ export const VcnvRound: React.FC = () => {
                   key={i}
                   className={`w-8 h-10 sm:w-9 sm:h-11 rounded-xl flex items-center justify-center font-digital font-black text-base sm:text-lg border-2 transition-all ${
                     char
-                      ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow scale-105'
-                      : 'bg-[#0B101B] text-[#00D9FF] border-[#303D52] shadow-inner'
+                      ? 'bg-[#F7C873] text-[#05060F] border-[#F7C873] shadow-glow-yellow scale-105'
+                      : 'bg-[#080B1E] text-[#B9C0EA] border-[#262E66] shadow-inner'
                   }`}
                 >
                   {char || '?'}
@@ -340,19 +340,19 @@ export const VcnvRound: React.FC = () => {
               disabled={!canBuzz}
               className={`w-full py-2 sm:py-2.5 px-3 rounded-xl font-heading font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 canBuzz
-                  ? 'bg-gradient-to-r from-[#FF496C] via-[#E11D48] to-[#BE123C] text-white border-2 border-[#FF8DA1] shadow-[0_4px_0_#881337,0_0_20px_rgba(255,73,108,0.7)] hover:brightness-110 active:translate-y-0.5 active:shadow-[0_1px_0_#881337] animate-pulse'
+                  ? 'bg-gradient-to-r from-[#FF5D8F] via-[#C2306A] to-[#C2306A] text-white border-2 border-[#FFB6CF] shadow-[0_4px_0_#2A0F24,0_0_20px_rgba(255,93,143,0.7)] hover:brightness-110 active:translate-y-0.5 active:shadow-[0_1px_0_#2A0F24] animate-pulse'
                 : isBuzzerLocked
-                ? 'bg-[#1C2638] text-[#FF496C] border border-[#FF496C]/40 opacity-70 cursor-not-allowed'
-                : 'bg-[#0E1524] text-[#64748B] border border-[#303D52] opacity-60 cursor-not-allowed'
+                ? 'bg-[#11163A] text-[#FF5D8F] border border-[#FF5D8F]/40 opacity-70 cursor-not-allowed'
+                : 'bg-[#080B1E] text-[#6D75AD] border border-[#262E66] opacity-60 cursor-not-allowed'
               }`}
               title={canBuzz ? 'Bấm chuông giành quyền trả lời Chướng ngại vật (Phím Space)' : 'Chuông hiện chưa mở'}
             >
               <Bell
                 size={16}
-                className={canBuzz ? 'animate-bounce text-[#FFD43B]' : 'text-[#64748B]'}
+                className={canBuzz ? 'animate-bounce text-[#F7C873]' : 'text-[#6D75AD]'}
               />
               {canBuzz && (
-                <kbd className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-md bg-white text-[#BE123C] font-heading font-black text-sm tracking-[0.2em] shadow-[0_2px_0_rgba(0,0,0,0.4)] order-last">
+                <kbd className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-md bg-white text-[#C2306A] font-heading font-black text-sm tracking-[0.2em] shadow-[0_2px_0_rgba(0,0,0,0.4)] order-last">
                   SPACE
                 </kbd>
               )}
@@ -360,7 +360,7 @@ export const VcnvRound: React.FC = () => {
                 {canBuzz
                   ? 'RUNG CHUÔNG — NHẤN'
                   : isBuzzerLocked
-                  ? `🔒 ${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} ĐÃ BẤM`
+                  ? `${room.players.find((p) => p.id === room.state.buzzerLockedBy)?.name || 'Thí sinh'} ĐÃ BẤM`
                   : isEliminated
                   ? 'ĐÃ BỊ LOẠI KHỎI VCNV'
                   : isViewer
@@ -383,20 +383,20 @@ export const VcnvRound: React.FC = () => {
         <div
           className={`w-full p-2.5 rounded-xl text-center border transition-all shrink-0 ${
             isMyTurnToPick
-              ? 'bg-[#1C2638] border-2 border-[#FFD43B] shadow-glow-yellow-lg animate-pulse'
-              : 'bg-[#111827] border-[#303D52]'
+              ? 'bg-[#11163A] border-2 border-[#F7C873] shadow-glow-yellow-lg animate-pulse'
+              : 'bg-[#0A0D22] border-[#262E66]'
           }`}
         >
           {isMyTurnToPick ? (
             <div className="flex items-center justify-center gap-1.5">
-              <Sparkles size={16} className="text-[#FFD43B]" />
-              <span className="text-xs sm:text-sm font-heading font-black text-[#FFD43B] uppercase tracking-wider">
+              <Sparkles size={16} className="text-[#F7C873]" />
+              <span className="text-xs sm:text-sm font-heading font-black text-[#F7C873] uppercase tracking-wider">
                 Đến lượt bạn chọn hàng ngang! Bấm vào hàng trên hoặc phím 1 - 4
               </span>
             </div>
           ) : (
-            <span className="text-xs font-medium text-[#94A3B8]">
-              Đang chờ <strong className="font-heading font-bold text-[#FFD43B] bg-[#1C2638] px-2 py-0.5 rounded border border-[#303D52]">{activeChooser?.name || 'Thí sinh'}</strong> chọn hàng ngang...
+            <span className="text-xs font-medium text-[#A6ACDB]">
+              Đang chờ <strong className="font-heading font-bold text-[#F7C873] bg-[#11163A] px-2 py-0.5 rounded border border-[#262E66]">{activeChooser?.name || 'Thí sinh'}</strong> chọn hàng ngang...
             </span>
           )}
         </div>
@@ -404,9 +404,9 @@ export const VcnvRound: React.FC = () => {
 
       {/* Question Card (Khi có câu hỏi hàng ngang hoặc trung tâm) */}
       {currentQ && subPhase !== 'CNV_ANSWERING' && subPhase !== 'FINAL_GUESS_ANSWERING' && (
-        <div className="w-full bg-[#1C2638] border border-[#303D52] rounded-xl p-3 sm:p-4 shadow-xl shrink-0">
+        <div className="w-full bg-[#11163A] border border-[#262E66] rounded-xl p-3 sm:p-4 shadow-xl shrink-0">
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-[10px] sm:text-xs font-heading font-extrabold uppercase tracking-wider bg-[#FFD43B]/15 text-[#FFD43B] px-2.5 py-0.5 rounded-md border border-[#FFD43B]/40 shadow-glow-yellow">
+            <span className="text-[10px] sm:text-xs font-heading font-extrabold uppercase tracking-wider bg-[#F7C873]/15 text-[#F7C873] px-2.5 py-0.5 rounded-md border border-[#F7C873]/40 shadow-glow-yellow">
               {subPhase === 'CENTER_QUESTION'
                 ? 'CÂU HỎI TRUNG TÂM · GỢI Ý'
                 : `HÀNG NGANG ${(activeRowIdx ?? 0) + 1} (${rowLetterCounts[activeRowIdx ?? 0] || 6} CHỮ CÁI)`}
@@ -417,7 +417,7 @@ export const VcnvRound: React.FC = () => {
             />
           </div>
 
-          <p className="text-sm sm:text-base md:text-lg font-bold text-[#F8FAFC] mb-2.5 leading-snug">
+          <p className="text-sm sm:text-base md:text-lg font-bold text-[#EEF0FF] mb-2.5 leading-snug">
             {currentQ.prompt}
           </p>
 
@@ -425,7 +425,7 @@ export const VcnvRound: React.FC = () => {
           {subPhase === 'CENTER_QUESTION' && (
             <div
               role="note"
-              className="p-2.5 bg-[#FFD43B]/10 border border-[#FFD43B]/50 rounded-lg text-xs sm:text-sm font-bold text-[#FFD43B] flex items-start gap-2"
+              className="p-2.5 bg-[#F7C873]/10 border border-[#F7C873]/50 rounded-lg text-xs sm:text-sm font-bold text-[#F7C873] flex items-start gap-2"
             >
               <Bell size={16} className="shrink-0 mt-0.5" />
               <span>
@@ -444,11 +444,11 @@ export const VcnvRound: React.FC = () => {
                 placeholder="Nhập câu trả lời (Enter để gửi)..."
                 value={inputAnswer}
                 onChange={(e) => setInputAnswer(e.target.value)}
-                className="flex-1 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#090D18] border border-[#303D52] rounded-xl text-[#F8FAFC] uppercase placeholder-[#64748B] focus:outline-none focus:border-[#00D9FF] focus:shadow-glow-cyan text-xs sm:text-sm md:text-base font-heading font-bold tracking-wider transition-all"
+                className="flex-1 px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#05060F] border border-[#262E66] rounded-xl text-[#EEF0FF] uppercase placeholder-[#6D75AD] focus:outline-none focus:border-[#F7C873]/70 focus:shadow-glow-yellow text-xs sm:text-sm md:text-base font-heading font-bold tracking-wider transition-all"
               />
               <button
                 type="submit"
-                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-black rounded-xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#FFD43B] shadow-glow-yellow hover:scale-105 active:scale-95 cursor-pointer"
+                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-[#F7C873] hover:bg-[#FBE0A8] text-[#05060F] font-heading font-black rounded-xl text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5 transition-all border border-[#F7C873] shadow-glow-yellow hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Send size={15} />
                 <span>{submitted ? 'Đổi đáp án' : 'Gửi'}</span>
@@ -457,14 +457,14 @@ export const VcnvRound: React.FC = () => {
           )}
 
           {isViewer && subPhase === 'ROW_QUESTION' && (
-            <div className="p-2 bg-[#00D9FF]/10 border border-[#00D9FF]/40 rounded-lg text-center text-xs font-bold text-[#00D9FF] flex items-center justify-center gap-1.5 shadow-glow-cyan">
+            <div className="p-2 bg-[#B9C0EA]/10 border border-[#B9C0EA]/40 rounded-lg text-center text-xs font-bold text-[#B9C0EA] flex items-center justify-center gap-1.5 shadow-glow-cyan">
               <Eye size={14} />
               <span>Bạn đang theo dõi với vai trò Khán giả. Đang chờ các thí sinh nhập đáp án...</span>
             </div>
           )}
 
           {submitted && subPhase === 'ROW_QUESTION' && (
-            <div className="text-[11px] text-[#20D6A0] mt-1.5 font-bold flex items-center gap-1.5 bg-[#20D6A0]/10 border border-[#20D6A0]/30 px-2.5 py-1 rounded-lg shadow-glow-success w-fit">
+            <div className="text-[11px] text-[#43E6B5] mt-1.5 font-bold flex items-center gap-1.5 bg-[#43E6B5]/10 border border-[#43E6B5]/30 px-2.5 py-1 rounded-lg shadow-glow-success w-fit">
               <CheckCircle2 size={13} />
               <span>
                 Đã ghi nhận: <strong className="font-heading font-black text-white">"{inputAnswer.toUpperCase()}"</strong>
@@ -473,7 +473,7 @@ export const VcnvRound: React.FC = () => {
           )}
 
           {isEliminated && (
-            <div className="p-2 bg-[#FF496C]/15 border border-[#FF496C]/40 rounded-lg text-center text-xs font-bold text-[#FF496C] flex items-center justify-center gap-1.5 shadow-glow-danger">
+            <div className="p-2 bg-[#FF5D8F]/15 border border-[#FF5D8F]/40 rounded-lg text-center text-xs font-bold text-[#FF5D8F] flex items-center justify-center gap-1.5 shadow-glow-danger">
               <AlertCircle size={14} />
               <span>Bạn đã bị loại khỏi phần thi VCNV (vẫn theo dõi và cổ vũ các thí sinh khác).</span>
             </div>
@@ -481,23 +481,23 @@ export const VcnvRound: React.FC = () => {
 
           {/* Reveal Result */}
           {(subPhase === 'ROW_REVEAL' || subPhase === 'CENTER_REVEAL') && lastReveal && (
-            <div className="mt-2 pt-2 border-t border-[#303D52] space-y-2">
+            <div className="mt-2 pt-2 border-t border-[#262E66] space-y-2">
               {lastReveal.correctAnswer ? (
-                <div className="flex items-center justify-between p-2 bg-[#111827] rounded-lg border border-[#303D52]">
-                  <span className="text-[11px] text-[#94A3B8] font-heading font-bold uppercase tracking-wider">
+                <div className="flex items-center justify-between p-2 bg-[#0A0D22] rounded-lg border border-[#262E66]">
+                  <span className="text-[11px] text-[#A6ACDB] font-heading font-bold uppercase tracking-wider">
                     Đáp án chính xác:
                   </span>
-                  <span className="text-xs sm:text-sm font-heading font-black text-[#090D18] bg-[#20D6A0] px-3 py-0.5 rounded-lg shadow-glow-success">
+                  <span className="text-xs sm:text-sm font-heading font-black text-[#05060F] bg-[#43E6B5] px-3 py-0.5 rounded-lg shadow-glow-success">
                     {lastReveal.correctAnswer}
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-2 bg-[#111827] rounded-lg border border-[#EF4444]/40 bg-[#EF4444]/5">
-                  <span className="text-[11px] text-[#EF4444] font-heading font-bold uppercase tracking-wider flex items-center gap-1">
+                <div className="flex items-center justify-between p-2 bg-[#0A0D22] rounded-lg border border-[#FF5D8F]/40 bg-[#FF5D8F]/5">
+                  <span className="text-[11px] text-[#FF5D8F] font-heading font-bold uppercase tracking-wider flex items-center gap-1">
                     <AlertCircle size={13} />
                     Kết quả câu hỏi:
                   </span>
-                  <span className="text-[11px] font-heading font-extrabold text-[#FCA5A5] bg-[#EF4444]/20 border border-[#EF4444]/30 px-2.5 py-0.5 rounded-lg">
+                  <span className="text-[11px] font-heading font-extrabold text-[#FFB6CF] bg-[#FF5D8F]/20 border border-[#FF5D8F]/30 px-2.5 py-0.5 rounded-lg">
                     Không ai trả lời đúng
                   </span>
                 </div>
@@ -511,21 +511,21 @@ export const VcnvRound: React.FC = () => {
                     return (
                       <div
                         key={res.playerId}
-                        className="flex items-center justify-between p-2 rounded-xl bg-[#111827] border border-[#303D52] text-xs sm:text-sm"
+                        className="flex items-center justify-between p-2 rounded-xl bg-[#0A0D22] border border-[#262E66] text-xs sm:text-sm"
                       >
                         <span className="flex items-center gap-1.5 min-w-0">
                           <PlayerAvatar player={p} size={20} />
-                          <span className="font-bold text-[#F8FAFC] truncate max-w-[90px]">{p.name}:</span>
+                          <span className="font-bold text-[#EEF0FF] truncate max-w-[90px]">{p.name}:</span>
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {res.answer && (
-                            <span className="text-[#94A3B8] text-[11px] sm:text-xs font-mono truncate max-w-[80px]">
+                            <span className="text-[#A6ACDB] text-[11px] sm:text-xs font-mono truncate max-w-[80px]">
                               "{res.answer}"
                             </span>
                           )}
                           <span
                             className={`px-1.5 py-0.5 rounded font-digital font-bold border tabular-nums text-xs ${
-                              res.isCorrect ? 'bg-[#20D6A0]/20 text-[#20D6A0] border-[#20D6A0]/40' : 'bg-[#FF496C]/20 text-[#FF496C] border-[#FF496C]/40'
+                              res.isCorrect ? 'bg-[#43E6B5]/20 text-[#43E6B5] border-[#43E6B5]/40' : 'bg-[#FF5D8F]/20 text-[#FF5D8F] border-[#FF5D8F]/40'
                             }`}
                           >
                             {res.isCorrect ? '+10đ' : '0đ'}
@@ -546,21 +546,21 @@ export const VcnvRound: React.FC = () => {
       {/* ======================================================== */}
       {(subPhase === 'CNV_ANSWERING' || subPhase === 'FINAL_GUESS_ANSWERING') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="max-w-md w-full bg-[#111827] border-2 border-[#FFD43B] rounded-3xl p-6 shadow-glow-yellow-lg flex flex-col items-center text-center relative">
-            <div className="w-14 h-14 rounded-2xl bg-[#FFD43B] text-[#090D18] shadow-glow-yellow flex items-center justify-center mb-2.5 animate-bounce">
+          <div className="max-w-md w-full bg-[#0A0D22] border-2 border-[#F7C873] rounded-3xl hud hud-gold p-6 shadow-glow-yellow-lg flex flex-col items-center text-center relative">
+            <div className="w-14 h-14 rounded-2xl bg-[#F7C873] text-[#05060F] shadow-glow-yellow flex items-center justify-center mb-2.5 animate-bounce">
               <Bell size={26} />
             </div>
 
-            <h3 className="text-xl font-heading font-black uppercase tracking-wider text-[#F8FAFC] mb-1">
+            <h3 className="text-xl font-heading font-black uppercase tracking-wider text-[#EEF0FF] mb-1">
               GIẢI MÃ TỪ KHÓA CHÍNH
             </h3>
 
             <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
-              <span className="text-xs text-[#94A3B8]">Thí sinh:</span>
-              <span className="px-2.5 py-1 bg-[#1C2638] border border-[#FFD43B]/60 rounded-lg text-xs font-heading font-bold text-[#FFD43B]">
+              <span className="text-xs text-[#A6ACDB]">Thí sinh:</span>
+              <span className="px-2.5 py-1 bg-[#11163A] border border-[#F7C873]/60 rounded-lg text-xs font-heading font-bold text-[#F7C873]">
                 {activeAnsweringPlayer?.name || 'Thí sinh'}
               </span>
-              <span className="px-2.5 py-1 bg-[#20D6A0]/20 border border-[#20D6A0]/40 rounded-lg text-xs font-digital font-bold text-[#20D6A0]">
+              <span className="px-2.5 py-1 bg-[#43E6B5]/20 border border-[#43E6B5]/40 rounded-lg text-xs font-digital font-bold text-[#43E6B5]">
                 +{currentCnvPoints}đ
               </span>
             </div>
@@ -575,7 +575,7 @@ export const VcnvRound: React.FC = () => {
               {Array.from({ length: obstacleLetterCount }).map((_, i) => (
                 <div
                   key={i}
-                  className="w-8 h-10 sm:w-9 sm:h-11 rounded-xl bg-[#1C2638] border border-[#00D9FF]/50 flex items-center justify-center text-base sm:text-lg font-digital font-bold text-[#00D9FF] shadow-glow-cyan"
+                  className="w-8 h-10 sm:w-9 sm:h-11 rounded-xl bg-[#11163A] border border-[#B9C0EA]/50 flex items-center justify-center text-base sm:text-lg font-digital font-bold text-[#B9C0EA] shadow-glow-cyan"
                 >
                   ?
                 </div>
@@ -591,30 +591,30 @@ export const VcnvRound: React.FC = () => {
                   placeholder="Nhập từ khóa chính..."
                   value={inputAnswer}
                   onChange={(e) => setInputAnswer(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#090D18] border-2 border-[#00D9FF] rounded-xl text-[#00D9FF] uppercase text-center font-digital font-bold tracking-widest text-lg sm:text-xl placeholder-[#64748B] focus:outline-none shadow-glow-cyan"
+                  className="w-full px-4 py-3 bg-[#05060F] border-2 border-[#B9C0EA] rounded-xl text-[#B9C0EA] uppercase text-center font-digital font-bold tracking-widest text-lg sm:text-xl placeholder-[#6D75AD] focus:outline-none shadow-glow-cyan"
                 />
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#FFD43B] hover:bg-[#ffe066] text-[#090D18] font-heading font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl border border-[#FFD43B] shadow-glow-yellow hover:scale-[1.02] active:scale-95 cursor-pointer"
+                  className="w-full py-3 bg-[#F7C873] hover:bg-[#FBE0A8] text-[#05060F] font-heading font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl border border-[#F7C873] shadow-glow-yellow hover:scale-[1.02] active:scale-95 cursor-pointer"
                 >
                   {submitted ? 'CẬP NHẬT TỪ KHÓA (ENTER)' : 'XÁC NHẬN GỬI TỪ KHÓA (ENTER)'}
                 </button>
 
                 {submitted && (
-                  <p className="text-xs text-[#20D6A0] font-bold bg-[#20D6A0]/10 border border-[#20D6A0]/40 p-2 rounded-xl">
+                  <p className="text-xs text-[#43E6B5] font-bold bg-[#43E6B5]/10 border border-[#43E6B5]/40 p-2 rounded-xl">
                     ✓ Đã ghi nhận: "{inputAnswer.toUpperCase()}"
                   </p>
                 )}
 
-                <p className="text-xs text-[#FF496C] font-bold">
-                  ⚠️ Trả lời sai sẽ bị loại khỏi vòng VCNV!
+                <p className="text-xs text-[#FF5D8F] font-bold">
+                  Trả lời sai sẽ bị loại khỏi vòng VCNV!
                 </p>
               </form>
             ) : (
-              <div className="w-full p-3.5 bg-[#1C2638] rounded-xl border border-[#303D52] text-xs">
-                <p className="font-medium text-[#F8FAFC] text-sm">
-                  <strong className="text-[#FFD43B] font-heading">{activeAnsweringPlayer?.name}</strong> đang nhập từ khóa chính...
+              <div className="w-full p-3.5 bg-[#11163A] rounded-xl border border-[#262E66] text-xs">
+                <p className="font-medium text-[#EEF0FF] text-sm">
+                  <strong className="text-[#F7C873] font-heading">{activeAnsweringPlayer?.name}</strong> đang nhập từ khóa chính...
                 </p>
               </div>
             )}

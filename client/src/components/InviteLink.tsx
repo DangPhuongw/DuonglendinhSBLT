@@ -35,7 +35,7 @@ export const InviteLink: React.FC<{ roomCode: string }> = ({ roomCode }) => {
 
   useEffect(() => {
     let alive = true;
-    QRCode.toDataURL(url, { width: 176, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#090D18', light: '#FFFFFF' } })
+    QRCode.toDataURL(url, { width: 176, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#05060F', light: '#FFFFFF' } })
       .then((src) => alive && setQrSrc(src))
       .catch(() => alive && setQrSrc(''));
     return () => {
@@ -66,17 +66,17 @@ export const InviteLink: React.FC<{ roomCode: string }> = ({ roomCode }) => {
   };
 
   const btn =
-    'h-9 px-2.5 rounded-xl bg-[#1C2638] text-[#F8FAFC] hover:text-[#00D9FF] border border-[#303D52] hover:border-[#00D9FF]/60 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 text-xs font-heading font-bold';
+    'h-9 px-2.5 rounded-xl bg-[#11163A] text-[#EEF0FF] hover:text-[#7CB4FF] border border-[#262E66] hover:border-[#7CB4FF]/60 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 text-xs font-heading font-bold';
 
   return (
     <div className="relative flex items-center gap-1.5" ref={popRef}>
       <button onClick={handleCopy} className={btn} title={`Sao chép link mời: ${url}`}>
-        {copied ? <Check size={15} className="text-[#20D6A0] stroke-[3]" /> : <Link2 size={15} />}
+        {copied ? <Check size={15} className="text-[#43E6B5] stroke-[3]" /> : <Link2 size={15} />}
         <span className="hidden sm:inline">{copied ? 'Đã chép link' : 'Link mời'}</span>
       </button>
       <button
         onClick={() => setQrOpen((v) => !v)}
-        className={`${btn} ${qrOpen ? 'text-[#00D9FF] border-[#00D9FF]/60' : ''}`}
+        className={`${btn} ${qrOpen ? 'text-[#7CB4FF] border-[#7CB4FF]/60' : ''}`}
         title="Hiện mã QR để quét bằng điện thoại"
         aria-expanded={qrOpen}
       >
@@ -85,19 +85,19 @@ export const InviteLink: React.FC<{ roomCode: string }> = ({ roomCode }) => {
       </button>
 
       {qrOpen && (
-        <div className="fixed inset-x-0 top-24 mx-auto sm:absolute sm:inset-x-auto sm:mx-0 sm:right-0 sm:top-11 z-50 w-[200px] bg-[#111827] border border-[#303D52] rounded-2xl p-3 shadow-[0_12px_40px_rgba(0,0,0,0.7)] rx-pop">
+        <div className="fixed inset-x-0 top-24 mx-auto sm:absolute sm:inset-x-auto sm:mx-0 sm:right-0 sm:top-11 z-50 w-[200px] bg-[#0A0D22] border border-[#262E66] rounded-2xl p-3 shadow-[0_12px_40px_rgba(0,0,0,0.7)] rx-pop">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#94A3B8]">Quét để vào phòng</span>
-            <button onClick={() => setQrOpen(false)} className="text-[#64748B] hover:text-[#F8FAFC] cursor-pointer" aria-label="Đóng mã QR">
+            <span className="text-xs font-heading font-bold uppercase tracking-wider text-[#A6ACDB]">Quét để vào phòng</span>
+            <button onClick={() => setQrOpen(false)} className="text-[#6D75AD] hover:text-[#EEF0FF] cursor-pointer" aria-label="Đóng mã QR">
               <X size={14} />
             </button>
           </div>
           {qrSrc ? (
             <img src={qrSrc} alt={`Mã QR vào phòng ${roomCode}`} width={176} height={176} className="rounded-lg w-[176px] h-[176px]" />
           ) : (
-            <div className="w-[176px] h-[176px] rounded-lg bg-[#1C2638] flex items-center justify-center text-xs text-[#64748B]">Đang tạo mã...</div>
+            <div className="w-[176px] h-[176px] rounded-lg bg-[#11163A] flex items-center justify-center text-xs text-[#6D75AD]">Đang tạo mã...</div>
           )}
-          <div className="mt-2 text-center font-digital font-bold tracking-widest text-[#FFD43B]">{roomCode}</div>
+          <div className="mt-2 text-center font-digital font-bold tracking-widest text-[#F7C873]">{roomCode}</div>
         </div>
       )}
     </div>

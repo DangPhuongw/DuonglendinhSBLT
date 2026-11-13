@@ -49,18 +49,18 @@ export const QuestionSpeakerButton: React.FC<QuestionSpeakerButtonProps> = ({
       title={isSpeaking ? 'Dừng đọc (Tiếng Việt)' : 'Đọc câu hỏi (Tiếng Việt)'}
       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-heading transition-all border active:scale-95 cursor-pointer ${
         isSpeaking
-          ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow'
-          : 'bg-[#1C2638] hover:bg-[#24324a] text-[#94A3B8] hover:text-[#00D9FF] hover:border-[#00D9FF] border-[#303D52]'
+          ? 'bg-[#F7C873] text-[#05060F] border-[#F7C873] shadow-glow-yellow'
+          : 'bg-[#11163A] hover:bg-[#161B45] text-[#A6ACDB] hover:text-[#B9C0EA] hover:border-[#F7C873]/60 border-[#262E66]'
       } ${className}`}
     >
       {isSpeaking ? (
         <>
-          <Square size={13} className="fill-[#090D18] text-[#090D18]" />
+          <Square size={13} className="fill-[#05060F] text-[#05060F]" />
           <span>Đang đọc...</span>
         </>
       ) : (
         <>
-          <Volume2 size={14} className="text-[#00D9FF]" />
+          <Volume2 size={14} className="text-[#B9C0EA]" />
           <span>Đọc câu hỏi</span>
         </>
       )}

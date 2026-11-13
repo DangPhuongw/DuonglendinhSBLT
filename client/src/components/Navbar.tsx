@@ -71,15 +71,32 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="w-full h-14 shrink-0 bg-[#111827]/95 backdrop-blur-md border-b border-[#303D52] px-3 sm:px-6 flex items-center justify-between z-50 shadow-[0_2px_15px_rgba(0,0,0,0.5)]">
+    <header className="relative w-full h-14 shrink-0 bg-[#05060F]/70 backdrop-blur-xl border-b border-[#262E66]/80 px-3 sm:px-6 flex items-center justify-between z-50">
+      <span className="nav-hairline" aria-hidden="true" />
       <div className="flex items-center gap-3">
         {/* Brand Logo ĐẤU TRƯỜNG TRÍ TUỆ */}
         <div className="flex items-center gap-2.5 cursor-pointer group">
-          <div className="w-8 h-8 rounded-xl bg-[#FFD43B] text-[#090D18] border border-[#FFD43B] flex items-center justify-center font-extrabold font-heading text-sm shadow-glow-yellow transition-transform duration-200 group-hover:scale-105">
-            ĐT
-          </div>
-          <span className="font-heading font-extrabold tracking-tight text-[#F8FAFC] text-base sm:text-lg leading-none group-hover:text-[#FFD43B] transition-colors">
-            ĐẤU TRƯỜNG TRÍ TUỆ
+          {/* Biểu tượng: hành tinh có vòng quỹ đạo và một vệ tinh đang xoay */}
+          <svg viewBox="0 0 36 36" className="w-9 h-9 shrink-0 overflow-visible" aria-hidden="true">
+            <defs>
+              <radialGradient id="nav-planet" cx="35%" cy="30%" r="75%">
+                <stop offset="0" stopColor="#FBE0A8" />
+                <stop offset="0.55" stopColor="#9B7BFF" />
+                <stop offset="1" stopColor="#2A2470" />
+              </radialGradient>
+            </defs>
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#7CB4FF" strokeOpacity="0.28" strokeWidth="0.8" />
+            <circle cx="18" cy="18" r="8.2" fill="url(#nav-planet)" />
+            <g className="orbit-ring">
+              <ellipse cx="18" cy="18" rx="15.5" ry="15.5" fill="none" />
+              <circle cx="18" cy="2.5" r="1.7" fill="#F7C873" />
+            </g>
+          </svg>
+          <span className="hidden min-[430px]:flex flex-col leading-none min-w-0">
+            <span className="font-heading font-bold whitespace-nowrap tracking-[0.08em] sm:tracking-[0.14em] text-[#EEF0FF] text-[11px] min-[400px]:text-sm sm:text-base group-hover:text-[#FBE0A8] transition-colors">
+              ĐẤU TRƯỜNG TRÍ TUỆ
+            </span>
+            <span className="tech-label !text-[0.55rem] !tracking-[0.34em] mt-1 hidden sm:block">Olympia Arena</span>
           </span>
         </div>
       </div>
@@ -90,8 +107,8 @@ export const Navbar: React.FC = () => {
           onClick={toggleTts}
           className={`flex items-center gap-2 text-xs sm:text-sm font-bold font-heading px-3.5 py-1.5 rounded-xl border transition-all active:scale-95 ${
             ttsEnabled
-              ? 'bg-[#FFD43B] text-[#090D18] border-[#FFD43B] shadow-glow-yellow'
-              : 'bg-[#1C2638] text-[#94A3B8] border-[#303D52] hover:border-[#00D9FF] hover:text-[#F8FAFC]'
+              ? 'bg-[#F7C873] text-[#05060F] border-[#F7C873] shadow-glow-yellow'
+              : 'bg-[#11163A] text-[#A6ACDB] border-[#262E66] hover:border-[#F7C873]/60 hover:text-[#EEF0FF]'
           }`}
           title={ttsEnabled ? 'Tắt đọc câu hỏi (Tiếng Việt)' : 'Bật đọc câu hỏi (Tiếng Việt)'}
         >
@@ -105,7 +122,7 @@ export const Navbar: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowVoiceHelp((v) => !v)}
-              className="flex items-center gap-1.5 text-xs font-bold font-heading px-2.5 py-1.5 rounded-xl bg-[#FB923C]/15 text-[#FB923C] border border-[#FB923C]/60 hover:bg-[#FB923C]/25 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold font-heading px-2.5 py-1.5 rounded-xl bg-[#D6903F]/15 text-[#D6903F] border border-[#D6903F]/60 hover:bg-[#D6903F]/25 transition-colors"
               title="Máy chưa có giọng đọc tiếng Việt: bấm để xem cách cài"
               aria-label="Máy chưa có giọng đọc tiếng Việt"
               aria-expanded={showVoiceHelp}
@@ -116,18 +133,18 @@ export const Navbar: React.FC = () => {
             {showVoiceHelp && (
               <div
                 role="dialog"
-                className="absolute right-0 top-full mt-2 w-[min(22rem,90vw)] z-[60] rounded-2xl bg-[#111827] border border-[#FB923C]/60 shadow-2xl p-4 text-left"
+                className="absolute right-0 top-full mt-2 w-[min(22rem,90vw)] z-[60] rounded-2xl bg-[#0A0D22] border border-[#D6903F]/60 shadow-2xl p-4 text-left"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className="font-heading font-black text-sm text-[#FB923C]">Thiết bị chưa có giọng đọc tiếng Việt</p>
-                  <button onClick={() => setShowVoiceHelp(false)} className="text-[#94A3B8] hover:text-white" aria-label="Đóng">
+                  <p className="font-heading font-black text-sm text-[#D6903F]">Thiết bị chưa có giọng đọc tiếng Việt</p>
+                  <button onClick={() => setShowVoiceHelp(false)} className="text-[#A6ACDB] hover:text-white" aria-label="Đóng">
                     <X size={16} />
                   </button>
                 </div>
-                <p className="text-xs text-[#94A3B8] mb-2">
+                <p className="text-xs text-[#A6ACDB] mb-2">
                   Giọng đọc câu hỏi đã được tạm tắt trên máy này để không đọc nhầm bằng tiếng Anh. Cài giọng tiếng Việt rồi tải lại trang:
                 </p>
-                <ul className="space-y-1.5 text-xs text-[#F8FAFC] list-disc pl-4">
+                <ul className="space-y-1.5 text-xs text-[#EEF0FF] list-disc pl-4">
                   <li><b>Windows:</b> Cài đặt → Thời gian &amp; ngôn ngữ → Giọng nói → Thêm giọng nói → Tiếng Việt. Hoặc dùng trình duyệt <b>Microsoft Edge</b> (có sẵn giọng Hoài My, Nam Minh).</li>
                   <li><b>Android:</b> Cài đặt → Chuyển văn bản thành giọng nói → Google → cài dữ liệu giọng nói Tiếng Việt.</li>
                   <li><b>iPhone / iPad / Mac:</b> Cài đặt → Trợ năng → Nội dung được đọc → Giọng nói → Tiếng Việt (Linh).</li>
@@ -150,12 +167,12 @@ export const Navbar: React.FC = () => {
           onClick={toggleBgm}
           className={`flex items-center gap-1.5 text-xs sm:text-sm font-bold font-heading px-3 py-1.5 rounded-xl border transition-all active:scale-95 ${
             bgmEnabled
-              ? 'bg-[#1C2638] text-[#FFD43B] border-[#FFD43B]/60 shadow-glow-yellow'
-              : 'bg-[#1C2638] text-[#64748B] border-[#303D52] hover:text-[#94A3B8]'
+              ? 'bg-[#11163A] text-[#F7C873] border-[#F7C873]/60 shadow-glow-yellow'
+              : 'bg-[#11163A] text-[#6D75AD] border-[#262E66] hover:text-[#A6ACDB]'
           }`}
           title={bgmEnabled ? 'Nhạc nền: Đang BẬT (bấm để tắt)' : 'Nhạc nền: Đang TẮT (bấm để bật)'}
         >
-          <Music size={17} className={`stroke-[2.5] ${bgmEnabled ? 'animate-pulse text-[#FFD43B]' : 'text-[#64748B]'}`} />
+          <Music size={17} className={`stroke-[2.5] ${bgmEnabled ? 'animate-pulse text-[#F7C873]' : 'text-[#6D75AD]'}`} />
           <span className="hidden md:inline">
             {bgmEnabled ? 'Nhạc nền: BẬT' : 'Nhạc nền: TẮT'}
           </span>
@@ -173,8 +190,8 @@ export const Navbar: React.FC = () => {
           onClick={toggleFullscreen}
           className={`p-2 sm:p-2.5 rounded-xl border transition-all active:scale-95 flex items-center justify-center ${
             isFullscreen
-              ? 'bg-[#00D9FF]/20 text-[#00D9FF] border-[#00D9FF] shadow-glow-cyan'
-              : 'bg-[#1C2638] text-[#94A3B8] hover:text-[#00D9FF] hover:border-[#00D9FF] border-[#303D52] hover:shadow-glow-cyan'
+              ? 'bg-[#B9C0EA]/20 text-[#B9C0EA] border-[#B9C0EA] shadow-glow-cyan'
+              : 'bg-[#11163A] text-[#A6ACDB] hover:text-[#B9C0EA] hover:border-[#F7C873]/60 border-[#262E66] hover:shadow-glow-yellow'
           }`}
           title={isFullscreen ? 'Thu nhỏ màn hình (Esc)' : 'Mở toàn màn hình (F11)'}
           aria-label={isFullscreen ? 'Thu nhỏ màn hình' : 'Mở toàn màn hình'}
@@ -190,7 +207,7 @@ export const Navbar: React.FC = () => {
         {room && (
           <button
             onClick={leaveRoom}
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold font-heading px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#1C2638] hover:bg-[#FF496C] text-[#FF496C] hover:text-white border border-[#FF496C]/50 hover:border-[#FF496C] transition-all active:scale-95 hover:shadow-glow-danger"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold font-heading px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#11163A] hover:bg-[#FF5D8F] text-[#FF5D8F] hover:text-white border border-[#FF5D8F]/50 hover:border-[#FF5D8F] transition-all active:scale-95 hover:shadow-glow-danger"
             title="Rời phòng"
           >
             <LogOut size={16} className="stroke-[2.5]" />

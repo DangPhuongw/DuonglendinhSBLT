@@ -92,7 +92,7 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen h-[100dvh] max-h-screen w-full overflow-hidden text-[#F8FAFC] flex flex-col selection:bg-[#FFD43B] selection:text-[#090D18] relative">
+      <div className="h-screen h-[100dvh] max-h-screen w-full overflow-hidden text-[#EEF0FF] flex flex-col selection:bg-[#F7C873] selection:text-[#05060F] relative">
         <GalaxyBackground />
         <Navbar />
         <AntiCheatGuard />
