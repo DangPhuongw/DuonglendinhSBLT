@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import confetti from 'canvas-confetti';
 import { Trophy, Download, RotateCcw } from 'lucide-react';
 import { soundManager } from '../utils/soundEffects';
+import { getPerfTier } from '../utils/perf';
 import { leaderboardOf } from '../utils/predictions';
 import { PlayerAvatar } from './PlayerAvatar';
 
@@ -31,31 +31,26 @@ export const Podium: React.FC = () => {
 
     soundManager.playFanfare();
 
-    // Trigger confetti with Neo-Brutalism vibrant palette
-    const duration = 4 * 1000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#F7C873', '#7CB4FF', '#FF5D8F', '#43E6B5', '#9B7BFF'],
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#F7C873', '#7CB4FF', '#FF5D8F', '#43E6B5', '#9B7BFF'],
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
+    // Pháo giấy: thư viện chỉ được tải lúc này. Máy yếu bắn thưa và ít hạt hơn.
+    const lite = getPerfTier() === 'low';
+    const end = Date.now() + (lite ? 2500 : 4000);
+    const colors = ['#F7C873', '#7CB4FF', '#FF5D8F', '#43E6B5', '#9B7BFF'];
+    let timer = 0;
+    let cancelled = false;
+    import('canvas-confetti').then(({ default: confetti }) => {
+      const burst = () => {
+        if (cancelled) return;
+        const opts = { particleCount: lite ? 6 : 5, spread: 55, colors, disableForReducedMotion: true };
+        confetti({ ...opts, angle: 60, origin: { x: 0 } });
+        confetti({ ...opts, angle: 120, origin: { x: 1 } });
+        if (Date.now() < end) timer = window.setTimeout(burst, lite ? 180 : 60);
+      };
+      burst();
+    });
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
     };
-    frame();
   }, []);
 
   if (!room) return null;

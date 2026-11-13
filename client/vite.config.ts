@@ -9,6 +9,17 @@ export default defineConfig({
       '@olympia/shared': path.resolve(__dirname, '../shared/src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Thư viện ít thay đổi tách riêng: trình duyệt giữ trong bộ nhớ đệm qua các lần cập nhật web
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          socket: ['socket.io-client'],
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     proxy: {

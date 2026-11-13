@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import QRCode from 'qrcode';
 import { Link2, Check, QrCode, X } from 'lucide-react';
 
 /** Link mời: mở link là tới thẳng màn "Vào phòng" với mã phòng điền sẵn. */
@@ -35,13 +34,16 @@ export const InviteLink: React.FC<{ roomCode: string }> = ({ roomCode }) => {
 
   useEffect(() => {
     let alive = true;
-    QRCode.toDataURL(url, { width: 176, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#05060F', light: '#FFFFFF' } })
+    // Thư viện QR chỉ được tải khi người dùng mở ô QR lần đầu
+    if (!qrOpen || qrSrc) return;
+    import('qrcode')
+      .then(({ default: QRCode }) => QRCode.toDataURL(url, { width: 176, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#05060F', light: '#FFFFFF' } }))
       .then((src) => alive && setQrSrc(src))
       .catch(() => alive && setQrSrc(''));
     return () => {
       alive = false;
     };
-  }, [url]);
+  }, [url, qrOpen, qrSrc]);
 
   // Bấm ra ngoài hoặc Esc thì đóng QR
   useEffect(() => {

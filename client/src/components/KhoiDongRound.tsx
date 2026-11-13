@@ -6,7 +6,7 @@ import { voiceReader } from '../utils/voiceReader';
 import { Bell, Sparkles, Lock, Eye } from 'lucide-react';
 import { GAME_CONFIG } from '@olympia/shared';
 import { LockedBuzzer } from './LockedBuzzer';
-import { useBuzzLock } from '../utils/useBuzzLock';
+import { useBuzzLocked } from '../utils/useBuzzLock';
 import { KdChungIntro } from './KdChungIntro';
 import { PlayerAvatar } from './PlayerAvatar';
 
@@ -22,8 +22,7 @@ export const KhoiDongRound: React.FC = () => {
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   // Chuông khóa 3 giây đầu lượt giành chuông, đếm ngược đến mili giây
-  const buzzLockMs = useBuzzLock(room?.state?.buzzUnlockAt);
-  const buzzLocked = buzzLockMs > 0;
+  const buzzLocked = useBuzzLocked(room?.state?.buzzUnlockAt);
 
   const currentRound = room?.state?.round; // 'KD_RIENG' or 'KD_CHUNG'
   const subPhase = room?.state?.subPhase;
@@ -313,7 +312,7 @@ export const KhoiDongRound: React.FC = () => {
             </div>
           ) : buzzLocked ? (
             <LockedBuzzer
-              remainingMs={buzzLockMs}
+              unlockAt={room.state.buzzUnlockAt}
               totalMs={GAME_CONFIG.BUZZ_LOCK_SECONDS * 1000}
               accent="#F7C873"
             />

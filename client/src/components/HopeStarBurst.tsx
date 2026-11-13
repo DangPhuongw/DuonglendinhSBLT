@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { soundManager } from '../utils/soundEffects';
+import { getPerfTier } from '../utils/perf';
+
+// Máy yếu / điện thoại: ít hạt lấp lánh hơn
+const SPARKLES = () => (getPerfTier() === 'low' ? 14 : 34);
+const TWINKLES = () => (getPerfTier() === 'low' ? 10 : 26);
 
 const DURATION_MS = 2800;
 
@@ -49,8 +54,8 @@ export const HopeStarBurst: React.FC = () => {
   // Mỗi lần lóe tạo bộ ngôi sao mới
   const sparkles = useMemo(
     () =>
-      Array.from({ length: 34 }, (_, i) => {
-        const angle = (i / 34) * Math.PI * 2 + Math.random() * 0.4;
+      Array.from({ length: SPARKLES() }, (_, i) => {
+        const angle = (i / SPARKLES()) * Math.PI * 2 + Math.random() * 0.4;
         const dist = 160 + Math.random() * 380;
         return {
           id: i,
@@ -65,7 +70,7 @@ export const HopeStarBurst: React.FC = () => {
   );
   const twinkles = useMemo(
     () =>
-      Array.from({ length: 26 }, (_, i) => ({
+      Array.from({ length: TWINKLES() }, (_, i) => ({
         id: i,
         left: Math.random() * 100,
         top: Math.random() * 100,

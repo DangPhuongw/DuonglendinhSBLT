@@ -1,33 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 
+/** Số mili giây chuông còn khóa, theo đồng hồ server (đọc tức thời, không gây re-render). */
+export function lockRemainingMs(unlockAt: number | null | undefined, serverOffset: number): number {
+  return unlockAt ? Math.max(0, unlockAt - (Date.now() + serverOffset)) : 0;
+}
+
 /**
- * Thời gian còn lại (mili giây) của đợt khóa chuông, theo đồng hồ server.
- * Trả 0 khi không khóa hoặc đã hết khóa. Cập nhật mỗi khung hình để hiển thị đến mili giây.
+ * Chuông còn đang khóa hay không. Chỉ đổi trạng thái 2 lần (lúc bắt đầu khóa và lúc mở khóa) bằng một
+ * setTimeout, thay vì cập nhật từng khung hình: cả màn hình vòng thi không phải vẽ lại 60 lần/giây.
+ * Phần đếm mili giây do LockedBuzzer tự vẽ (cập nhật thẳng vào DOM).
  */
-export function useBuzzLock(unlockAt?: number | null): number {
+export function useBuzzLocked(unlockAt?: number | null): boolean {
   const serverOffset = useGameStore((s) => s.serverOffset);
-  const compute = () => (unlockAt ? Math.max(0, unlockAt - (Date.now() + serverOffset)) : 0);
-  const [remaining, setRemaining] = useState(compute);
+  const [locked, setLocked] = useState(() => lockRemainingMs(unlockAt, serverOffset) > 0);
 
   useEffect(() => {
-    setRemaining(compute());
-    if (!unlockAt) return;
-    let frame = 0;
-    const tick = () => {
-      const rem = Math.max(0, unlockAt - (Date.now() + serverOffset));
-      setRemaining(rem);
-      if (rem > 0) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    // Phòng khi trình duyệt tạm dừng requestAnimationFrame (tab ẩn, tiết kiệm pin): vẫn mở khóa đúng giờ
-    const safety = setTimeout(() => setRemaining(0), Math.max(0, unlockAt - (Date.now() + serverOffset)) + 20);
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(safety);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const rem = lockRemainingMs(unlockAt, serverOffset);
+    setLocked(rem > 0);
+    if (rem <= 0) return;
+    const timer = setTimeout(() => setLocked(false), rem);
+    return () => clearTimeout(timer);
   }, [unlockAt, serverOffset]);
 
-  return remaining;
+  return locked;
 }
