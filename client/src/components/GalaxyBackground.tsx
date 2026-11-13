@@ -5,8 +5,9 @@ import React, { useEffect, useRef } from 'react';
  *  1. Nền vũ trụ + mây tinh vân tím/hồng/xanh băng (CSS gradient)
  *  2. Dải ngân hà chéo: bụi sao + quầng sáng, vẽ một lần lên canvas, trôi rất chậm (parallax)
  *  3. ~3600 sao xa li ti, nhiều sao hơn trong dải ngân hà
- *  4. Sao lấp lánh (~420 sao nhấp nháy) + vài sao sáng có tia chữ thập + sao băng thỉnh thoảng
- *  5. Lưới kỹ thuật mờ, vignette và hạt nhiễu phim để bớt phẳng
+ *  4. Sao trôi thật sự qua màn hình (lớp gần), nhánh tinh vân xoay chậm, mây thở nhẹ
+ *  5. Sao lấp lánh (~420 sao nhấp nháy) + vài sao sáng có tia chữ thập + sao băng thỉnh thoảng
+ *  6. Lưới kỹ thuật mờ, vignette và hạt nhiễu phim để bớt phẳng
  * Canvas động chỉ chạy ~30fps, tạm dừng khi tab ẩn, và đứng yên nếu người dùng tắt hiệu ứng chuyển động.
  */
 
@@ -92,6 +93,16 @@ interface Bright {
   speed: number;
   phase: number;
 }
+interface Drifter {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  s: number;
+  rgb: RGB;
+  a: number;
+  glow: boolean;
+}
 interface Shooter {
   x: number;
   y: number;
@@ -121,6 +132,7 @@ export const GalaxyBackground: React.FC = () => {
     let twinklers: Twinkler[] = [];
     let brights: Bright[] = [];
     let shooters: Shooter[] = [];
+    let drifters: Drifter[] = [];
     let nextShooter = 0;
     let last = 0;
     const sprites = [makeGlowSprite([200, 215, 255]), makeGlowSprite([255, 226, 170]), makeGlowSprite([196, 170, 255])];
@@ -129,8 +141,8 @@ export const GalaxyBackground: React.FC = () => {
       width = window.innerWidth;
       height = window.innerHeight;
       // Vẽ quá khổ 8% để lớp trôi chậm không lộ mép
-      const w = Math.round(width * 1.08);
-      const h = Math.round(height * 1.08);
+      const w = Math.round(width * 1.14);
+      const h = Math.round(height * 1.14);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rand = mulberry32(20261113);
 
@@ -202,12 +214,29 @@ export const GalaxyBackground: React.FC = () => {
           phase: rand() * Math.PI * 2,
         });
       }
+      // Sao trôi: lớp gần, trôi thật sự qua màn hình (to hơn thì nhanh hơn: có chiều sâu)
+      drifters = [];
+      for (let i = 0; i < 90; i++) {
+        const depth = rand();
+        const speed = 5 + depth * 20;
+        const ang = Math.PI * (1.18 + rand() * 0.2); // hướng lên-trái, hơi lệch
+        drifters.push({
+          x: rand() * w,
+          y: rand() * h,
+          vx: Math.cos(ang) * speed,
+          vy: Math.sin(ang) * speed,
+          s: 0.9 + depth * 1.3,
+          rgb: pickTint(rand),
+          a: 0.45 + depth * 0.5,
+          glow: depth > 0.9,
+        });
+      }
       brights = [];
-      for (let i = 0; i < 22; i++) {
+      for (let i = 0; i < 7; i++) {
         brights.push({
           x: rand() * w,
           y: rand() * h,
-          s: 14 + rand() * 20,
+          s: 7 + rand() * 8,
           sprite: Math.floor(rand() * sprites.length),
           speed: 0.25 + rand() * 0.5,
           phase: rand() * Math.PI * 2,
@@ -233,14 +262,34 @@ export const GalaxyBackground: React.FC = () => {
         ctx.fillRect(s.x, s.y, s.r, s.r);
       }
 
+      {
+        const cw = live.width / dpr;
+        const ch = live.height / dpr;
+        for (const d of drifters) {
+          d.x += d.vx * dt;
+          d.y += d.vy * dt;
+          if (d.x < -8) d.x = cw + 8;
+          else if (d.x > cw + 8) d.x = -8;
+          if (d.y < -8) d.y = ch + 8;
+          else if (d.y > ch + 8) d.y = -8;
+          if (d.glow) {
+            ctx.globalAlpha = 0.22;
+            ctx.drawImage(sprites[0], d.x - d.s * 2, d.y - d.s * 2, d.s * 4, d.s * 4);
+            ctx.globalAlpha = 1;
+          }
+          ctx.fillStyle = `rgba(${d.rgb[0]},${d.rgb[1]},${d.rgb[2]},${d.a.toFixed(2)})`;
+          ctx.fillRect(d.x, d.y, d.s, d.s);
+        }
+      }
+
       for (const b of brights) {
         const k = 0.55 + 0.45 * Math.sin(t * b.speed + b.phase);
         const spr = sprites[b.sprite];
-        ctx.globalAlpha = 0.35 + 0.5 * k;
+        ctx.globalAlpha = 0.2 + 0.3 * k;
         ctx.drawImage(spr, b.x - b.s, b.y - b.s, b.s * 2, b.s * 2);
         // tia chữ thập
-        ctx.globalAlpha = 0.25 + 0.55 * k;
-        const arm = b.s * (0.9 + 0.5 * k);
+        ctx.globalAlpha = 0.15 + 0.35 * k;
+        const arm = b.s * (0.8 + 0.4 * k);
         const grad = ctx.createLinearGradient(b.x - arm, b.y, b.x + arm, b.y);
         grad.addColorStop(0, 'rgba(220,230,255,0)');
         grad.addColorStop(0.5, 'rgba(235,240,255,0.9)');
@@ -256,8 +305,8 @@ export const GalaxyBackground: React.FC = () => {
         ctx.globalAlpha = 1;
       }
 
-      // sao băng thỉnh thoảng (mỗi 7-15 giây)
-      if (t > nextShooter && shooters.length < 2) {
+      // sao băng thường xuyên hơn (mỗi 3-7 giây, tối đa 3 cùng lúc)
+      if (t > nextShooter && shooters.length < 3) {
         const rand = Math.random;
         const w = live.width / dpr;
         const h = live.height / dpr;
@@ -272,7 +321,7 @@ export const GalaxyBackground: React.FC = () => {
           max: 0.9 + rand() * 0.5,
           len: 90 + rand() * 90,
         });
-        nextShooter = t + 7 + rand() * 8;
+        nextShooter = t + 3 + rand() * 4;
       }
       shooters = shooters.filter((s) => s.life < s.max);
       for (const s of shooters) {
@@ -330,10 +379,18 @@ export const GalaxyBackground: React.FC = () => {
   return (
     <div className="galaxy-bg fixed inset-0 pointer-events-none overflow-hidden select-none -z-10" aria-hidden="true">
       <div className="galaxy-nebula absolute inset-0" />
-      <div className="galaxy-drift absolute -inset-[4%]">
-        <canvas ref={hazeRef} className="absolute left-0 top-0" />
-        <canvas ref={farRef} className="absolute left-0 top-0" />
-        <canvas ref={liveRef} className="absolute left-0 top-0" />
+      <div className="galaxy-arms" />
+      {/* Ba lớp trôi ngược hướng nhau với tốc độ khác nhau: tạo cảm giác chiều sâu */}
+      <div className="absolute -inset-[7%]">
+        <div className="galaxy-layer galaxy-layer-haze absolute inset-0">
+          <canvas ref={hazeRef} className="absolute left-0 top-0" />
+        </div>
+        <div className="galaxy-layer galaxy-layer-far absolute inset-0">
+          <canvas ref={farRef} className="absolute left-0 top-0" />
+        </div>
+        <div className="galaxy-layer galaxy-layer-live absolute inset-0">
+          <canvas ref={liveRef} className="absolute left-0 top-0" />
+        </div>
       </div>
       <div className="galaxy-grid absolute inset-0" />
       <div className="galaxy-vignette absolute inset-0" />

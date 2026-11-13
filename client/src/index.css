@@ -536,11 +536,58 @@
     linear-gradient(180deg, #070A1C 0%, #05060F 58%, #04050B 100%);
 }
 
-/* Lớp sao trôi rất chậm: đủ để thấy chiều sâu, không gây phân tâm */
-.galaxy-drift { animation: galaxy-drift 240s ease-in-out infinite alternate; will-change: transform; }
-@keyframes galaxy-drift {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-2.4%, -1.6%, 0) scale(1.012); }
+/* Ba lớp sao trôi ngược hướng, tốc độ khác nhau: đủ để thấy chiều sâu mà không gây phân tâm */
+.galaxy-layer { will-change: transform; }
+.galaxy-layer-haze { animation: galaxy-drift-a 70s ease-in-out infinite alternate; }
+.galaxy-layer-far { animation: galaxy-drift-b 48s ease-in-out infinite alternate; }
+.galaxy-layer-live { animation: galaxy-drift-c 34s ease-in-out infinite alternate; }
+@keyframes galaxy-drift-a {
+  from { transform: translate3d(3%, 2%, 0) scale(1.01); }
+  to { transform: translate3d(-3%, -2%, 0) scale(1.05); }
+}
+@keyframes galaxy-drift-b {
+  from { transform: translate3d(-4%, 2.6%, 0); }
+  to { transform: translate3d(4%, -2.6%, 0); }
+}
+@keyframes galaxy-drift-c {
+  from { transform: translate3d(5%, 3%, 0); }
+  to { transform: translate3d(-5%, -3%, 0); }
+}
+
+/* Nhánh tinh vân xoay rất chậm quanh tâm: màu tím / hồng / xanh quét qua nền */
+.galaxy-arms {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  margin: -75vmax 0 0 -75vmax;
+  background: conic-gradient(
+    from 0deg,
+    rgba(112, 84, 255, 0) 0%,
+    rgba(112, 84, 255, 0.24) 8%,
+    rgba(112, 84, 255, 0) 22%,
+    rgba(255, 93, 143, 0.16) 38%,
+    rgba(255, 93, 143, 0) 50%,
+    rgba(58, 138, 255, 0.22) 66%,
+    rgba(58, 138, 255, 0) 80%,
+    rgba(155, 123, 255, 0.18) 92%,
+    rgba(112, 84, 255, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent 6%, #000 38%, transparent 72%);
+  mask-image: radial-gradient(circle, transparent 6%, #000 38%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  animation: galaxy-arms-spin 150s linear infinite;
+  will-change: transform;
+}
+@keyframes galaxy-arms-spin { to { transform: rotate(360deg); } }
+
+/* Mây tinh vân "thở": sáng tối nhẹ theo nhịp chậm */
+.galaxy-nebula { animation: galaxy-breathe 16s ease-in-out infinite alternate; }
+@keyframes galaxy-breathe {
+  from { opacity: 0.82; }
+  to { opacity: 1; }
 }
 
 /* Lưới kỹ thuật mờ, tan dần ra mép */
@@ -563,7 +610,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .galaxy-drift { animation: none; }
+  .galaxy-layer, .galaxy-arms, .galaxy-nebula { animation: none; }
 }
 
 /* ---- Bề mặt kính: ánh sáng nhẹ từ trên xuống, viền mảnh ánh chàm ---- */
