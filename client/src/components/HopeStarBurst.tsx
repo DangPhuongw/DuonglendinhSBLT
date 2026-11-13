@@ -3,6 +3,15 @@ import { useGameStore } from '../store/gameStore';
 import { soundManager } from '../utils/soundEffects';
 import { getPerfTier } from '../utils/perf';
 
+/** Một điểm ngẫu nhiên nằm trong dải viền (không rơi vào vùng giữa có câu hỏi). */
+function edgePoint(): { left: number; top: number } {
+  const band = Math.random() < 0.5;
+  const t = Math.random() * 100;
+  const e = Math.random() * 11;
+  const side = Math.random() < 0.5 ? e : 100 - e;
+  return band ? { left: t, top: side } : { left: side, top: t };
+}
+
 // Máy yếu / điện thoại: ít hạt lấp lánh hơn
 const SPARKLES = () => (getPerfTier() === 'low' ? 14 : 34);
 const TWINKLES = () => (getPerfTier() === 'low' ? 10 : 26);
@@ -56,12 +65,12 @@ export const HopeStarBurst: React.FC = () => {
     () =>
       Array.from({ length: SPARKLES() }, (_, i) => {
         const angle = (i / SPARKLES()) * Math.PI * 2 + Math.random() * 0.4;
-        const dist = 160 + Math.random() * 380;
+        const dist = 70 + Math.random() * 190;
         return {
           id: i,
           dx: Math.cos(angle) * dist,
-          dy: Math.sin(angle) * dist,
-          size: 10 + Math.random() * 22,
+          dy: Math.sin(angle) * dist * 0.45,
+          size: 8 + Math.random() * 14,
           delay: Math.random() * 0.5,
           dur: 1.4 + Math.random() * 0.9,
         };
@@ -72,8 +81,7 @@ export const HopeStarBurst: React.FC = () => {
     () =>
       Array.from({ length: TWINKLES() }, (_, i) => ({
         id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
+        ...edgePoint(),
         size: 6 + Math.random() * 14,
         delay: Math.random() * 1.4,
         dur: 0.8 + Math.random() * 0.8,
@@ -83,9 +91,10 @@ export const HopeStarBurst: React.FC = () => {
 
   if (!visible) return null;
 
+  // Ánh vàng chỉ chạy quanh viền + dải thông báo nhỏ ở trên: phần giữa màn hình (câu hỏi) luôn để trống
   return (
     <div key={burstKey} className="fixed inset-0 z-[90] pointer-events-none overflow-hidden" role="status" aria-live="polite">
-      <div className="hope-veil absolute inset-0" />
+      <div className="hope-frame absolute inset-0" />
 
       {twinkles.map((t) => (
         <span
@@ -97,8 +106,7 @@ export const HopeStarBurst: React.FC = () => {
         </span>
       ))}
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="hope-rays absolute w-[140vmax] h-[140vmax]" />
+      <div className="absolute left-1/2 top-16 sm:top-20 -translate-x-1/2 flex items-center justify-center">
         {sparkles.map((s) => (
           <span
             key={s.id}
@@ -108,12 +116,12 @@ export const HopeStarBurst: React.FC = () => {
             <StarShape size={s.size} />
           </span>
         ))}
-        <div className="relative flex flex-col items-center gap-3 sm:gap-4">
-          <StarShape size={180} className="hope-star-main w-32 h-32 sm:w-44 sm:h-44 lg:w-52 lg:h-52" />
-          <div className="hope-title text-center px-4">
-            <div className="font-heading font-black text-2xl sm:text-4xl lg:text-5xl text-[#F7C873] uppercase">Ngôi sao hy vọng</div>
+        <div className="hope-banner relative flex items-center gap-3 rounded-full border border-[#F7C873]/70 bg-[#05060F]/80 pl-2 pr-5 py-1.5 shadow-glow-yellow-lg">
+          <StarShape size={44} className="hope-star-main w-10 h-10 sm:w-12 sm:h-12 shrink-0" />
+          <div className="text-left leading-tight">
+            <div className="font-heading font-black text-base sm:text-xl text-[#F7C873] uppercase tracking-wider whitespace-nowrap">Ngôi sao hy vọng</div>
             {playerName && (
-              <div className="mt-1 font-heading font-bold text-sm sm:text-lg text-[#FBE0A8]">{playerName} đặt ngôi sao cho câu hỏi này</div>
+              <div className="font-heading font-bold text-xs sm:text-sm text-[#FBE0A8] whitespace-nowrap">{playerName} đặt ngôi sao cho câu này</div>
             )}
           </div>
         </div>

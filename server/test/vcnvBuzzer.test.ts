@@ -208,3 +208,34 @@ describe('VCNV: câu hỏi thứ 5 (ô trung tâm) chỉ là gợi ý', () => {
     machine.dispose();
   });
 });
+
+describe('VCNV: báo kết quả đoán từ khóa cho hiệu ứng ở client', () => {
+  it('đoán sai: gửi kèm kết quả sai (ai, đoán gì) cho mọi máy trước khi câu hỏi chạy lại', async () => {
+    vi.useFakeTimers();
+    const { machine, callbacks, p2 } = await setup('VB0901');
+    await (machine as any).presentVcnvRow(0, 0);
+    await vi.advanceTimersByTimeAsync(5000);
+    machine.handleBuzzer(p2.id);
+    machine.submitAnswer(p2.id, state(machine).currentQuestion.id, 'sai bét');
+    await vi.advanceTimersByTimeAsync(50);
+
+    const sent = (callbacks.broadcastRoom as any).mock.calls.map((c: any[]) => c[0].state.vcnvGuessResult).filter(Boolean);
+    expect(sent[sent.length - 1]).toMatchObject({ playerId: p2.id, correct: false, guess: 'sai bét' });
+    machine.dispose();
+  });
+
+  it('đoán đúng: trạng thái kết quả có kết quả đúng kèm từ khóa đã mở', async () => {
+    vi.useFakeTimers();
+    const { machine, p2, obstacle } = await setup('VB0902');
+    await (machine as any).presentVcnvRow(0, 0);
+    await vi.advanceTimersByTimeAsync(5000);
+    machine.handleBuzzer(p2.id);
+    machine.submitAnswer(p2.id, obstacle.id, obstacle.answer);
+    await vi.advanceTimersByTimeAsync(50);
+
+    expect(state(machine).subPhase).toBe('CNV_RESULT');
+    expect(state(machine).vcnvGuessResult).toMatchObject({ playerId: p2.id, correct: true, answer: obstacle.answer });
+    expect(state(machine).obstacleAnswerRevealed.join('')).toBe(obstacle.answer.toUpperCase().replace(/\s+/g, ''));
+    machine.dispose();
+  });
+});

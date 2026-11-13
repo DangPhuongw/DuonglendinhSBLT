@@ -198,6 +198,28 @@ class SoundManager {
       osc.stop(ctx.currentTime + 1.2);
     });
   }
+
+  /** Còi báo động hai tông (đoán sai từ khóa VCNV), khoảng 1,6 giây. */
+  public playAlarm() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    for (let i = 0; i < 4; i++) {
+      osc.frequency.setValueAtTime(880, t0 + i * 0.4);
+      osc.frequency.setValueAtTime(620, t0 + i * 0.4 + 0.2);
+    }
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.16, t0 + 0.03);
+    gain.gain.setValueAtTime(0.16, t0 + 1.45);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.6);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 1.62);
+  }
 }
 
 export const soundManager = new SoundManager();

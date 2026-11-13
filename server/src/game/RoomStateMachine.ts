@@ -1529,6 +1529,8 @@ export class RoomStateMachine {
       deadline: null,
       buzzUnlockAt,
       currentQuestion: question,
+      // Số thứ tự câu phải có ở MỌI pha, nếu không màn hình hiện "1/12" giữa các câu
+      questionIndex,
       buzzerLockedBy: null,
       activePlayerId: undefined,
     };
@@ -2109,6 +2111,8 @@ export class RoomStateMachine {
         rowAnswersRevealed: allRowLetters,
         obstacleSolved: true,
         obstacleAnswerRevealed: obstacleLetters,
+        // Để mọi máy chạy hiệu ứng chúc mừng (xem VcnvKeywordFx ở client)
+        vcnvGuessResult: { playerId, correct: true, guess, answer: obsQuestion.answer, at: Date.now() },
       };
 
       const revealPayload: RevealPayload = {
@@ -2138,6 +2142,8 @@ export class RoomStateMachine {
     this.buzzedPlayerId = null;
     this.room.state.buzzerLockedBy = null;
     this.room.state.activePlayerId = undefined;
+    // Để mọi máy chạy hiệu ứng báo động đỏ (xem VcnvKeywordFx ở client)
+    this.room.state.vcnvGuessResult = { playerId, correct: false, guess, at: Date.now() };
 
     const revealPayload: RevealPayload = {
       questionId: obsQuestion.id,

@@ -34,4 +34,22 @@ describe('Màn nhắc luật Khởi động chung', () => {
     expect(machine.room.state.currentQuestion?.id).toBe(machine.questionSet.khoiDong.chung[0].id);
     machine.dispose();
   });
+
+  it('số thứ tự câu đúng ở cả pha giành chuông (không bị về 1/12 giữa các câu)', async () => {
+    vi.useFakeTimers();
+    const machine = new RoomStateMachine('INTRO2', { id: 'p1', name: 'An', token: 't1' }, mockCallbacks());
+    machine.addPlayer('Bình', 't2');
+    machine.room.status = 'KD_CHUNG';
+    const last = Math.min(GAME_CONFIG.KHOI_DONG.CHUNG_QUESTIONS, machine.questionSet.khoiDong.chung.length) - 1;
+    for (const i of [0, 5, last]) {
+      await (machine as any).runKdChungQuestion(i);
+      expect(machine.room.state.subPhase).toBe('QUESTION_BUZZ');
+      expect(machine.room.state.questionIndex).toBe(i);
+    }
+    // Không ai bấm chuông: pha công bố đáp án vẫn giữ đúng số câu
+    await vi.advanceTimersByTimeAsync((GAME_CONFIG.BUZZ_LOCK_SECONDS + GAME_CONFIG.KHOI_DONG.CHUNG_BUZZ_SECONDS) * 1000 + GAME_CONFIG.NETWORK_GRACE_MS + 50);
+    expect(machine.room.state.questionIndex).toBe(last);
+    machine.dispose();
+  });
+
 });

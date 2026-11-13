@@ -167,6 +167,8 @@ export interface RoomState {
   obstacleAnswerRevealed?: string[] | null;
   vcnvQuestionsAppearedCount?: number;
   roundResults?: RoundResults;
+  /** Lần đoán từ khóa Vượt chướng ngại vật gần nhất (để hiện hiệu ứng đúng / sai). */
+  vcnvGuessResult?: { playerId: string; correct: boolean; guess: string; /** Từ khóa gốc (chỉ có khi đoán đúng). */ answer?: string; at: number };
   // Additional dynamic state fields
   [key: string]: any;
 }

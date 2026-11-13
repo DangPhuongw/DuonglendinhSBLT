@@ -715,3 +715,54 @@
   box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.8) !important;
 }
 [data-perf="low"] .reaction-float { will-change: auto; }
+
+/* Ngôi sao hy vọng: viền vàng phát sáng quanh màn hình, giữa để trống cho câu hỏi */
+.hope-frame {
+  animation: hope-veil 2.8s ease-out forwards;
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(247, 200, 115, 0.22) 82%, rgba(247, 170, 60, 0.42) 100%);
+  box-shadow: inset 0 0 0 2px rgba(247, 200, 115, 0.65), inset 0 0 70px rgba(247, 200, 115, 0.45);
+}
+.hope-banner { animation: hope-title 2.8s ease-out forwards; }
+
+/* ===== VCNV: đoán từ khóa ===== */
+/* Đúng: quầng sáng vàng / xanh cực quang từ giữa lan ra, thẻ từ khóa bật lên */
+@keyframes cnv-win-glow { 0% { opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes cnv-win-card {
+  0% { opacity: 0; transform: scale(0.6) translateY(20px); }
+  14% { opacity: 1; transform: scale(1.06); }
+  22% { transform: scale(1); }
+  86% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.96); }
+}
+.cnv-win-glow {
+  background: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(247, 200, 115, 0.3), rgba(67, 230, 181, 0.12) 45%, rgba(5, 6, 15, 0.55) 85%);
+  animation: cnv-win-glow 4.2s ease-out forwards;
+}
+.cnv-win-card { animation: cnv-win-card 4.2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards; }
+
+/* Sai: viền đỏ nhấp nháy quanh màn hình (giữa để trống), còi lắc */
+@keyframes cnv-alarm {
+  0%, 100% { opacity: 0; }
+  8%, 30%, 52%, 74% { opacity: 1; }
+  19%, 41%, 63%, 85% { opacity: 0.25; }
+}
+.cnv-alarm {
+  background: radial-gradient(ellipse 72% 66% at 50% 50%, transparent 52%, rgba(255, 40, 90, 0.32) 80%, rgba(255, 30, 70, 0.6) 100%);
+  box-shadow: inset 0 0 0 3px rgba(255, 93, 143, 0.85), inset 0 0 90px rgba(255, 40, 90, 0.55);
+  animation: cnv-alarm 2.6s linear forwards;
+}
+@keyframes cnv-alarm-banner {
+  0% { opacity: 0; transform: translateY(-14px); }
+  10% { opacity: 1; transform: translateY(0); }
+  14% { transform: translateX(-6px); } 18% { transform: translateX(6px); }
+  22% { transform: translateX(-4px); } 26% { transform: translateX(0); }
+  88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.cnv-alarm-banner { animation: cnv-alarm-banner 2.6s ease-out forwards; }
+@keyframes cnv-siren { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+.cnv-siren { animation: cnv-siren 0.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cnv-alarm { animation: cnv-win-glow 2.6s ease-out forwards; }
+  .cnv-siren, .cnv-alarm-banner { animation: none; }
+}
