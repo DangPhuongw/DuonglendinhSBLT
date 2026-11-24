@@ -19,12 +19,32 @@ const readOption = (row: any, ...keys: string[]): string => {
 const KNOWN_SHEETS = ['khoidong_rieng', 'khoidong_chung', 'vcnv', 'tangtoc', 'tăng tốc', 'vedich', 'về đích', 'tiebreak', 'phụ'];
 
 /**
+ * File xuất từ Google Sheets / CSV có thể dính ký tự BOM (U+FEFF) ở đầu ô tiêu đề đầu tiên,
+ * khiến "Prompt" thành "﻿Prompt" và cột bị đọc thành rỗng. Gỡ BOM khỏi hàng tiêu đề mọi sheet.
+ */
+function stripHeaderBom(workbook: xlsx.WorkBook): void {
+  for (const name of workbook.SheetNames) {
+    const sheet = workbook.Sheets[name];
+    if (!sheet?.['!ref']) continue;
+    const range = xlsx.utils.decode_range(sheet['!ref']);
+    for (let c = range.s.c; c <= range.e.c; c++) {
+      const cell = sheet[xlsx.utils.encode_cell({ r: range.s.r, c })];
+      if (cell && typeof cell.v === 'string' && cell.v.includes('﻿')) {
+        cell.v = cell.v.replace(/﻿/g, '').trim();
+        if (typeof cell.w === 'string') cell.w = cell.w.replace(/﻿/g, '').trim();
+      }
+    }
+  }
+}
+
+/**
  * Đọc file Excel đề thi. Phần nào file không có thì để trống (KHÔNG tự lấy đề mặc định);
  * người gọi quyết định bù phần thiếu từ kho (xem questionFill.ts).
  * Ném lỗi nếu file không giống file đề (không có sheet nào hợp lệ) hoặc là file theo định dạng kho.
  */
 export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đề tải lên'): QuestionSet {
   const workbook = xlsx.read(buffer, { type: 'buffer' });
+  stripHeaderBom(workbook);
   const sheetNames = workbook.SheetNames;
 
   const recognised = sheetNames.filter((n) => KNOWN_SHEETS.some((k) => n.toLowerCase().includes(k)));
@@ -68,7 +88,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
         readOption(row, 'OptionC', 'optionC', 'C', 'c', 'Phương án C'),
         readOption(row, 'OptionD', 'optionD', 'D', 'd', 'Phương án D'),
       ],
-      answer: String(row.Answer || row.answer || '').trim().toUpperCase(),
+      answer: String(row.Answer ?? row.answer ?? '').trim().toUpperCase(),
       difficulty: readDifficulty(row),
       alternatives,
     };
@@ -93,7 +113,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
         readOption(row, 'OptionC', 'optionC', 'C', 'c', 'Phương án C'),
         readOption(row, 'OptionD', 'optionD', 'D', 'd', 'Phương án D'),
       ],
-      answer: String(row.Answer || row.answer || '').trim().toUpperCase(),
+      answer: String(row.Answer ?? row.answer ?? '').trim().toUpperCase(),
       difficulty: readDifficulty(row),
       alternatives,
     });
@@ -123,7 +143,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
     const altStr = String(row.Alternatives || row.alternatives || '');
     const alternatives = altStr ? altStr.split(';').map((s) => s.trim()) : [];
     const prompt = String(row.Prompt || row.prompt || '');
-    const answer = String(row.Answer || row.answer || '').trim();
+    const answer = String(row.Answer ?? row.answer ?? '').trim();
 
     if (row.Image || row.image) {
       vcnvImage = String(row.Image || row.image);
@@ -169,7 +189,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       id: `tt-${tangToc.length + 1}`,
       type: 'text',
       prompt: String(row.Prompt || row.prompt || ''),
-      answer: String(row.Answer || row.answer || '').trim(),
+      answer: String(row.Answer ?? row.answer ?? '').trim(),
       alternatives,
       media: row.Media || row.media || undefined,
       ignoreDiacritics: true,
@@ -189,7 +209,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       id: `vd-${points}-${pool10.length + pool20.length + pool30.length + 1}`,
       type: 'text',
       prompt: String(row.Prompt || row.prompt || ''),
-      answer: String(row.Answer || row.answer || '').trim(),
+      answer: String(row.Answer ?? row.answer ?? '').trim(),
       alternatives,
       points: points as any,
       difficulty: GAME_CONFIG.VE_DICH.DIFFICULTY_BY_POINTS[points],
@@ -211,7 +231,7 @@ export function parseExcelQuestionSet(buffer: Buffer, title: string = 'Bộ đ�
       id: `tb-${tieBreak.length + 1}`,
       type: 'text',
       prompt: String(row.Prompt || row.prompt || ''),
-      answer: String(row.Answer || row.answer || '').trim(),
+      answer: String(row.Answer ?? row.answer ?? '').trim(),
       alternatives,
       ignoreDiacritics: true,
     });
