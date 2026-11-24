@@ -20,7 +20,7 @@ const KNOWN_SHEETS = ['khoidong_rieng', 'khoidong_chung', 'vcnv', 'tangtoc', 't�
 
 /**
  * File xuất từ Google Sheets / CSV có thể dính ký tự BOM (U+FEFF) ở đầu ô tiêu đề đầu tiên,
- * khiến "Prompt" thành "﻿Prompt" và cột bị đọc thành rỗng. Gỡ BOM khỏi hàng tiêu đề mọi sheet.
+ * khiến "Prompt" thành "\uFEFFPrompt" và cột bị đọc thành rỗng. Gỡ BOM khỏi hàng tiêu đề mọi sheet.
  */
 function stripHeaderBom(workbook: xlsx.WorkBook): void {
   for (const name of workbook.SheetNames) {
@@ -29,9 +29,9 @@ function stripHeaderBom(workbook: xlsx.WorkBook): void {
     const range = xlsx.utils.decode_range(sheet['!ref']);
     for (let c = range.s.c; c <= range.e.c; c++) {
       const cell = sheet[xlsx.utils.encode_cell({ r: range.s.r, c })];
-      if (cell && typeof cell.v === 'string' && cell.v.includes('﻿')) {
-        cell.v = cell.v.replace(/﻿/g, '').trim();
-        if (typeof cell.w === 'string') cell.w = cell.w.replace(/﻿/g, '').trim();
+      if (cell && typeof cell.v === 'string' && cell.v.includes('\uFEFF')) {
+        cell.v = cell.v.replace(/\uFEFF/g, '').trim();
+        if (typeof cell.w === 'string') cell.w = cell.w.replace(/\uFEFF/g, '').trim();
       }
     }
   }

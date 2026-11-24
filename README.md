@@ -20,11 +20,11 @@ Web game thời gian thực, nhiều người chơi, lấy cảm hứng từ đ�
 
 | Bài toán | Cách giải | Ở đâu trong code |
 |---|---|---|
-| Nhiều người bấm chuông cùng lúc, chỉ một người được thắng | Mọi sự kiện của một phòng đi qua hàng đợi tuần tự; người đầu tiên vào hàng đợi giữ khóa chuông, người sau bị từ chối. Có test 5 bot bấm đồng thời 100 lần | `server/src/game/EventQueue.ts`, `RoomStateMachine.handleBuzzer`, `server/test/concurrencyBuzzer.test.ts` |
+| Nhiều người bấm chuông cùng lúc, chỉ một người được thắng | Kiểm tra và ghi người thắng nằm liền nhau, không có `await`, trên một luồng nên chỉ một người thắng. Các sự kiện luật chơi (bấm chuông, nộp đáp án...) còn đi qua hàng đợi tuần tự của phòng. Có unit test 5 người bấm, lặp 100 lần | `server/src/game/EventQueue.ts`, `RoomStateMachine.handleBuzzer`, `server/test/concurrencyBuzzer.test.ts` |
 | Thí sinh không gian lận được thời gian | Server đặt `deadline` và tự hẹn giờ; bài nộp sau `deadline + 300 ms` (bù trễ mạng) bị từ chối. Client chỉ hiển thị, đồng bộ giờ qua `time:ping` | `RoomStateMachine.setDeadline`, `submitAnswer`, `shared/src/config.ts` |
-| Đáp án không lộ xuống trình duyệt | Trạng thái phòng được lọc qua `getSanitizedRoom()` trước khi gửi, bỏ đáp án và đáp án tương đương | `RoomStateMachine.getSanitizedRoom` |
+| Đáp án không lộ xuống trình duyệt | Câu hỏi đang chơi được lọc qua `getSanitizedRoom()` trước khi gửi: chỉ giữ các trường được phép, không có đáp án và đáp án tương đương | `RoomStateMachine.getSanitizedRoom` |
 | Tải lại trang vẫn vào đúng ghế | Mỗi người nhận một `token` lưu ở localStorage; sự kiện `room:rejoin` gắn lại kết nối mới vào người chơi cũ. Chủ phòng mất kết nối quá lâu thì tự chuyển quyền | `server/src/index.ts` (`room:rejoin`), `RoomManager.ts` |
-| Server khởi động lại giữa trận | Phòng và bộ đề được lưu snapshot ra đĩa, khởi động lại thì nạp lại | `SnapshotManager.ts`, `RoomManager.ts` |
+| Server khởi động lại giữa trận | Phòng và bộ đề được lưu snapshot ra đĩa. Khởi động lại thì nạp lại phòng; vòng đang dở được chơi lại từ đầu và điểm của vòng đó được hoàn tác | `SnapshotManager.ts`, `RoomManager.ts` |
 | So đáp án tiếng Việt gõ bằng nhiều bộ gõ | Chuẩn hóa Unicode NFC/NFD, bỏ dấu khi cần, hỗ trợ đáp án tương đương | `shared/src/answerMatcher.ts` |
 | Đồng hạng ở vòng Tăng tốc | Hai bài nộp cách nhau không quá 50 ms tính là đồng hạng | `GAME_CONFIG.TANG_TOC.TIE_THRESHOLD_MS` |
 | Chống spam | Giới hạn 30 sự kiện/giây mỗi kết nối, giới hạn tạo phòng, rate limit API và upload, kiểm tra kiểu mọi dữ liệu client gửi lên | `server/src/index.ts`, `reactionLimiter.ts` |
